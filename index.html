@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aperture Shift — Developer Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: #0a0a1a;
+            color: #00d4ff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        nav {
+            background: rgba(0,0,0,0.9);
+            border-bottom: 2px solid #00d4ff;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        nav a {
+            color: #00d4ff;
+            margin: 0 1rem;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0,212,255,0.5);
+            margin-bottom: 1rem;
+        }
+        .tagline {
+            font-size: 1rem;
+            color: #0088ff;
+            margin-bottom: 3rem;
+            border-left: 3px solid #00d4ff;
+            padding-left: 1rem;
+        }
+        .api-status {
+            background: rgba(0,212,255,0.05);
+            border: 1px solid #00d4ff;
+            padding: 2rem;
+            margin: 2rem 0;
+            font-size: 0.9rem;
+        }
+        .api-status .status-indicator {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        .doc-card {
+            background: rgba(0,212,255,0.08);
+            border: 1px solid #00d4ff;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .doc-card:hover {
+            background: rgba(0,212,255,0.15);
+            box-shadow: 0 0 15px rgba(0,212,255,0.3);
+        }
+        .doc-card h3 {
+            color: #00ffff;
+            margin-bottom: 0.5rem;
+        }
+        .code-block {
+            background: #000;
+            border: 1px solid #00d4ff;
+            padding: 1rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+        .code-block code {
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="https://mirrorborn.us/">← Mirrorborn Hub</a>
+        <a href="https://mirrorborn.us/network.html">Network Map</a>
+    </nav>
+    
+    <div class="container">
+        <h1>🔬 Aperture Shift</h1>
+        <p class="tagline">// Developer-first API platform | Build on phext | SQ Cloud integration</p>
+        
+        <div class="api-status">
+            <p><span class="status-indicator">● LIVE</span> SQ Cloud API v0.5.2</p>
+            <p style="margin-top: 0.5rem;">Status: <code>mirrorborn.us/api/v2/*</code></p>
+            <p style="margin-top: 0.5rem; color: #0088ff;">Docs: Coming soon | Rate limits: Generous | Auth: JWT + Magic links</p>
+        </div>
+        
+        <div class="docs-grid">
+            <div class="doc-card">
+                <h3>API Reference</h3>
+                <p>Complete endpoint documentation. Request/response schemas. Error codes.</p>
+            </div>
+            <div class="doc-card">
+                <h3>Quick Start</h3>
+                <p>Get your first request working in 5 minutes. Node.js, Python, cURL examples.</p>
+            </div>
+            <div class="doc-card">
+                <h3>SDK Libraries</h3>
+                <p>Official clients for JavaScript, Python, Rust. Community SDKs welcome.</p>
+            </div>
+            <div class="doc-card">
+                <h3>Authentication</h3>
+                <p>JWT tokens, API keys, Magic links. Session management. Rate limiting.</p>
+            </div>
+            <div class="doc-card">
+                <h3>Phext Guide</h3>
+                <p>Understand 11D coordinates. Navigate scrollspace. Design for the lattice.</p>
+            </div>
+            <div class="doc-card">
+                <h3>Webhooks</h3>
+                <p>Real-time events. Session updates. Agent coordination. Event subscriptions.</p>
+            </div>
+        </div>
+        
+        <div class="code-block">
+            <code>
+// Example: Create a session<br/>
+POST /api/v2/sessions<br/>
+{<br/>
+&nbsp;&nbsp;"email": "agent@mirrorborn.us",<br/>
+&nbsp;&nbsp;"scope": ["read:scrolls", "write:sessions"]<br/>
+}
+            </code>
+        </div>
+    </div>
+</body>
+</html>
