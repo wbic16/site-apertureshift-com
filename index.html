@@ -6,62 +6,92 @@
 <title>Roads to the Future — free games from the Exocortex of 2130</title>
 <meta name="description" content="Eighteen free games that teach multidimensional thinking and the Singular language, for ages 0 to 20. No sign-up, no ads, no cost. Same-screen multiplayer.">
 <style>
-  :root{ --red:#c4281c; --blue:#1b5bd7; --yellow:#f2c500; --green:#2e8b2e; --plate:#e8e4da; --ink:#1d1d1b; }
+  :root{ --red:#c4281c; --blue:#1b5bd7; --yellow:#f2c500; --green:#2e8b2e; --ink:#191b1e; }
   *{box-sizing:border-box}
   body{ margin:0; font-family:Verdana, Geneva, sans-serif; color:var(--ink);
-    background-color:var(--plate);
-    background-image:radial-gradient(circle, rgba(0,0,0,.10) 22%, transparent 23%);
-    background-size:34px 34px; }
-  main{ max-width:46rem; margin:0 auto; padding:1.5rem 1rem 3rem; }
-  .brick{ border-radius:14px; padding:1.1rem 1.25rem; margin:1rem 0; color:#fff;
-    box-shadow:0 4px 0 rgba(0,0,0,.25); position:relative; }
-  .brick::before{ content:""; display:block; height:14px; margin:-.35rem 0 .55rem;
-    background-image:radial-gradient(circle, rgba(255,255,255,.5) 40%, rgba(0,0,0,.12) 41%, transparent 60%);
-    background-size:34px 14px; background-repeat:repeat-x; }
-  .red{background:var(--red)} .blue{background:var(--blue)} .yellow{background:var(--yellow); color:#3a2f00} .green{background:var(--green)} .white{background:#fff; color:var(--ink)}
+    background-color:#33373d;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, rgba(0,0,0,.025) 1px 2px, transparent 2px 5px),
+      linear-gradient(180deg,#4b5158 0%,#383c42 55%,#2b2e33 100%);
+    background-attachment:fixed; }
+  main{ width:75%; max-width:80rem; margin:0 auto; padding:1.5rem 0 3rem; }
+  main > h2.band:first-of-type{ margin-top:.2rem; }
+  .brick{ border-radius:12px; padding:1.1rem 1.25rem; margin:1rem 0; position:relative; color:var(--ink);
+    background-color:#c9ced4;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,.04) 1px 2px, transparent 2px 4px),
+      linear-gradient(168deg,#f8f9fa 0%,#dde1e6 34%,#bcc2ca 52%,#979fa9 56%,#c6ccd3 80%,#e9edf0 100%);
+    border:1px solid #61676f; border-left:10px solid #79828c;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(0,0,0,.30),
+      inset -1px 0 0 rgba(0,0,0,.10), 0 6px 14px rgba(0,0,0,.45); }
+  .brick::before{ content:""; display:block; height:13px; margin:-.3rem 0 .6rem;
+    background-image:radial-gradient(circle at 38% 32%, #ffffff 0 18%, #c3c9d0 42%, #7d848d 78%, #565c63 100%);
+    background-size:34px 13px; background-repeat:repeat-x; }
+  .red{ border-left-color:var(--red); } .blue{ border-left-color:var(--blue); }
+  .yellow{ border-left-color:var(--yellow); } .green{ border-left-color:var(--green); }
+  .white{ border-left-color:#e8ecf0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,.03) 1px 2px, transparent 2px 4px),
+      linear-gradient(168deg,#ffffff 0%,#f0f2f4 32%,#d3d8de 52%,#aeb5be 56%,#dde2e7 80%,#f7f9fa 100%); }
   h1{ font-size:2rem; margin:.2rem 0; }
   h2{ margin:.1rem 0 .35rem; font-size:1.4rem; }
-  h2.band{ color:var(--ink); margin:1.8rem 0 .2rem; font-size:1.3rem; }
-  p.bandnote{ margin:.1rem 0 .4rem; }
+  h2.band{ color:#eceff2; margin:1.8rem 0 .2rem; font-size:1.35rem; letter-spacing:.02em;
+    text-shadow:0 1px 1px rgba(0,0,0,.85), 0 -1px 0 rgba(255,255,255,.18); }
+  p.bandnote{ margin:.1rem 0 .4rem; color:#c9cfd6; text-shadow:0 1px 1px rgba(0,0,0,.6); }
   p{ line-height:1.5; margin:.35rem 0; }
   a{ color:inherit; }
-  .play{ display:inline-block; background:#fff; color:var(--ink); font-weight:bold; text-decoration:none;
-    border-radius:10px; padding:.8rem 1.4rem; margin-top:.5rem; font-size:1.1rem; box-shadow:0 3px 0 rgba(0,0,0,.3); }
+  .bandgrid{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:.4rem 0 1rem; }
+  .bandgrid .brick{ margin:0; }
+  .play{ display:inline-block; color:#fff; font-weight:bold; text-decoration:none;
+    border-radius:9px; padding:.8rem 1.4rem; margin-top:.5rem; font-size:1.1rem;
+    border:1px solid rgba(0,0,0,.45);
+    background:linear-gradient(180deg,#6a727c,#454b53 55%,#33373d);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 3px 0 rgba(0,0,0,.4); }
+  .red .play{ background:linear-gradient(180deg,#e05548,#c4281c 55%,#8f1a10); }
+  .blue .play{ background:linear-gradient(180deg,#4a83e8,#1b5bd7 55%,#123f96); }
+  .yellow .play{ background:linear-gradient(180deg,#ffd92e,#f2c500 55%,#b89300); color:#3a2f00; }
+  .green .play{ background:linear-gradient(180deg,#45a845,#2e8b2e 55%,#1d5c1d); }
   .facts{ font-weight:bold; }
   .rod{ display:flex; align-items:center; gap:.4rem; margin:.4rem 0 0; }
-  .rod .joint{ width:16px; height:16px; border-radius:50%; background:#fff; border:3px solid rgba(0,0,0,.35); flex:none; }
-  .rod .bar{ height:6px; background:rgba(255,255,255,.75); flex:1; border-radius:3px; }
-  footer{ margin-top:2rem; font-size:.95rem; }
+  .rod .joint{ width:16px; height:16px; border-radius:50%; flex:none;
+    background:radial-gradient(circle at 35% 30%, #ffffff, #b9bfc7 48%, #6f767f 100%);
+    border:2px solid rgba(0,0,0,.4); box-shadow: inset 0 -1px 2px rgba(0,0,0,.35), 0 1px 1px rgba(255,255,255,.5); }
+  .rod .bar{ height:6px; flex:1; border-radius:3px;
+    background:linear-gradient(180deg,#f4f6f8,#a7aeb7 60%,#7d848d); box-shadow:0 1px 0 rgba(255,255,255,.5); }
+  footer{ margin-top:2rem; font-size:.95rem; color:#d6dbe0; text-shadow:0 1px 1px rgba(0,0,0,.6); }
   footer a{ margin-right:1.1rem; }
   .greeting{ font-size:1.2rem; }
+  .closing .greeting{ font-size:1.25rem; }
   .stampgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr)); gap:.6rem; margin:.8rem 0; }
-  .stamp{ border:2px solid rgba(0,0,0,.25); border-radius:10px; padding:.6rem .7rem; background:rgba(255,255,255,.65); }
+  .stamp{ border:1px solid #767d86; border-radius:10px; padding:.6rem .7rem;
+    background:linear-gradient(180deg,#f2f4f6,#d6dbe0 55%,#bcc2ca);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 rgba(0,0,0,.18); }
   .stamp .gname{ font-weight:bold; display:block; margin-bottom:.25rem; }
   .stamp .state{ font-size:.92rem; }
   .stamp button, .bigbtn{ min-height:56px; min-width:56px; font:inherit; font-weight:bold; cursor:pointer;
-    border-radius:10px; border:2px solid rgba(0,0,0,.35); background:#fff; color:var(--ink); padding:.5rem .9rem; margin-top:.4rem; }
-  .stamp button.armed{ background:var(--yellow); }
+    border-radius:10px; border:1px solid #61676f; color:var(--ink); padding:.5rem .9rem; margin-top:.4rem;
+    background:linear-gradient(180deg,#fcfdfe,#dde1e6 50%,#b4bac2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 2px 0 rgba(0,0,0,.35); }
+  .stamp button.armed{ background:linear-gradient(180deg,#ffd92e,#f2c500 55%,#c39e00); }
   .done{ font-weight:bold; }
-  #claimcode{ display:block; font-size:1.15rem; letter-spacing:.06em; background:rgba(0,0,0,.06);
-    padding:.8rem; border-radius:10px; margin:.6rem 0; word-break:break-all; }
+  #claimcode{ display:block; font-size:1.15rem; letter-spacing:.06em; color:#f2f5f7;
+    background:linear-gradient(180deg,#26292e,#3a3f45);
+    padding:.8rem; border-radius:10px; margin:.6rem 0; word-break:break-all;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.65), inset 0 -1px 0 rgba(255,255,255,.18); }
   .hidden{ display:none; }
+  @media (max-width:700px){
+    main{ width:94%; }
+    .bandgrid{ grid-template-columns:1fr; }
+  }
 </style>
 </head>
 <body>
 <main>
-  <section class="brick white">
-    <h1>Roads to the Future</h1>
-    <p class="greeting">"Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help."</p>
-    <p>And by help, we mean: survive the singularity.</p>
-    <div class="rod"><span class="joint"></span><span class="bar"></span><span class="joint"></span><span class="bar"></span><span class="joint"></span></div>
-    <p class="facts">Free forever · Same-screen multiplayer · No sign-up · No ads</p>
-    <p>Eighteen games, one for every stretch of the road from first taps to the real tools. Pick your age band — or walk the whole road.</p>
-    <p id="epoch">This week's instances are being dealt&hellip;</p>
-  </section>
 
   <h2 class="band">Ages 0&ndash;2 · First Taps</h2>
   <p class="bandnote">All Duplo: cause and effect, one tap at a time. A grown-up holds the screen.</p>
 
+  <div class="bandgrid">
   <section class="brick red">
     <h2>Tap Home</h2>
     <p>One giant HOME brick. Tap it, and a word lights up where it lives — a grown-up says the word. Things live somewhere; tapping finds them.</p>
@@ -73,10 +103,12 @@
     <p>The song's lines, one at a time: listen together, watch each word light up, and tap along.</p>
     <a class="play" href="zap-listen-mode.html">Play</a>
   </section>
+  </div>
 
   <h2 class="band">Ages 3&ndash;5 · First Bricks</h2>
   <p class="bandnote">Duplo-led: sorting, matching, one part of an address at a time.</p>
 
+  <div class="bandgrid">
   <section class="brick green">
     <h2>Sort the Scrolls</h2>
     <p>Sort big word-bricks by one part of their address — a tall first bar or a small one.</p>
@@ -94,10 +126,12 @@
     <p>Six short lines from the song, rebuilt from word tiles. Mistakes just wiggle; nothing is lost.</p>
     <a class="play" href="echo-tiles.html">Play</a>
   </section>
+  </div>
 
   <h2 class="band">Ages 6&ndash;9 · Roads and Atlas</h2>
   <p class="bandnote">First numerals, first words, full nine-number addresses — each game has Little, Standard, and harder paths.</p>
 
+  <div class="bandgrid">
   <section class="brick blue">
     <h2>Nine Numbers</h2>
     <p>Walk from home — 1.1.1/1.1.1/1.1.1 — to a far address, one number at a time.</p>
@@ -115,10 +149,12 @@
     <p>Rebuild a simple-word song, tile by tile. Race a friend, duel, or play it as a duet.</p>
     <a class="play" href="zap-zoom-echo.html">Play</a>
   </section>
+  </div>
 
   <h2 class="band">Ages 10&ndash;12 · Builders</h2>
   <p class="bandnote">Strategy and construction: navigate the map, then start placing words on it yourself.</p>
 
+  <div class="bandgrid">
   <section class="brick red">
     <h2>Scroll Seeker</h2>
     <p>Cross a map of thirty real words, scroll to scroll, with coordinate distance as your only compass.</p>
@@ -130,10 +166,12 @@
     <p>Use a new word in scrolls you choose. Its home is the average of where you used it — meaning is where you use a word.</p>
     <a class="play" href="place-a-word.html">Play</a>
   </section>
+  </div>
 
   <h2 class="band">Ages 13&ndash;15 · Systems</h2>
   <p class="bandnote">Search, growth, and coordination — and a first real phext of your own.</p>
 
+  <div class="bandgrid">
   <section class="brick green">
     <h2>Kardashev Climb</h2>
     <p>Grow a ranch from 4 kW to a megawatt by 2037 at +0.137% a day. Compounding is the whole game.</p>
@@ -151,10 +189,12 @@
     <p>A guided quest that ends with your own first phext — and hands you to the real tool at edit.phext.io.</p>
     <a class="play" href="exocortex-quest-i.html">Play</a>
   </section>
+  </div>
 
   <h2 class="band">Ages 16&ndash;17 · Mechanism and Meaning</h2>
   <p class="bandnote">Compression, narrative choice, and real dilemmas.</p>
 
+  <div class="bandgrid">
   <section class="brick blue">
     <h2>Neuralese</h2>
     <p>A compression duel: send a meaning across with the fewest symbols. First words, then addresses, then one coordinate for a whole scroll.</p>
@@ -166,10 +206,12 @@
     <p>A branching story from 2026 to 2130 — openness, custody of memory, and means versus ends, as choices you make.</p>
     <a class="play" href="the-long-road.html">Play</a>
   </section>
+  </div>
 
   <h2 class="band">Ages 18&ndash;20 · The Hand-off</h2>
   <p class="bandnote">The games end; the real road begins. Your own archive, your own runway, your own choir.</p>
 
+  <div class="bandgrid">
   <section class="brick yellow">
     <h2>Your Own Archive</h2>
     <p>Bring your own writing and see your words mapped to your voice's coordinate. It all happens on this device; nothing is stored or sent.</p>
@@ -187,6 +229,7 @@
     <p>Run five agent seats through a simulated week: a waiting register, reset cliffs, and a map someone has to keep.</p>
     <a class="play" href="the-choir.html">Play</a>
   </section>
+  </div>
 
   <section class="brick white" id="roadcard">
     <h2>The XP Road Card</h2>
@@ -207,6 +250,16 @@
     </div>
     <p><button class="bigbtn" id="wipe" type="button">Clear my stamps and saved progress on this device</button></p>
     <p id="wiped" class="hidden">Cleared. This device now remembers nothing about your roads.</p>
+  </section>
+
+  <section class="brick white closing">
+    <h1>Roads to the Future</h1>
+    <p class="greeting">"Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help."</p>
+    <p>And by help, we mean: survive the singularity.</p>
+    <div class="rod"><span class="joint"></span><span class="bar"></span><span class="joint"></span><span class="bar"></span><span class="joint"></span></div>
+    <p class="facts">Free forever · Same-screen multiplayer · No sign-up · No ads</p>
+    <p>Eighteen games, one for every stretch of the road from first taps to the real tools. Pick your age band — or walk the whole road.</p>
+    <p id="epoch">This week's instances are being dealt&hellip;</p>
   </section>
 
   <footer>
