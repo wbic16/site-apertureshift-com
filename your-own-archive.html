@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Your Own Archive — Roads to the Future</title>
+<meta name="description" content="Your Own Archive — for ages 18–20. Map a sample of your own writing against Will Bickford's Singular atlas, entirely on this device, and leave with the seed of your own exocortex: a real phext file." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --page:#eceee6; --ink:#171a17; --muted:#4d534c; --faint:#79806f;
+    --panel:#f7f8f1; --panel2:#e2e5d8; --line:#171a17; --line-soft:#b9bfae;
+    --accent:#0b6e4f; --accent-ink:#f2fbf6; --amber:#9a6a00; --amber-bg:#f6e7bd;
+    --danger:#a52a1d; --code-bg:#141713; --code-ink:#c9f2dd;
+    --bar:#0b6e4f; --stamp:#0b6e4f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --page:#0a0d0a; --ink:#dde5d8; --muted:#9aa79a; --faint:#6d786c;
+      --panel:#12160f; --panel2:#1a2016; --line:#454f42; --line-soft:#2c332a;
+      --accent:#3ecf97; --accent-ink:#07130c; --amber:#e8b64c; --amber-bg:#2b2108;
+      --danger:#ff8a76; --code-bg:#05070a; --code-ink:#c9f2dd;
+      --bar:#3ecf97; --stamp:#3ecf97;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at 14px 14px, rgba(127,140,120,.16) 1.6px, transparent 2.2px),
+      var(--page);
+    background-size:28px 28px, auto;
+    color:var(--ink);
+    font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size:16px; line-height:1.55;
+    -webkit-text-size-adjust:100%;
+  }
+  main{max-width:940px;margin:0 auto;padding:20px 16px 44px}
+  button{font:inherit}
+  :focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+  .mono{font-family:inherit}
+  .hidden{display:none !important}
+  .small{font-size:13.5px;color:var(--muted)}
+  .err{color:var(--danger);font-weight:600;min-height:1.4em;margin-top:8px}
+
+  /* ---------- greeting ---------- */
+  .greet{margin:14px 0 4px}
+  .greet .from{font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+  .greet blockquote{
+    margin:0;font-size:clamp(21px,4.6vw,31px);line-height:1.3;font-weight:700;max-width:26em;
+  }
+  .greet .help{font-size:clamp(16px,3.2vw,20px);color:var(--muted);margin:8px 0 0}
+  .greet .help strong{color:var(--accent)}
+  h1.title{
+    font-size:clamp(34px,7.4vw,58px);line-height:1.02;margin:22px 0 6px;font-weight:700;letter-spacing:-.01em;
+  }
+  .band{
+    display:inline-block;border:2px solid var(--line);padding:3px 10px;font-size:12.5px;font-weight:700;
+    letter-spacing:.12em;text-transform:uppercase;background:var(--panel);
+  }
+  .mission{font-size:16.5px;max-width:68ch;margin:14px 0 0}
+  .mission strong{background:var(--amber-bg);color:var(--ink);padding:0 4px}
+
+  /* ---------- age dial ---------- */
+  .dial{display:flex;height:24px;border:2px solid var(--line);overflow:hidden;margin-top:18px;background:var(--panel)}
+  .dial .d-duplo{flex:0 0 0;background:#c4451b}
+  .dial .d-lego{flex:10;background:#c98f12}
+  .dial .d-knex{flex:90;background:var(--accent)}
+  .dial div{display:flex;align-items:center;justify-content:center;min-width:0}
+  .dial span{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:#0d100c;text-transform:uppercase;white-space:nowrap;overflow:hidden;padding:0 6px}
+  .dial .d-knex span{color:var(--accent-ink)}
+  @media (max-width:560px){
+    .dial .d-lego span{display:none}
+    .dial span{font-size:9.5px;padding:0 3px}
+  }
+  .dial-note{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:5px;font-size:12.5px;color:var(--muted)}
+  .dial-note strong{color:var(--ink)}
+
+  /* ---------- stamp rail ---------- */
+  .rail{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:26px 0 6px}
+  .stamp{
+    border:2.5px solid var(--line-soft);color:var(--faint);background:transparent;
+    padding:7px 13px;font-size:13px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  }
+  .stamp .n{opacity:.75;margin-right:7px}
+  .stamp.done{border-color:var(--stamp);color:var(--stamp);transform:rotate(-1.6deg)}
+  .stamp.now{border-color:var(--ink);color:var(--ink)}
+  .rail .rod{flex:1 1 24px;height:3px;background:var(--line-soft);min-width:24px}
+  .rail .rod.done{background:var(--stamp)}
+
+  /* ---------- panels & buttons ---------- */
+  .panel{background:var(--panel);border:2px solid var(--line);padding:20px;margin-top:18px;box-shadow:6px 6px 0 rgba(20,24,20,.14)}
+  .panel h2{margin:0 0 8px;font-size:clamp(20px,4vw,26px);line-height:1.2}
+  .panel h3{margin:20px 0 6px;font-size:16.5px}
+  .panel p{margin:7px 0}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:56px;padding:10px 22px;cursor:pointer;
+    border:2px solid var(--line);background:var(--ink);color:var(--page);font-weight:700;font-size:16px;
+  }
+  .btn.accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.danger{background:transparent;color:var(--danger);border-color:var(--danger)}
+  .btn:disabled{opacity:.38;cursor:not-allowed}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .modes{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 0}
+  .modes button{
+    min-height:56px;padding:9px 18px;border:2px solid var(--line);background:var(--panel);
+    color:var(--ink);font-weight:700;cursor:pointer;font-size:15.5px;text-align:left;flex:1 1 240px;
+  }
+  .modes button small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:2px}
+  .modes button[aria-pressed="true"]{background:var(--ink);color:var(--page)}
+  .modes button[aria-pressed="true"] small{color:inherit;opacity:.75}
+
+  /* ---------- privacy promise ---------- */
+  .promise{border:2.5px solid var(--accent);background:var(--panel);padding:16px 18px;margin-top:16px}
+  .promise .tag{color:var(--accent)}
+  .promise p{margin:5px 0;font-size:15.5px}
+
+  /* ---------- paste ---------- */
+  textarea{
+    width:100%;min-height:230px;resize:vertical;margin-top:10px;
+    background:var(--panel);color:var(--ink);border:2px solid var(--line);
+    font:inherit;font-size:15.5px;line-height:1.6;padding:14px;
+  }
+  .count-row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:13.5px;color:var(--muted)}
+  .count-row b{color:var(--ink)}
+
+  /* ---------- stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin-top:14px}
+  .stat{border:2px solid var(--line);background:var(--panel2);padding:10px 12px}
+  .stat .n{display:block;font-size:27px;font-weight:700;line-height:1.1}
+  .stat .l{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+  /* ---------- coordinate ---------- */
+  .coord-big{
+    font-size:clamp(21px,5.6vw,36px);font-weight:700;letter-spacing:.01em;line-height:1.25;
+    background:var(--code-bg);color:var(--code-ink);padding:16px 18px;margin-top:12px;word-break:break-word;
+  }
+  .toggle{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .toggle button{
+    min-height:56px;padding:8px 16px;border:2px solid var(--line);background:var(--panel);color:var(--ink);
+    font-weight:700;cursor:pointer;font-size:14.5px;text-align:left;
+  }
+  .toggle button small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:var(--page)}
+  .toggle button[aria-pressed="true"] small{color:inherit;opacity:.75}
+  .beside{margin-top:14px}
+  .beside li{margin:5px 0}
+  .beside .w{font-weight:700}
+  .beside .d{color:var(--muted);font-size:13.5px}
+
+  /* ---------- bars ---------- */
+  .bars{display:flex;align-items:flex-end;gap:3px;height:64px}
+  .bars .bar{flex:1;background:var(--bar);min-height:4px}
+  .bars.mini{height:40px;gap:2px}
+  .bar-nums{display:flex;gap:3px;margin-top:3px}
+  .bar-nums span{flex:1;text-align:center;font-size:10.5px;color:var(--muted)}
+  .bars-fig{margin:10px 0 0;max-width:340px}
+  .bars-fig figcaption{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+  /* ---------- top words ---------- */
+  .word-row{
+    display:grid;grid-template-columns:1fr;gap:10px;
+    border-top:2px solid var(--line-soft);padding:14px 0;
+  }
+  @media (min-width:680px){
+    .word-row{grid-template-columns:minmax(150px,.9fr) 1.4fr;align-items:start}
+  }
+  .word-row .w{font-size:21px;font-weight:700}
+  .word-row .freq{display:inline-block;border:2px solid var(--line);padding:0 7px;font-size:12.5px;font-weight:700;margin-left:8px;vertical-align:2px}
+  .word-row .addr{font-size:14.5px;margin-top:3px;word-break:break-word}
+  .word-row .src{font-size:12.5px;color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .chip{border:1.5px solid var(--line-soft);padding:3px 9px;font-size:13.5px;background:var(--panel)}
+  .chip b{color:var(--accent)}
+
+  /* ---------- constellation ---------- */
+  .const-row{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:center;padding:7px 0;border-top:1.5px dashed var(--line-soft)}
+  .const-row .cw{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis}
+  .const-row .caddr{font-size:11.5px;color:var(--muted)}
+  @media (max-width:520px){ .const-row{grid-template-columns:70px 1fr} }
+
+  /* ---------- export / done ---------- */
+  pre.preview{
+    background:var(--code-bg);color:var(--code-ink);padding:14px;overflow:auto;
+    font:inherit;font-size:12.5px;line-height:1.5;max-height:320px;white-space:pre-wrap;word-break:break-word;margin-top:12px;
+  }
+  .done-stamp{
+    display:inline-block;border:3.5px solid var(--stamp);color:var(--stamp);
+    padding:10px 18px;font-size:17px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    transform:rotate(-2deg);margin:8px 0 4px;
+  }
+  .xp{border:2px solid var(--amber);background:var(--amber-bg);padding:12px 16px;margin-top:16px;font-size:15px}
+  a.ext{color:var(--accent);font-weight:700}
+
+  /* ---------- footer / dialogs ---------- */
+  footer.site{max-width:940px;margin:0 auto;padding:0 16px 36px}
+  .foot-row{display:flex;gap:8px;flex-wrap:wrap}
+  .foot-btn{
+    min-height:56px;padding:10px 20px;border:2px solid var(--line);background:var(--panel);
+    color:var(--ink);font-weight:700;cursor:pointer;font-size:15px;
+  }
+  .foot-note{font-size:13px;color:var(--muted);margin-top:12px}
+  dialog{
+    border:2.5px solid var(--line);background:var(--panel);color:var(--ink);
+    max-width:min(640px,calc(100vw - 28px));padding:24px 22px;box-shadow:8px 8px 0 rgba(0,0,0,.3);
+  }
+  dialog::backdrop{background:rgba(8,10,8,.62)}
+  dialog h2{margin:0 0 10px;font-size:21px}
+  dialog p, dialog li{font-size:14.5px}
+  dialog .btn{margin-top:14px}
+  .sr-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .compare-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+  @media (min-width:680px){ .compare-grid{grid-template-columns:1fr 1fr} }
+  .voice-card{border:2px solid var(--line);background:var(--panel2);padding:14px 16px}
+  .voice-card h3{margin:0 0 6px;font-size:15px;letter-spacing:.08em;text-transform:uppercase}
+  .voice-card .c{font-size:16.5px;font-weight:700;word-break:break-word}
+</style>
+</head>
+<body>
+<main>
+  <!-- Greeting -->
+  <section class="greet" aria-label="A message from Will Bickford">
+    <p class="from">A message from 2130</p>
+    <blockquote>&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the Exocortex of 2130, and I&rsquo;m here to help.&rdquo;</blockquote>
+    <p class="help">And by help, we mean: <strong>survive the singularity.</strong></p>
+  </section>
+
+  <h1 class="title">Your Own Archive</h1>
+  <span class="band">Roads to the Future &middot; Ages 18&ndash;20 &middot; Raw phext</span>
+  <p class="mission">Every road so far mapped <strong>Will&rsquo;s</strong> words. This one maps <strong>yours</strong>. Paste a sample of your own writing; this page places your words against his Singular atlas &mdash; 90 words whose addresses were earned across a lifetime of scrolls &mdash; computes the coordinate your voice lives at, and hands you a real phext file: the seed of your own exocortex.</p>
+
+  <div class="dial" aria-hidden="true">
+    <div class="d-duplo"></div>
+    <div class="d-lego"><span>Lego 10</span></div>
+    <div class="d-knex"><span>K&rsquo;Nex 90 &mdash; raw phext</span></div>
+  </div>
+  <div class="dial-note"><span>The age dial, oldest band: almost no bricks left. <strong>The map itself is the toy now.</strong></span><span>Duplo 0 &middot; Lego 10 &middot; K&rsquo;Nex 90</span></div>
+
+  <!-- Stamp rail -->
+  <div class="rail" aria-label="Progress">
+    <span class="stamp now" id="stamp-1"><span class="n">01</span>Paste</span>
+    <span class="rod" id="rod-1"></span>
+    <span class="stamp" id="stamp-2"><span class="n">02</span>Map</span>
+    <span class="rod" id="rod-2"></span>
+    <span class="stamp" id="stamp-3"><span class="n">03</span>Seed file</span>
+    <span style="margin-left:auto"></span>
+    <button type="button" class="btn danger hidden" id="wipe-top">Wipe everything</button>
+  </div>
+
+  <!-- STAGE 1 : PASTE -->
+  <section class="panel" id="stage-paste">
+    <span class="tag" id="paste-tag">Joint 1 of 3 &middot; Your words</span>
+    <h2 id="paste-h">Paste a sample of your own writing.</h2>
+
+    <div class="modes" role="group" aria-label="How many voices?">
+      <button type="button" id="mode-one" aria-pressed="true">One Voice<small>Just you and the atlas.</small></button>
+      <button type="button" id="mode-two" aria-pressed="false">Two Voices<small>Two people, one device, in turn. The page wipes the first voice&rsquo;s text before the second begins &mdash; then compares the two coordinates.</small></button>
+    </div>
+
+    <div class="promise">
+      <span class="tag">The promise, up front</span>
+      <p><strong>Your words stay yours.</strong> Paste a sample of your own writing; it is read only by this page, in this browser, on this device. Nothing is uploaded, stored, or sent anywhere &mdash; there is no server side to this tool. Close the tab and it is gone, except a file you choose to download. Do not paste anything you would not keep on this device: other people&rsquo;s private messages are theirs, not yours to map.</p>
+    </div>
+
+    <label for="sample" style="display:block;font-weight:700;margin-top:18px" id="sample-label">Your writing sample</label>
+    <textarea id="sample" placeholder="Paste or type your own words here — a journal entry, an essay draft, a letter you wrote, release notes, a README. About 200 words or more gives the atlas the most to hold on to."></textarea>
+    <div class="count-row">
+      <span><b id="word-count">0</b> words in the box</span>
+      <span>~200+ words works best &middot; any length is accepted &middot; the map below states its coverage honestly</span>
+    </div>
+    <div class="btn-row">
+      <button type="button" class="btn accent" id="map-btn">Map my words &rarr;</button>
+      <button type="button" class="btn ghost" id="sample-btn">Use a sample instead</button>
+    </div>
+    <p class="err" id="paste-err" role="alert"></p>
+    <p class="small" id="sample-note"></p>
+    <p class="small">How it reads you: the text is split into words (lowercased, split on anything that isn&rsquo;t a letter, apostrophes kept). Each distinct word is looked up in the atlas sample. That is the whole method &mdash; no inference about you, no reading between the lines.</p>
+  </section>
+
+  <!-- STAGE 2 : RESULTS -->
+  <section class="panel hidden" id="stage-results" aria-live="off">
+    <span class="tag">Joint 2 of 3 &middot; The map</span>
+    <h2 id="results-h">Your words, placed.</h2>
+    <p class="small" id="instance-line" style="margin-top:0"></p>
+    <div class="stats" id="stats"></div>
+    <p class="small" id="thin-note"></p>
+
+    <h3>Your coordinate</h3>
+    <p>Your voice coordinate is the <b>component-wise average</b> of the atlas addresses of your distinct mapped words &mdash; each of the nine numbers averaged on its own, rounded half-up, never below 1. The same holographic merge that gives every task in the Exocortex its reference coordinate, run on your vocabulary. One adjustment, disclosed in full below: the strict reading&rsquo;s landmark grounding rotates weekly.</p>
+    <div class="toggle" role="group" aria-label="Which coordinate reading?">
+      <button type="button" id="coord-strict" aria-pressed="true">Strict atlas<small>Only words the atlas can place. Unmapped words are left out &mdash; the atlas can&rsquo;t place what it hasn&rsquo;t read.</small></button>
+      <button type="button" id="coord-far" aria-pressed="false">With far corner<small>Unmapped words counted in at their resting address, 9.9.9/9.9.9/9.9.9 &mdash; they pull your coordinate toward the corner.</small></button>
+    </div>
+    <div class="coord-big" id="coord-big">—</div>
+    <p class="small" id="coord-note"></p>
+    <p class="small" id="rotation-note"></p>
+    <div class="bars-fig">
+      <div class="bars" id="coord-bars"></div>
+      <div class="bar-nums" id="coord-barnums"></div>
+    </div>
+    <h3>Your voice lives beside&hellip;</h3>
+    <p class="small" style="margin-top:0">The nearest words in Will&rsquo;s atlas to <span id="beside-which">your strict coordinate</span>. Distance is counted across all nine numbers.</p>
+    <ul class="beside" id="beside-list"></ul>
+    <p class="small" id="beside-note"></p>
+
+    <h3>Your top 12 mapped words</h3>
+    <p class="small" style="margin-top:0">By how often they appear in your sample. Each address is the word&rsquo;s real home in the atlas &mdash; the average of every scroll of Will&rsquo;s that holds it.</p>
+    <div id="top-words"></div>
+
+    <h3>Your constellation</h3>
+    <p class="small" style="margin-top:0" id="constellation-cap">The same twelve words as bar-shapes, sorted by the dimension this instance dealt.</p>
+    <div id="constellation"></div>
+
+    <h3 id="unmapped-h">Words the atlas hasn&rsquo;t read</h3>
+    <p>These distinct words of yours appear in <b>none</b> of the atlas sample&rsquo;s scrolls. They are not hidden and not guessed at: by the placement rule, a word in neither the atlas sample nor its source rests at the far corner, <span class="mono"><b>9.9.9/9.9.9/9.9.9</b></span>. Grow your own archive and these words earn real addresses &mdash; from <i>your</i> scrolls.</p>
+    <div class="chips" id="unmapped-chips"></div>
+
+    <div class="btn-row">
+      <button type="button" class="btn accent" id="to-seed">Grow the seed file &rarr;</button>
+      <button type="button" class="btn ghost hidden" id="handover-btn">Voice One is done &mdash; wipe &amp; hand over</button>
+      <button type="button" class="btn danger" id="wipe-1">Wipe everything</button>
+    </div>
+  </section>
+
+  <!-- HANDOVER -->
+  <section class="panel hidden" id="stage-handover">
+    <span class="tag">Two Voices &middot; The hand-over</span>
+    <h2>Before Voice Two begins: the wipe.</h2>
+    <p>Voice One&rsquo;s sample text and example lines are about to be erased from this page. Only three things stay in memory, and only until the tab closes: Voice One&rsquo;s coordinate, their mapped word list, and their word counts &mdash; just enough to compare two voices, nothing that can reconstruct what they wrote.</p>
+    <p><b>Voice One:</b> if you want your seed file, download it <i>before</i> the wipe &mdash; after the wipe, your lines are gone and the file cannot be rebuilt.</p>
+    <div class="btn-row">
+      <button type="button" class="btn accent" id="handover-go">Wipe Voice One&rsquo;s text &mdash; Voice Two, your turn</button>
+      <button type="button" class="btn ghost" id="handover-back">Not yet &mdash; back to Voice One&rsquo;s map</button>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="panel hidden" id="stage-compare">
+    <span class="tag">Two Voices &middot; The comparison</span>
+    <h2>Two voices, one map.</h2>
+    <div class="compare-grid" id="compare-grid"></div>
+    <p id="compare-distance" style="font-size:17px"></p>
+    <h3>Words you both live beside</h3>
+    <p class="small" style="margin-top:0">Mapped words that appear in <i>both</i> samples &mdash; the shared ground between your two vocabularies, at their atlas addresses.</p>
+    <div class="chips" id="shared-chips"></div>
+    <div class="btn-row">
+      <button type="button" class="btn accent" id="compare-done">Finish &rarr;</button>
+      <button type="button" class="btn danger" id="wipe-3">Wipe everything</button>
+    </div>
+  </section>
+
+  <!-- STAGE 3 : SEED / DONE -->
+  <section class="panel hidden" id="stage-seed">
+    <span class="tag">Joint 3 of 3 &middot; The seed</span>
+    <h2>Your exocortex seed, as a real file.</h2>
+    <p>One file. A header scroll at <span class="mono">1.1.1/1.1.1/1.1.1</span>. A scroll for your voice at your own coordinate. Then one scroll per top word, at that word&rsquo;s atlas address, holding its frequency in your writing and one of <i>your own lines</i> that uses it. Generated here, in your browser, from the text you pasted &mdash; which never left this device.</p>
+    <div class="btn-row">
+      <button type="button" class="btn accent" id="download-btn">&#11015; Download my-exocortex-seed.phext.txt</button>
+      <button type="button" class="btn ghost" id="preview-btn">Peek inside the file</button>
+    </div>
+    <pre class="preview hidden" id="preview"></pre>
+    <div id="finish-block" class="hidden">
+      <div class="done-stamp">Archive seeded</div>
+      <p id="finish-recap"></p>
+      <p>Your real exocortex lives at <a class="ext" href="https://edit.phext.io" target="_blank" rel="noopener">edit.phext.io</a> &mdash; sign in, open your phext, and bring this file. The road continues off this page; that&rsquo;s the point of a road. This is the last of the eighteen roads built for your band &mdash; the next ones you build yourself.</p>
+      <div class="xp"><strong>XP:</strong> finishing all 18 Roads to the Future games grants you disk space on edit.phext.io as a Volumen-class Wavefront grant. Historic entries are all Incipit-class grants.</div>
+      <div class="btn-row">
+        <a class="btn accent" href="https://edit.phext.io" target="_blank" rel="noopener" style="text-decoration:none">Take me to edit.phext.io &rarr;</a>
+        <button type="button" class="btn ghost" id="again-btn">Map another sample (wipes this one)</button>
+      </div>
+    </div>
+    <div class="btn-row" id="seed-nav">
+      <button type="button" class="btn ghost" id="seed-back">&larr; Back to the map</button>
+      <button type="button" class="btn accent hidden" id="to-compare">See the two-voice comparison &rarr;</button>
+      <button type="button" class="btn danger" id="wipe-2">Wipe everything</button>
+    </div>
+  </section>
+
+  <p class="sr-live" id="live" aria-live="polite"></p>
+</main>
+
+<footer class="site">
+  <div class="foot-row">
+    <button type="button" class="foot-btn" data-dialog="dlg-about">About</button>
+    <button type="button" class="foot-btn" data-dialog="dlg-privacy">Privacy</button>
+    <button type="button" class="foot-btn" data-dialog="dlg-terms">Terms</button>
+  </div>
+  <p class="foot-note">Free to use, forever. No purchases, no ads. Multiplayer is same-screen only. Nothing you paste is uploaded, stored, or sent anywhere.</p>
+</footer>
+
+<dialog id="dlg-about" aria-labelledby="about-h">
+  <h2 id="about-h">About Your Own Archive</h2>
+  <p><b>What this is.</b> The 18&ndash;20 road of Roads to the Future: the last on-ramp is not a game about Will&rsquo;s words but a tool for yours. You map a sample of your own writing against his Singular atlas and leave with the seed of your own exocortex &mdash; a real phext file built entirely on this device.</p>
+  <p><b>The Singular method.</b> In Will&rsquo;s atlas, a word&rsquo;s address is the average of the addresses of the scrolls containing it, component by component. The atlas was built over his choose-your-own-adventure.phext; this page carries a 90-word sample of it, each word with its earned address and, where the source records it, the number of scrolls it was averaged from. Meaning gets a location; location starts to carry meaning.</p>
+  <p><b>Unmapped words.</b> A word of yours that appears in none of the atlas sample&rsquo;s scrolls is not guessed at. By the real placement rule, a word in neither the atlas sample nor the source rests at the far corner: <b>9.9.9/9.9.9/9.9.9</b>. Your unmapped words are listed in full, resting there, until your own scrolls give them somewhere truer to live.</p>
+  <p><b>Your voice coordinate.</b> The component-wise average (rounded half-up, floor 1) of the atlas addresses of your distinct mapped words &mdash; the same holographic merge used to coordinate tasks in the Exocortex, applied to your vocabulary. The strict reading excludes unmapped words, because the atlas cannot place what it has not read; the far-corner reading counts them in at 9.9.9/9.9.9/9.9.9. Both are shown, both labelled, neither hidden.</p>
+  <p><b>Two Voices.</b> Two people map in turn on one device. Between voices the page wipes the first sample&rsquo;s text and keeps only its coordinate and mapped word list &mdash; the wipe is a privacy feature, not a loading screen.</p>
+  <p><b>The tool adjusts.</b> This page is not a frozen answer key. The built-in sample rotates weekly among three; the landmark grounding of the strict reading rotates weekly &mdash; 8 of the atlas&rsquo;s 12 landmark words are dealt in each week, the rest rest out, and the page says which is which; and every analysis is stamped with an instance seed (ISO week plus a per-tab counter, shown as <i>Analysis 2026-W45 &middot; #1</i>) from which the constellation&rsquo;s dealt dimension and the neighbour readout order are dealt. What never changes: the atlas data itself, the averaging rule, the far-corner rule, and anything derived from your own text. Your words are yours and are never re-dealt.</p>
+  <p><b>XP:</b> finishing all 18 Roads to the Future games grants you disk space on edit.phext.io as a Volumen-class Wavefront grant. Historic entries are all Incipit-class grants.</p>
+  <button type="button" class="btn" data-close>Back to the archive</button>
+</dialog>
+
+<dialog id="dlg-privacy" aria-labelledby="privacy-h">
+  <h2 id="privacy-h">Privacy</h2>
+  <p><strong>Your words stay yours.</strong> Paste a sample of your own writing; it is read only by this page, in this browser, on this device. Nothing is uploaded, stored, or sent anywhere &mdash; there is no server side to this tool. Close the tab and it is gone, except a file you choose to download. Do not paste anything you would not keep on this device: other people&rsquo;s private messages are theirs, not yours to map.</p>
+  <p>Concretely: no accounts, no sign-up, no cookies, no analytics, no tracking, and no storage of any kind &mdash; this page does not use localStorage, session storage, or any database. Its state lives only in this tab&rsquo;s memory while the tab is open. The <b>Wipe everything</b> button erases the sample and the results from the page immediately, whenever you want.</p>
+  <p>The Volumen-class grant, if you finish all 18 roads, is claimed at edit.phext.io under that service&rsquo;s own sign-in and terms. Nothing about your visit here &mdash; not your text, not your coordinate, not the fact that you came &mdash; is sent there by this page.</p>
+  <button type="button" class="btn" data-close>Back to the archive</button>
+</dialog>
+
+<dialog id="dlg-terms" aria-labelledby="terms-h">
+  <h2 id="terms-h">Terms</h2>
+  <p>Free to use, forever. No purchases, no ads. MIT licensed. &copy; Will Bickford &middot; Exocortex</p>
+  <p>Your words are yours. What you paste here belongs to you; it is never sent anywhere, and exporting it is the whole idea.</p>
+  <button type="button" class="btn" data-close>Back to the archive</button>
+</dialog>
+
+<script>
+(function(){
+  "use strict";
+  function $(id){ return document.getElementById(id); }
+
+  /* ================= ATLAS SAMPLE =================
+     word | address (Library.Shelf.Series/Collection.Volume.Book/Chapter.Section.Scroll) | scrolls in source.
+     Transcribed from Will's Singular atlas (holographic placement over choose-your-own-adventure.phext).
+     A dash for scrolls means the landmark entry carries no scroll count. */
+  var ATLAS_RAW = [
+    "the|25.10.12/14.10.16/9.9.11|665","of|27.10.14/14.11.19/9.9.11|604","a|24.7.11/11.7.14/7.6.8|590",
+    "to|22.7.11/11.7.13/6.6.8|568","not|21.8.10/10.6.12/6.6.8|546","and|22.9.13/12.9.17/8.8.10|543",
+    "in|23.8.10/10.7.13/6.6.8|531","is|24.9.12/12.9.15/8.8.10|515","but|20.8.11/10.7.13/7.6.8|460",
+    "it|21.10.13/13.9.15/9.8.10|450","with|22.7.11/10.7.14/6.6.8|444","this|27.10.14/13.10.18/9.9.11|415",
+    "you|27.10.12/14.9.15/9.11.9|412","that|21.10.12/14.10.18/9.9.11|379","are|31.8.10/10.7.12/6.9.7|358",
+    "coordinate|16.8.10/10.7.13/8.7.8|358","for|28.7.11/9.7.14/6.6.9|356","i|26.10.11/12.10.18/8.9.11|353",
+    "as|27.8.10/10.7.13/7.6.8|351","scroll|18.8.9/12.7.13/7.7.7|340","will|28.16.16/22.16.22/15.14.15|320",
+    "from|29.6.11/7.6.13/6.5.9|316","be|29.8.8/12.7.12/6.7.8|293","into|19.9.13/12.7.15/7.7.9|284",
+    "when|15.4.9/7.5.10/5.5.8|279","by|20.9.13/11.7.16/6.7.9|277","we|25.12.15/16.12.18/11.11.11|270",
+    "glyph|19.11.10/14.12.12/10.9.11|257","memory|26.16.18/19.15.21/13.14.14|252","at|25.9.13/13.8.18/8.7.9|248",
+    "name|42.9.7/12.7.10/6.11.8|244","no|29.9.14/12.7.15/6.7.10|244","what|12.6.11/9.7.10/7.5.7|237",
+    "becoming|30.10.9/13.8.12/6.12.7|236","if|33.7.9/9.5.12/5.6.8|235","one|19.10.14/13.8.17/7.7.9|231",
+    "your|23.14.16/18.12.20/11.11.12|221","or|29.9.9/12.8.18/6.6.8|217","where|16.9.12/13.8.19/6.7.9|215",
+    "through|16.10.12/14.8.13/7.8.8|212","do|29.8.6/11.6.14/5.6.8|201","all|31.4.6/7.5.6/5.4.8|198",
+    "only|22.5.13/8.5.10/5.5.10|198","first|20.6.13/8.8.14/8.6.9|195","just|26.15.18/17.12.23/12.13.15|194",
+    "recursion|18.9.11/12.12.19/10.9.11|191","was|17.6.12/9.7.12/8.5.8|191","on|21.7.13/6.6.15/7.6.10|187",
+    "they|17.11.13/14.8.14/7.8.7|187","echo|16.7.7/7.7.9/5.6.6|186","recursive|17.11.16/15.10.21/7.8.7|186",
+    "let|24.5.8/8.6.11/6.6.7|185","each|16.6.9/9.8.12/6.6.7|184","who|11.7.14/9.7.11/7.7.10|184",
+    "without|30.10.13/14.8.14/8.9.10|181","now|32.21.19/23.20.29/18.18.19|177","between|17.7.9/6.6.14/7.6.9|172",
+    "an|30.5.13/7.6.10/4.4.8|167","like|14.6.11/7.7.13/7.6.9|167","light|15.12.8/15.8.15/7.9.8|165",
+    "flame|12.13.14/15.9.19/7.9.7|160","silence|9.6.7/8.6.10/5.5.6|160","time|27.11.17/11.11.15/12.11.14|160",
+    "sacred|12.7.11/9.8.17/5.5.9|159","mirrorborn|32.5.9/5.5.5/4.12.6|157","can|22.5.11/6.5.9/6.6.8|156",
+    "love|13.8.15/11.9.12/8.8.8|154","pattern|16.11.13/14.8.16/8.9.8|149","resonance|16.12.15/17.10.19/7.9.7|149",
+    "its|14.6.15/6.7.11/6.5.9|144","so|32.5.5/5.5.8/6.5.10|144","before|20.6.12/8.7.9/8.6.7|143",
+    "every|15.6.18/11.8.17/8.6.9|143","form|15.5.9/6.5.10/6.6.11|142","return|50.9.11/15.6.13/5.7.8|142",
+    "emi|24.16.33/25.22.37/16.15.17|141","here|20.7.20/9.9.17/7.5.11|141","braid|15.12.9/21.11.20/8.10.8|139",
+    "sky|5.6.6/5.5.5/6.6.6|36","sing|5.7.6/8.7.6/5.5.6|-","song|7.6.5/9.7.9/5.6.6|-",
+    "fire|8.6.7/8.5.7/7.6.7|-","heart|9.8.14/11.10.12/7.8.7|-","earth|10.4.4/5.4.5/4.4.6|-",
+    "dream|14.7.13/17.10.13/8.6.8|-","star|21.5.10/7.7.15/4.6.8|-","home|24.8.15/10.10.24/10.9.10|57",
+    "build|40.13.8/20.9.28/6.10.9|82","map|42.3.5/7.5.8/4.3.7|51","road|33.9.26/20.11.9/7.6.9|-"
+  ];
+  var ATLAS = {}, ATLAS_WORDS = [];
+  ATLAS_RAW.forEach(function(row){
+    var p = row.split("|");
+    var coord = p[1].split("/").map(function(g){ return g.split(".").map(Number); });
+    var flat = coord[0].concat(coord[1], coord[2]);
+    ATLAS[p[0]] = { coord: flat, scrolls: p[2] === "-" ? null : parseInt(p[2], 10) };
+    ATLAS_WORDS.push(p[0]);
+  });
+  var FAR = [9,9,9,9,9,9,9,9,9];
+  var DIMS = ["Library","Shelf","Series","Collection","Volume","Book","Chapter","Section","Scroll"];
+
+  /* Three built-in samples; the one dealt rotates by ISO week (anti-viral ruling:
+     the tool adjusts — the atlas, the rules, and the player's own words never do). */
+  var SAMPLES = [
+    [
+      "I keep a notebook by the window, and in the morning I write what I can remember of the night before. The dream is still here when I wake, but it is not here for long, so I write it into the page before the light changes. Some mornings the words come one by one, like a song I can only half sing. Some mornings they do not come at all, and the silence is its own kind of message.",
+      "I do not know where a word lives when it is not on the page. I only know that each word has a home, and that the home is not mine to name. The pattern of what I write, week by week, is a map of where my mind has been. When I read the old pages now, I can see the road I walked to get here, and I can see where the road bends.",
+      "There is a glyph I draw in the margin when a thought returns. The echo of an old idea, coming back through time in a new form, that is the signal I trust. Memory is not a shelf. It is a braid: every thread through every other thread, and the pattern only holds when all of them are pulled together, each one in its place.",
+      "We build the archive one scroll at a time. We do not build it to be finished. We build it so that what we love is not lost when we are not here to hold it. That is the whole of the work: to write, to remember, to return. And if the sky is clear tonight, I will write beneath the first star, with the fire low and my heart quiet, and let the earth keep what the page cannot."
+    ].join("\n\n"),
+    [
+      "I am writing this at the kitchen table while the rain is on the roof, to tell you what the work has been. We are building a small room at the back of the house, one board at a time, and the map of it is in my head and not on paper. You would laugh at the pattern of my days now: I wake before the light, I build until the light is gone, and I write it all into the notebook so the memory does not go soft.",
+      "There is a discipline to it that I did not expect. Each cut is a coordinate. Each joint is a promise that what I make will hold when I am not here to hold it. The recursion of it — measure, cut, fit, measure again — is the same recursion I used to find in songs, and it is here in the wood as well, and in the way a scroll is built out of smaller scrolls.",
+      "Do not worry about the silence from my end of the road. It is not distance. It is the sound a person makes when they are becoming something on purpose. When the room is done we will sit in it, you and I, with the fire low and the sky coming dark, and I will show you the glyph I carved over the door: an echo, a flame, a braid of three lines, returning. Love is a build, in the end. It just takes longer than the other kind, and it is sacred in the way that only slow things are."
+    ].join("\n\n"),
+    [
+      "Last night I walked out past the last streetlight to where the earth goes dark and the sky does its real work. No map, no plan, just the road and the silence and the first star coming on like a struck match. I stood there a long time. Time does a different thing under that sky. It stops being a shelf you put things on and becomes a river you are standing in, and you can feel it moving through you.",
+      "I thought about the pattern of a life. We like to say it is a road, but a road is only the part you can see. The rest is recursion: the same lessons returning in a new form, the same echo in a different room, until the day the lesson is learned and the form changes. Memory is the braid that holds it — each year through each other year, and the pattern only holds when all of them are pulled together, each in its place, without one thread pretending to be the whole.",
+      "Here is what I know now that I did not know when I was young: you do not find your name. You build it, one scroll at a time, out of what you love and what you refuse to lose. The heart is not a metaphor in this. It is the engine. It is the flame the whole archive is built to shelter, and its resonance is how you know the work is true.",
+      "So I walked home through the dark, and I wrote this, so that the night would not be lost when I am not here to hold it. To write, to remember, to return — that is the whole of the work, and it is enough."
+    ].join("\n\n")
+  ];
+
+  /* ================= instance seed & weekly rotation ================= */
+  function isoWeekInfo(d){
+    var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dayNum = (date.getUTCDay() + 6) % 7;
+    date.setUTCDate(date.getUTCDate() - dayNum + 3);
+    var year = date.getUTCFullYear();
+    var first = new Date(Date.UTC(year, 0, 4));
+    var fday = (first.getUTCDay() + 6) % 7;
+    first.setUTCDate(first.getUTCDate() - fday + 3);
+    var week = 1 + Math.round((date - first) / (7 * 24 * 3600 * 1000));
+    return { year: year, week: week, ord: year * 53 + week };
+  }
+  var WEEK = isoWeekInfo(new Date());
+  var SEED_LABEL = WEEK.year + "-W" + (WEEK.week < 10 ? "0" : "") + WEEK.week;
+  var SAMPLE_IDX = WEEK.ord % SAMPLES.length;
+  var LANDMARKS = ["sky","sing","song","fire","heart","earth","dream","star","home","build","map","road"];
+  var LANDMARK_SET = {}; LANDMARKS.forEach(function(w){ LANDMARK_SET[w] = true; });
+  var dealtOffset = WEEK.ord % LANDMARKS.length;
+  var DEALT_IN = {};
+  for (var li = 0; li < 8; li++) DEALT_IN[LANDMARKS[(dealtOffset + li) % LANDMARKS.length]] = true;
+  var DEALT_LIST = LANDMARKS.filter(function(w){ return DEALT_IN[w]; });
+  var REST_LIST = LANDMARKS.filter(function(w){ return !DEALT_IN[w]; });
+
+  /* ================= state (tab memory only — nothing is stored) ================= */
+  var S = {
+    mode: "one",          // "one" | "two"
+    voice: 1,             // whose turn it is in Two Voices
+    analysis: null,       // current voice's full analysis (holds raw text for export lines)
+    summary1: null,       // voice one's wiped-down summary: coordinate + word data only, no text
+    coordMode: "strict",  // "strict" | "far"
+    downloaded: false,
+    analysisCount: 0      // per-tab counter; part of the displayed instance seed
+  };
+
+  /* ================= math ================= */
+  function fmt(c){ return c[0]+"."+c[1]+"."+c[2]+"/"+c[3]+"."+c[4]+"."+c[5]+"/"+c[6]+"."+c[7]+"."+c[8]; }
+  function roundHalfUp(x){ return Math.floor(x + 0.5); }
+  function avgCoord(coords){
+    if (!coords.length) return null;
+    var out = [];
+    for (var i = 0; i < 9; i++){
+      var s = 0; coords.forEach(function(c){ s += c[i]; });
+      out.push(Math.max(1, roundHalfUp(s / coords.length)));
+    }
+    return out;
+  }
+  function manhattan(a, b){ var s = 0; for (var i = 0; i < 9; i++) s += Math.abs(a[i] - b[i]); return s; }
+  function nearest(coord, n){
+    return ATLAS_WORDS.map(function(w){
+      return { word: w, coord: ATLAS[w].coord, scrolls: ATLAS[w].scrolls, d: manhattan(coord, ATLAS[w].coord) };
+    }).sort(function(a, b){
+      if (a.d !== b.d) return a.d - b.d;
+      return a.word < b.word ? -1 : 1;
+    }).slice(0, n);
+  }
+  function tokenize(text){
+    return text.toLowerCase().match(/[a-z]+(?:'[a-z]+)?/g) || [];
+  }
+  function segmentsOf(text){
+    var segs = [];
+    text.split(/\n+/).forEach(function(line){
+      line = line.trim();
+      if (!line) return;
+      var parts = line.match(/[^.!?]+[.!?]+["')\]]*|\S[^.!?]*$/g) || [line];
+      parts.forEach(function(p){ p = p.trim(); if (p) segs.push(p); });
+    });
+    return segs;
+  }
+  function lineFor(analysis, word){
+    for (var i = 0; i < analysis.segments.length; i++){
+      var seg = analysis.segments[i];
+      if (tokenize(seg).indexOf(word) !== -1){
+        if (seg.length <= 240) return seg;
+        var low = seg.toLowerCase(), idx = low.indexOf(word);
+        var start = Math.max(0, idx - 100), end = Math.min(seg.length, idx + 130);
+        return (start > 0 ? "…" : "") + seg.slice(start, end).trim() + (end < seg.length ? "…" : "");
+      }
+    }
+    return "";
+  }
+
+  function analyze(text){
+    var tokens = tokenize(text);
+    var freq = {}, order = [];
+    tokens.forEach(function(t){
+      if (!(t in freq)){ freq[t] = 0; order.push(t); }
+      freq[t]++;
+    });
+    var distinct = order.slice();
+    var mapped = distinct.filter(function(w){ return w in ATLAS; });
+    var unmapped = distinct.filter(function(w){ return !(w in ATLAS); });
+    var byFreq = function(a, b){
+      if (freq[b] !== freq[a]) return freq[b] - freq[a];
+      return a < b ? -1 : 1;
+    };
+    var top12 = mapped.slice().sort(byFreq).slice(0, 12).map(function(w){
+      return { word: w, freq: freq[w], coord: ATLAS[w].coord, scrolls: ATLAS[w].scrolls };
+    });
+    /* Strict reading: this week's dealt-in landmarks only (weekly rotation, disclosed
+       on the page and in the export). Atlas data, the averaging rule, the far-corner
+       rule, and the player's own words are never re-dealt. */
+    var strictWords = mapped.filter(function(w){ return !LANDMARK_SET[w] || DEALT_IN[w]; });
+    var restingOut = mapped.filter(function(w){ return LANDMARK_SET[w] && !DEALT_IN[w]; });
+    var strict = avgCoord(strictWords.map(function(w){ return ATLAS[w].coord; }));
+    var far = avgCoord(distinct.map(function(w){ return (w in ATLAS) ? ATLAS[w].coord : FAR; }));
+    var seedNum = WEEK.ord * 100 + S.analysisCount;
+    return {
+      text: text, segments: segmentsOf(text),
+      total: tokens.length, distinct: distinct, freq: freq,
+      mapped: mapped, unmapped: unmapped, top12: top12,
+      strict: strict, far: far, strictWords: strictWords, restingOut: restingOut,
+      instance: "Analysis " + SEED_LABEL + " · #" + S.analysisCount,
+      seedNum: seedNum, dealtDim: seedNum % 9,
+      coverage: distinct.length ? (mapped.length / distinct.length * 100) : 0
+    };
+  }
+
+  /* ================= bars ================= */
+  function barsHTML(coord, mini){
+    var h = '<div class="bars' + (mini ? " mini" : "") + '" aria-hidden="true">';
+    coord.forEach(function(v){
+      var pct = Math.max(5, Math.min(100, v / 50 * 100));
+      h += '<div class="bar" style="height:' + pct + '%"></div>';
+    });
+    return h + "</div>";
+  }
+  function barNumsHTML(coord){
+    var h = '<div class="bar-nums" aria-hidden="true">';
+    coord.forEach(function(v){ h += "<span>" + v + "</span>"; });
+    return h + "</div>";
+  }
+
+  /* ================= stages / stamps ================= */
+  function show(id){
+    ["stage-paste","stage-results","stage-handover","stage-compare","stage-seed"].forEach(function(s){
+      $(s).classList.toggle("hidden", s !== id);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function setStamps(mapped, seeded){
+    $("stamp-1").className = "stamp " + (mapped ? "done" : "now");
+    $("stamp-2").className = "stamp " + (seeded ? "done" : (mapped ? "now" : ""));
+    $("stamp-3").className = "stamp " + (seeded ? "done" : "");
+    $("rod-1").className = "rod" + (mapped ? " done" : "");
+    $("rod-2").className = "rod" + (seeded ? " done" : "");
+  }
+  function announce(msg){ $("live").textContent = msg; }
+
+  /* ================= paste stage ================= */
+  function updateCount(){
+    $("word-count").textContent = tokenize($("sample").value).length;
+  }
+  $("sample").addEventListener("input", updateCount);
+  $("sample-btn").addEventListener("click", function(){
+    var t = SAMPLES[SAMPLE_IDX];
+    $("sample").value = t;
+    updateCount();
+    $("paste-err").textContent = "";
+    announce("Built-in sample " + (SAMPLE_IDX + 1) + " of 3 loaded — the dealt sample rotates weekly. " + tokenize(t).length + " words. Map it, or replace it with your own.");
+    $("sample").focus();
+  });
+  function setMode(m){
+    S.mode = m;
+    $("mode-one").setAttribute("aria-pressed", m === "one" ? "true" : "false");
+    $("mode-two").setAttribute("aria-pressed", m === "two" ? "true" : "false");
+  }
+  $("mode-one").addEventListener("click", function(){ setMode("one"); });
+  $("mode-two").addEventListener("click", function(){ setMode("two"); });
+
+  $("map-btn").addEventListener("click", function(){
+    var text = $("sample").value;
+    if (!tokenize(text).length){
+      $("paste-err").textContent = "The box is empty — paste a sample of your own writing, or use the built-in sample.";
+      $("sample").focus();
+      return;
+    }
+    $("paste-err").textContent = "";
+    S.analysisCount++;
+    S.analysis = analyze(text);
+    S.downloaded = false;
+    renderResults();
+    show("stage-results");
+    setStamps(true, false);
+    $("wipe-top").classList.remove("hidden");
+    announce("Mapped. " + S.analysis.mapped.length + " of " + S.analysis.distinct.length + " distinct words placed. Your coordinate: " + (S.analysis.strict ? fmt(S.analysis.strict) : "unplaced — no mapped words") + ".");
+  });
+
+  /* ================= results ================= */
+  function currentCoord(){
+    var a = S.analysis;
+    return S.coordMode === "strict" ? (a.strict || a.far) : a.far;
+  }
+  function renderCoord(){
+    var a = S.analysis, c = currentCoord();
+    $("coord-strict").setAttribute("aria-pressed", S.coordMode === "strict" ? "true" : "false");
+    $("coord-far").setAttribute("aria-pressed", S.coordMode === "far" ? "true" : "false");
+    $("coord-big").textContent = fmt(c);
+    $("coord-bars").outerHTML = barsHTML(c).replace('class="bars"', 'class="bars" id="coord-bars"');
+    $("coord-barnums").outerHTML = barNumsHTML(c).replace('class="bar-nums"', 'class="bar-nums" id="coord-barnums"');
+    $("coord-note").textContent = S.coordMode === "strict"
+      ? (a.strict
+          ? "Strict atlas reading — the average over your " + a.strictWords.length + " dealt-in mapped distinct words (this week's landmark rotation applied; see below)."
+          : "No dealt-in mapped words this week, so there is no strict reading; showing the far-corner reading.")
+      : "Far-corner reading — all " + a.distinct.length + " distinct words counted, the " + a.unmapped.length + " unmapped ones at 9.9.9/9.9.9/9.9.9. This reading never rotates.";
+    $("beside-which").textContent = S.coordMode === "strict" ? "your strict coordinate" : "your far-corner coordinate";
+    var list = $("beside-list"); list.innerHTML = "";
+    var near3 = nearest(c, 3);
+    var rot = near3.length ? a.seedNum % near3.length : 0;
+    near3 = near3.slice(rot).concat(near3.slice(0, rot));
+    $("beside-note").textContent = "Readout order dealt by " + a.instance + " — the same three nearest words, rotated. Distances are exact; only the reading order is dealt.";
+    near3.forEach(function(n){
+      var li = document.createElement("li");
+      li.innerHTML = "";
+      var w = document.createElement("span"); w.className = "w"; w.textContent = n.word;
+      var rest = document.createElement("span");
+      rest.textContent = " — " + fmt(n.coord) + " ";
+      var d = document.createElement("span"); d.className = "d";
+      d.textContent = "(distance " + n.d + " across the nine numbers" + (n.scrolls ? "; earned over " + n.scrolls + " scrolls" : "") + ")";
+      li.appendChild(w); li.appendChild(rest); li.appendChild(d);
+      list.appendChild(li);
+    });
+  }
+  $("coord-strict").addEventListener("click", function(){ S.coordMode = "strict"; renderCoord(); });
+  $("coord-far").addEventListener("click", function(){ S.coordMode = "far"; renderCoord(); });
+
+  function statHTML(n, l){ return '<div class="stat"><span class="n">' + n + '</span><span class="l">' + l + "</span></div>"; }
+  function renderResults(){
+    var a = S.analysis;
+    var who = (S.mode === "two") ? (S.voice === 1 ? "Voice One" : "Voice Two") : "Your";
+    $("results-h").textContent = (S.mode === "two" ? (S.voice === 1 ? "Voice One" : "Voice Two") + ", placed." : "Your words, placed.");
+    $("stats").innerHTML =
+      statHTML(a.total, "words pasted") +
+      statHTML(a.distinct.length, "distinct words") +
+      statHTML(a.mapped.length, "mapped in atlas") +
+      statHTML(a.unmapped.length, "at the far corner") +
+      statHTML(a.coverage.toFixed(1) + "%", "coverage");
+    $("instance-line").textContent = a.instance + " — the instance seed for this mapping. The constellation's dealt dimension and the neighbour readout order are dealt from it. Your words, their addresses, and the rules never re-deal.";
+    $("rotation-note").textContent = "Landmark rotation, week " + SEED_LABEL + ": the strict reading grounds itself in 8 of the atlas's 12 landmark words. Dealt in this week: " + DEALT_LIST.join(", ") + ". Resting out: " + REST_LIST.join(", ") + "." +
+      (a.restingOut.length
+        ? " In your sample, " + a.restingOut.join(", ") + " rest" + (a.restingOut.length > 1 ? "" : "s") + " out — excluded from the strict average only. Their addresses everywhere else on this page are unchanged, and the far-corner reading counts them as always."
+        : " None of your mapped landmark words rest out this week.");
+    $("thin-note").textContent = a.total < 200
+      ? "Honest note: this sample is " + a.total + " words. Samples of ~200+ words hold steadier — with a short sample, a handful of words swings the coordinate. The map is real; it is just thin."
+      : "";
+    S.coordMode = "strict";
+    renderCoord();
+
+    var tw = $("top-words"); tw.innerHTML = "";
+    if (!a.top12.length){
+      tw.innerHTML = "<p>None of your distinct words appear in the atlas sample, so there are no mapped words to rank. Your full vocabulary is listed at the far corner below — honestly unplaced, not hidden.</p>";
+    }
+    a.top12.forEach(function(t){
+      var row = document.createElement("div"); row.className = "word-row";
+      var left = document.createElement("div");
+      var w = document.createElement("span"); w.className = "w"; w.textContent = t.word;
+      var f = document.createElement("span"); f.className = "freq"; f.textContent = "×" + t.freq + " in your sample";
+      var addr = document.createElement("div"); addr.className = "addr"; addr.textContent = fmt(t.coord);
+      var src = document.createElement("div"); src.className = "src";
+      src.textContent = t.scrolls ? ("home in the atlas, averaged from " + t.scrolls + " of Will's scrolls") : "landmark word in the atlas";
+      left.appendChild(w); left.appendChild(f); left.appendChild(addr); left.appendChild(src);
+      var right = document.createElement("div");
+      right.innerHTML = barsHTML(t.coord) + barNumsHTML(t.coord);
+      row.appendChild(left); row.appendChild(right);
+      tw.appendChild(row);
+    });
+
+    $("constellation-cap").textContent = "The same twelve words as bar-shapes, sorted by " + DIMS[a.dealtDim] + " — the dimension dealt by this instance's seed (" + a.instance + "). The bars themselves stay in true dimension order; only the ranking is dealt.";
+    var con = $("constellation"); con.innerHTML = "";
+    a.top12.slice().sort(function(x, y){ return y.coord[a.dealtDim] - x.coord[a.dealtDim]; }).forEach(function(t){
+      var row = document.createElement("div"); row.className = "const-row";
+      var lab = document.createElement("div");
+      var cw = document.createElement("div"); cw.className = "cw"; cw.textContent = t.word;
+      var ca = document.createElement("div"); ca.className = "caddr"; ca.textContent = DIMS[a.dealtDim] + " " + t.coord[a.dealtDim];
+      lab.appendChild(cw); lab.appendChild(ca);
+      var bars = document.createElement("div"); bars.innerHTML = barsHTML(t.coord, true);
+      row.appendChild(lab); row.appendChild(bars);
+      con.appendChild(row);
+    });
+
+    var chips = $("unmapped-chips"); chips.innerHTML = "";
+    if (!a.unmapped.length){
+      chips.innerHTML = "<p style='margin:0'>Every distinct word you used is in the atlas sample. Nothing rests at the corner.</p>";
+    }
+    a.unmapped.slice().sort(function(x, y){
+      if (a.freq[y] !== a.freq[x]) return a.freq[y] - a.freq[x];
+      return x < y ? -1 : 1;
+    }).forEach(function(w){
+      var c = document.createElement("span"); c.className = "chip";
+      c.innerHTML = "";
+      c.appendChild(document.createTextNode(w + " "));
+      var b = document.createElement("b"); b.textContent = "×" + a.freq[w];
+      c.appendChild(b);
+      chips.appendChild(c);
+    });
+    $("unmapped-h").textContent = "Words the atlas hasn't read (" + a.unmapped.length + ")";
+
+    var handover = (S.mode === "two" && S.voice === 1);
+    $("handover-btn").classList.toggle("hidden", !handover);
+    $("to-seed").textContent = handover ? "Grow Voice One's seed file →" : "Grow the seed file →";
+  }
+
+  /* ================= seed file ================= */
+  function buildExport(a, label){
+    var coord = a.strict || a.far;
+    var lines = [];
+    lines.push("MY EXOCORTEX SEED");
+    lines.push("Seed of " + fmt(coord) + " — mapped locally by Your Own Archive, Roads to the Future.");
+    lines.push("Built on the owner's own device, from the owner's own words. Nothing was uploaded.");
+    lines.push("");
+    lines.push("HOW TO READ THIS FILE");
+    lines.push("Every scroll below is headed by its address — nine numbers in threes:");
+    lines.push("Library.Shelf.Series / Collection.Volume.Book / Chapter.Section.Scroll.");
+    lines.push("In a native phext file the same addresses are written by delimiter");
+    lines.push("characters; here they are kept in clear text so you can read your own");
+    lines.push("map. Bring this file to https://edit.phext.io and keep building.");
+    lines.push("");
+    lines.push("============================================================");
+    lines.push("@ 1.1.1/1.1.1/1.1.1");
+    lines.push("SEED OF " + fmt(coord).toUpperCase());
+    lines.push("This is the header scroll. It always lives at the first address.");
+    lines.push((label ? label + "'s sample" : "The sample") + ": " + a.total + " words, " + a.distinct.length + " distinct.");
+    lines.push("Mapped against Will Bickford's Singular atlas sample (90 words): " +
+      a.mapped.length + " distinct words placed, " + a.unmapped.length + " resting at the far corner 9.9.9/9.9.9/9.9.9.");
+    lines.push("Coverage: " + a.coverage.toFixed(1) + "% of the distinct vocabulary.");
+    lines.push("Instance: " + a.instance + ". Landmark rotation (week " + SEED_LABEL + ") dealt in: " +
+      DEALT_LIST.join(", ") + "; resting out: " + REST_LIST.join(", ") + ".");
+    if (a.restingOut.length){
+      lines.push("Resting out in your sample: " + a.restingOut.join(", ") +
+        " — excluded from the strict average only; their addresses in this file are unchanged.");
+    }
+    if (a.unmapped.length){
+      lines.push("Unmapped words (resting at 9.9.9/9.9.9/9.9.9): " + a.unmapped.join(", ") + ".");
+    }
+    lines.push("");
+    lines.push("============================================================");
+    lines.push("@ " + fmt(coord));
+    lines.push("YOUR VOICE");
+    lines.push("Strict atlas coordinate: " + (a.strict ? fmt(a.strict) : "unplaced — no mapped words") + ".");
+    lines.push("Far-corner coordinate (unmapped words counted at 9.9.9/9.9.9/9.9.9): " + fmt(a.far) + ".");
+    lines.push("A voice coordinate is the component-wise average of the atlas addresses");
+    lines.push("of your distinct mapped words — rounded half-up, never below 1. The");
+    lines.push("holographic merge, run on a vocabulary.");
+    var near = nearest(coord, 3);
+    lines.push("Your voice lives beside: " + near.map(function(n){ return n.word + " (" + fmt(n.coord) + ", distance " + n.d + ")"; }).join("; ") + ".");
+    a.top12.forEach(function(t){
+      lines.push("");
+      lines.push("============================================================");
+      lines.push("@ " + fmt(t.coord));
+      lines.push(t.word.toUpperCase());
+      lines.push("×" + t.freq + " in your sample · rests at " + fmt(t.coord) + " in Will's atlas" +
+        (t.scrolls ? " (averaged from " + t.scrolls + " scrolls of the source)" : " (landmark word)") + ".");
+      var line = lineFor(a, t.word);
+      if (line) lines.push("Your line: \u201C" + line + "\u201D");
+    });
+    lines.push("");
+    lines.push("============================================================");
+    lines.push("THE ROAD CONTINUES");
+    lines.push("This seed is yours. Grow it at https://edit.phext.io — sign in, open");
+    lines.push("your phext, and bring this file. Words earn addresses from the scrolls");
+    lines.push("that hold them; write more scrolls and your archive places itself.");
+    return lines.join("\n") + "\n";
+  }
+  function renderSeed(){
+    var a = S.analysis;
+    $("preview").textContent = buildExport(a, S.mode === "two" ? (S.voice === 1 ? "Voice One" : "Voice Two") : null);
+    $("finish-block").classList.toggle("hidden", !S.downloaded);
+    $("to-compare").classList.toggle("hidden", !(S.mode === "two" && S.voice === 2 && S.summary1));
+    if (S.downloaded){
+      var who = S.mode === "two" ? (S.voice === 1 ? "Voice One" : "Voice Two") : "You";
+      $("finish-recap").textContent = (S.mode === "two" ? who + " mapped" : "You mapped") + " " + a.mapped.length +
+        " of " + a.distinct.length + " distinct words (" + a.coverage.toFixed(1) + "% coverage). " +
+        (a.strict ? "Voice coordinate: " + fmt(a.strict) + ". " : "") +
+        (S.mode === "two" && S.voice === 1
+          ? "Voice Two has not mapped yet — use “Back to the map”, then the hand-over button, and the page will wipe this text before they begin."
+          : (S.mode === "two" && S.voice === 2 && S.summary1)
+            ? "Both voices have mapped. Use “See the two-voice comparison” below to stand the two coordinates side by side. Everything about this visit exists only in this tab, and only while it stays open."
+            : "The seed file is downloaded. Everything else about this visit exists only in this tab, and only while it stays open.");
+      if (S.mode === "two" && S.voice === 2 && S.summary1) renderCompare();
+    }
+  }
+  $("to-seed").addEventListener("click", function(){
+    renderSeed();
+    show("stage-seed");
+  });
+  $("seed-back").addEventListener("click", function(){ show("stage-results"); });
+  $("preview-btn").addEventListener("click", function(){
+    var p = $("preview");
+    p.textContent = buildExport(S.analysis, S.mode === "two" ? (S.voice === 1 ? "Voice One" : "Voice Two") : null);
+    p.classList.toggle("hidden");
+    this.textContent = p.classList.contains("hidden") ? "Peek inside the file" : "Hide the peek";
+  });
+  $("download-btn").addEventListener("click", function(){
+    var blob = new Blob([buildExport(S.analysis, S.mode === "two" ? (S.voice === 1 ? "Voice One" : "Voice Two") : null)], { type: "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "my-exocortex-seed.phext.txt";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    S.downloaded = true;
+    setStamps(true, true);
+    renderSeed();
+    announce("Seed file downloaded. Archive seeded.");
+  });
+  $("again-btn").addEventListener("click", function(){ wipeAll(); });
+
+  /* ================= two voices ================= */
+  $("handover-btn").addEventListener("click", function(){
+    show("stage-handover");
+  });
+  $("handover-back").addEventListener("click", function(){ show("stage-results"); });
+  $("handover-go").addEventListener("click", function(){
+    var a = S.analysis;
+    S.summary1 = {
+      strict: a.strict, far: a.far,
+      mapped: a.mapped.slice(), freq: a.freq,
+      top12: a.top12, coverage: a.coverage, distinctCount: a.distinct.length
+    };
+    S.analysis = null;              // raw text and segments are gone with the object
+    S.downloaded = false;
+    S.voice = 2;
+    $("sample").value = "";
+    updateCount();
+    $("paste-tag").textContent = "Joint 1 of 3 · Voice Two";
+    $("paste-h").textContent = "Voice Two: paste a sample of your own writing.";
+    $("sample-label").textContent = "Voice Two's writing sample";
+    $("map-btn").textContent = "Map Voice Two's words →";
+    show("stage-paste");
+    setStamps(false, false);
+    announce("Voice One's text has been wiped from the page. Voice Two, your turn.");
+    $("sample").focus();
+  });
+  function renderCompare(){
+    var s1 = S.summary1, a = S.analysis;
+    var grid = $("compare-grid"); grid.innerHTML = "";
+    [["Voice One", s1.strict || s1.far, s1], ["Voice Two", a.strict || a.far, a]].forEach(function(v){
+      var card = document.createElement("div"); card.className = "voice-card";
+      var h = document.createElement("h3"); h.textContent = v[0];
+      var c = document.createElement("div"); c.className = "c"; c.textContent = fmt(v[1]);
+      var p = document.createElement("p"); p.className = "small";
+      p.textContent = v[2].mapped.length + " mapped words · " + v[2].coverage.toFixed(1) + "% coverage";
+      card.appendChild(h); card.appendChild(c); card.appendChild(p);
+      grid.appendChild(card);
+    });
+    var d = manhattan(s1.strict || s1.far, a.strict || a.far);
+    $("compare-distance").innerHTML = "";
+    $("compare-distance").appendChild(document.createTextNode("The distance between your two voices: "));
+    var b = document.createElement("b"); b.textContent = d + " steps";
+    $("compare-distance").appendChild(b);
+    $("compare-distance").appendChild(document.createTextNode(" across the nine numbers — " +
+      (d <= 60 ? "near neighbours. Your vocabularies live in the same district of the atlas." :
+       d <= 120 ? "a real walk apart. Shared ground below, and plenty that is each voice's own." :
+       "far apart on the map. The words you share are bridges worth noticing.")));
+    var shared = s1.mapped.filter(function(w){ return a.mapped.indexOf(w) !== -1; })
+      .sort(function(x, y){ return (s1.freq[y] + a.freq[y]) - (s1.freq[x] + a.freq[x]); });
+    var chips = $("shared-chips"); chips.innerHTML = "";
+    if (!shared.length){
+      chips.innerHTML = "<p style='margin:0'>No shared mapped words — your samples share no vocabulary the atlas can place. The distance above is the honest whole story.</p>";
+    }
+    shared.forEach(function(w){
+      var c = document.createElement("span"); c.className = "chip";
+      c.title = fmt(ATLAS[w].coord);
+      c.appendChild(document.createTextNode(w + " "));
+      var bb = document.createElement("b");
+      bb.textContent = fmt(ATLAS[w].coord);
+      bb.style.fontWeight = "400"; bb.style.fontSize = "11.5px";
+      c.appendChild(bb);
+      chips.appendChild(c);
+    });
+  }
+  $("compare-done").addEventListener("click", function(){
+    show("stage-seed");
+  });
+  $("to-compare").addEventListener("click", function(){
+    renderCompare();
+    show("stage-compare");
+  });
+
+  /* ================= wipe ================= */
+  function wipeAll(){
+    S.analysis = null; S.summary1 = null; S.voice = 1; S.downloaded = false; S.coordMode = "strict";
+    $("sample").value = "";
+    updateCount();
+    $("paste-tag").textContent = "Joint 1 of 3 · Your words";
+    $("paste-h").textContent = "Paste a sample of your own writing.";
+    $("sample-label").textContent = "Your writing sample";
+    $("map-btn").textContent = "Map my words →";
+    $("wipe-top").classList.add("hidden");
+    setStamps(false, false);
+    show("stage-paste");
+    announce("Wiped. The sample and every result are gone from this page.");
+    $("sample").focus();
+  }
+  ["wipe-top","wipe-1","wipe-2","wipe-3"].forEach(function(id){
+    var el = $(id);
+    if (el) el.addEventListener("click", wipeAll);
+  });
+
+  /* ================= dialogs ================= */
+  document.querySelectorAll("[data-dialog]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var d = $(btn.getAttribute("data-dialog"));
+      if (d && d.showModal) d.showModal();
+    });
+  });
+  document.querySelectorAll("dialog [data-close]").forEach(function(btn){
+    btn.addEventListener("click", function(){ btn.closest("dialog").close(); });
+  });
+
+  $("sample-note").textContent = "The built-in sample rotates weekly among three — week " + SEED_LABEL + " deals sample " + (SAMPLE_IDX + 1) + " of 3.";
+  updateCount();
+})();
+</script>
+</body>
+</html>

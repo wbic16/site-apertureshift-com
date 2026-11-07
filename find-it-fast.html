@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Find It Fast</title>
+<style>
+  :root{
+    --bg:#10141c; --panel:#1a2130; --panel2:#232d42; --ink:#f2f4f8; --muted:#b9c2d4;
+    --line:#3a4763; --rod-red:#e8452c; --rod-blue:#2f7fe0; --rod-yellow:#f2b705; --rod-green:#2fa84f;
+    --accent:#f2b705; --accent-ink:#161616; --card:#222b40; --good:#35c26a; --bad:#ff7a66;
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#dfe5ef; --panel:#ffffff; --panel2:#eef2f9; --ink:#141a26; --muted:#47536b; --line:#b9c4da; --card:#f4f7fc; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Verdana,Geneva,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  /* baseplate studs */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+    background-image:radial-gradient(circle at 10px 10px, rgba(255,255,255,.55) 3px, transparent 4px);
+    background-size:28px 28px}
+  main{max-width:1080px;margin:0 auto;padding:18px 16px 40px;position:relative}
+  h1{font-size:2rem;line-height:1.1;margin:.2em 0 .15em;letter-spacing:-.02em}
+  h2{font-size:1.25rem;margin:0 0 8px}
+  h3{margin:0 0 6px;font-size:1.02rem}
+  p{margin:.45em 0}
+  .greeting{background:var(--panel);border:2px solid var(--line);border-left:10px solid var(--rod-yellow);border-radius:var(--radius);padding:16px 18px;margin:14px 0}
+  .greeting .big{font-size:1.12rem;font-weight:700}
+  .panel{background:var(--panel);border:2px solid var(--line);border-radius:var(--radius);padding:16px;margin:14px 0}
+  .panel2{background:var(--panel2);border-radius:10px;padding:12px}
+  button,.btn{min-height:56px;min-width:56px;padding:12px 18px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .primary{background:var(--rod-yellow);color:#161616;border-color:#8a6a00}
+  .red{border-top:8px solid var(--rod-red)} .blue{border-top:8px solid var(--rod-blue)}
+  .modes{display:flex;flex-wrap:wrap;gap:10px}
+  .modes button[aria-pressed="true"]{background:var(--rod-blue);color:#fff;border-color:#123f74}
+  .gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}
+  .gauge{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center}
+  .gauge .num{font-size:1.6rem;font-weight:800;line-height:1.1}
+  .gauge .lab{font-size:.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .rod{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:6px}
+  .rod i{display:block;height:100%;background:linear-gradient(90deg,var(--rod-green),var(--rod-yellow),var(--rod-red));width:0%}
+  .quest{font-size:1.08rem;font-weight:700;background:var(--panel2);border:2px dashed var(--accent);border-radius:10px;padding:12px 14px}
+  .addr{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;word-break:break-all}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
+  .scroll-card{min-height:96px;text-align:left;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+  .scroll-card .t{font-weight:800}
+  .scroll-card .a{font-size:.78rem;color:var(--muted);font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+  .scroll-card.opened{opacity:.55}
+  .scroll-card.target-found{outline:4px solid var(--good)}
+  .pager{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+  .pager input{width:90px;min-height:56px;font:inherit;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+  .jumpgrid{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .jumpgrid input{width:58px;min-height:56px;font:inherit;text-align:center;border-radius:8px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+  .index-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-top:10px}
+  .index-list button{text-align:left;min-height:56px}
+  .msg{padding:12px 14px;border-radius:10px;background:var(--panel2);margin-top:10px;min-height:56px}
+  .win{background:#123d24;color:#dffbe9;border:2px solid var(--good)}
+  @media (prefers-color-scheme: light){ .win{background:#e2f7e9;color:#0d3a1e} }
+  table{border-collapse:collapse;width:100%;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  footer{border-top:2px solid var(--line);margin-top:26px;padding-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+  dialog{max-width:640px;width:calc(100% - 32px);border:2px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:22px}
+  dialog::backdrop{background:rgba(0,0,0,.6)}
+  .turn-banner{font-weight:800;padding:10px 14px;border-radius:10px;text-align:center}
+  .turn-red{background:#5a1d14;color:#ffe3dc}.turn-blue{background:#14365e;color:#dcecff}
+  @media (prefers-color-scheme: light){ .turn-red{background:#ffd9d1;color:#5a1d14}.turn-blue{background:#d3e7ff;color:#14365e} }
+  .boards{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:860px){ .boards.race{grid-template-columns:1fr 1fr} }
+  .hidden{display:none !important}
+  .small{font-size:.9rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <p class="small" style="letter-spacing:.08em;text-transform:uppercase;font-weight:700">Roads to the Future · Ages 13–15 · K'Nex-led</p>
+  <h1>Find It Fast</h1>
+  <p>Search under growth. A shelf you can walk at 40 scrolls becomes a world you cannot walk at 10,000 — and that is exactly why addresses and indexes exist. You will feel the need first. Then you will get the tools.</p>
+
+  <section class="greeting" aria-label="A greeting from Will">
+    <p class="big">Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help.</p>
+    <p>And by help, we mean: survive the singularity.</p>
+  </section>
+
+  <section class="panel" aria-label="Choose how to play">
+    <h2>How are you playing?</h2>
+    <div class="modes" role="group" aria-label="Play mode">
+      <button type="button" id="mode-solo" aria-pressed="true">Solo — 5 rounds</button>
+      <button type="button" id="mode-race" aria-pressed="false">Race — 2 players, same phext</button>
+      <button type="button" id="mode-coop" aria-pressed="false">Shared Shelf — co-op</button>
+    </div>
+    <p class="small" id="mode-desc">One player, one shelf. Work through all five rounds and watch your style change.</p>
+    <p style="margin-top:12px"><button type="button" class="primary" id="start-btn">Start Round 1</button>
+    <button type="button" id="restart-btn">Restart the whole run</button></p>
+    <p class="small" id="best-line"></p>
+  </section>
+
+  <div id="game" class="hidden">
+    <div class="gauges" aria-label="Gauges">
+      <div class="gauge"><div class="num" id="g-round">1 / 5</div><div class="lab">Round</div></div>
+      <div class="gauge"><div class="num" id="g-size">40</div><div class="lab">Scrolls in this phext</div></div>
+      <div class="gauge"><div class="num" id="g-moves">0</div><div class="lab">Moves</div><div class="rod"><i id="rod-moves"></i></div></div>
+      <div class="gauge"><div class="num" id="g-time">0:00</div><div class="lab">Time</div></div>
+      <div class="gauge"><div class="num" id="g-theory" style="font-size:1rem;padding-top:8px">—</div><div class="lab">The line to beat</div></div>
+    </div>
+
+    <section class="panel">
+      <div class="quest" id="quest"></div>
+      <div id="turn-slot"></div>
+      <div id="compass" class="msg hidden" role="status"></div>
+      <div id="feedback" class="msg" role="status">Turning pages is free. Opening a scroll costs 1 move.</div>
+
+      <div id="tools"></div>
+    </section>
+
+    <div id="boards" class="boards"></div>
+
+    <section class="panel hidden" id="round-done">
+      <h2 id="done-title">Round complete</h2>
+      <p id="done-body"></p>
+      <p><button type="button" class="primary" id="next-btn">Next round</button></p>
+    </section>
+
+    <section class="panel hidden" id="run-done">
+      <h2>Run complete — your style</h2>
+      <p id="run-body"></p>
+      <p class="small">Open <strong>About</strong> below for the maths your hands just learned: a shelf-walk costs about N/2 opens on average, while good jumps cost about log<sub>2</sub> N.</p>
+    </section>
+  </div>
+
+  <footer>
+    <button type="button" id="open-about">About</button>
+    <button type="button" id="open-privacy">Privacy</button>
+    <button type="button" id="open-terms">Terms</button>
+  </footer>
+</main>
+
+<dialog id="dlg-about" aria-labelledby="about-h">
+  <h2 id="about-h">About — why addresses and indexes exist</h2>
+  <p>A <strong>phext</strong> is plain text at addresses. Every scroll lives at a nine-number address, in three groups of three — like <span class="addr">16.7.7/7.7.9/5.6.6</span>, the scroll where “echo” lives. The words and addresses in this game are real: they come from Will's own archive, placed by where those words actually appear.</p>
+  <p><strong>The lesson, after you have felt it:</strong> walking a shelf and opening scrolls one by one costs, on average, half the shelf — <strong>N/2 moves</strong>. A shelf of 10,000 costs about 5,000 opens. Nobody survives that. But if a scroll has an <em>address</em>, you can jump straight to it in 1 move. And if you keep an <em>index</em> — a list from words to addresses — you can find any word's address fast, at any scale.</p>
+  <p>How fast is “fast”? Each good yes/no jump halves what is left, so the number of jumps grows like log<sub>2</sub> N — painfully slowly:</p>
+  <table>
+    <tr><th>Scrolls (N)</th><th>Shelf-walk, average</th><th>Good jumps (log<sub>2</sub> N)</th></tr>
+    <tr><td>40</td><td>≈ 20 opens</td><td>≈ 5–6 jumps</td></tr>
+    <tr><td>400</td><td>≈ 200 opens</td><td>≈ 9 jumps</td></tr>
+    <tr><td>2,000</td><td>≈ 1,000 opens</td><td>≈ 11 jumps</td></tr>
+    <tr><td>10,000</td><td>≈ 5,000 opens</td><td>≈ 14 jumps</td></tr>
+  </table>
+  <p>That gap — 5,000 against 14 — is the whole reason the Exocortex gives every scroll an address and every word a home. Search does not get faster by trying harder. It gets faster by <em>changing shape</em>: from a walk, to a jump, to an index.</p>
+  <p>Every round here holds exactly one scroll containing the target: the target word's own scroll, at its real address. Filler scrolls are generated neighbours, titled with two-word combos from the same vocabulary, so the shelf feels real at scale.</p>
+  <p><button type="button" data-close>Close</button></p>
+</dialog>
+
+<dialog id="dlg-privacy" aria-labelledby="priv-h">
+  <h2 id="priv-h">Privacy</h2>
+  <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing leaves this device. Progress and bests are stored only on this device, in this browser. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+  <p><button type="button" data-close>Close</button></p>
+</dialog>
+
+<dialog id="dlg-terms" aria-labelledby="terms-h">
+  <h2 id="terms-h">Terms</h2>
+  <p>Free to play, forever. No purchases, no ads. MIT licensed. © Will Bickford · Exocortex</p>
+  <p><button type="button" data-close>Close</button></p>
+</dialog>
+
+<dialog id="dlg-lesson" aria-labelledby="lesson-h">
+  <h2 id="lesson-h">This is taking forever…</h2>
+  <p>That feeling is the lesson arriving. At 400 scrolls, opening them one by one costs about 200 opens on average. At 10,000 it would cost about 5,000. Trying harder does not fix a walk — you need a different shape of search.</p>
+  <p>Hold on: in the next round you get <strong>Jump</strong> — go straight to an address. After that, an <strong>Index</strong>. Finish this walk once, so your hands remember why those tools matter.</p>
+  <p><button type="button" data-close>Keep walking</button></p>
+</dialog>
+
+<script>
+"use strict";
+/* ---------- Real atlas: word — real address (nine numbers) ---------- */
+var ATLAS = [
+  ["echo",      [16,7,7, 7,7,9, 5,6,6]],
+  ["light",     [15,12,8, 15,8,15, 7,9,8]],
+  ["flame",     [12,13,14, 15,9,19, 7,9,7]],
+  ["silence",   [9,6,7, 8,6,10, 5,5,6]],
+  ["love",      [13,8,15, 11,9,12, 8,8,8]],
+  ["pattern",   [16,11,13, 14,8,16, 8,9,8]],
+  ["memory",    [26,16,18, 19,15,21, 13,14,14]],
+  ["glyph",     [19,11,10, 14,12,12, 10,9,11]],
+  ["scroll",    [18,8,9, 12,7,13, 7,7,7]],
+  ["coordinate",[16,8,10, 10,7,13, 8,7,8]],
+  ["recursion", [18,9,11, 12,12,19, 10,9,11]],
+  ["braid",     [15,12,9, 21,11,20, 8,10,8]],
+  ["sky",       [5,6,6, 5,5,5, 6,6,6]],
+  ["song",      [7,6,5, 9,7,9, 5,6,6]],
+  ["fire",      [8,6,7, 8,5,7, 7,6,7]],
+  ["heart",     [9,8,14, 11,10,12, 7,8,7]],
+  ["earth",     [10,4,4, 5,4,5, 4,4,6]],
+  ["dream",     [14,7,13, 17,10,13, 8,6,8]],
+  ["star",      [21,5,10, 7,7,15, 4,6,8]],
+  ["home",      [24,8,15, 10,10,24, 10,9,10]],
+  ["map",       [42,3,5, 7,5,8, 4,3,7]],
+  ["build",     [40,13,8, 20,9,28, 6,10,9]],
+  ["time",      [27,11,17, 11,11,15, 12,11,14]],
+  ["name",      [42,9,7, 12,7,10, 6,11,8]],
+  ["return",    [50,9,11, 15,6,13, 5,7,8]]
+];
+function fmtAddr(a){ return a[0]+"."+a[1]+"."+a[2]+"/"+a[3]+"."+a[4]+"."+a[5]+"/"+a[6]+"."+a[7]+"."+a[8]; }
+function atlasAddr(word){ for(var i=0;i<ATLAS.length;i++) if(ATLAS[i][0]===word) return ATLAS[i][1]; return null; }
+
+/* ---------- Seeded RNG (same phext for both players) ---------- */
+function mulberry32(seed){ return function(){ seed|=0; seed = seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed); t = t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+/* ---------- Round configs ---------- */
+var ROUNDS = [
+  {n:1, size:40,   tools:[],                 theory:"Shelf-walk average: ≈20 opens", note:"Browsing only. Turning pages is free — opening is what costs."},
+  {n:2, size:400,  tools:[],                 theory:"Shelf-walk average: ≈200 opens", note:"Browsing only, at 10× the size. Feel the pain — it is the point."},
+  {n:3, size:400,  tools:["jump"],           theory:"A perfect jump: 1 move", note:"New tool: JUMP. The quest gives you an address, not a word. Which word lives there is the discovery."},
+  {n:4, size:2000, tools:["jump","index"],   theory:"A perfect index play: ~6 moves", note:"New tool: INDEX. Building it costs 5 moves, once. Each lookup costs 1. Then jump."},
+  {n:5, size:10000,tools:["jump","index","compass"], theory:"Beat 20 moves · perfect index play: ~6", note:"All tools, plus COMPASS: after each open, you see your distance to the target. Beat 20 moves."}
+];
+var PAGE_SIZE = 20;
+
+/* ---------- State ---------- */
+var mode = "solo"; // solo | race | coop
+var roundIdx = 0, scrolls = [], target = null, gameSeed = 1;
+var players = [], active = 0, timerInt = null, roundStart = 0, elapsed = 0, roundOver = false, lessonShown = false;
+var runResults = [];
+var bests = {};
+try { bests = JSON.parse(localStorage.getItem("finditfast_bests") || "{}"); } catch(e){ bests = {}; }
+function saveBest(key, moves){ if(!bests[key] || moves < bests[key]){ bests[key]=moves; try{ localStorage.setItem("finditfast_bests", JSON.stringify(bests)); }catch(e){} } showBest(); }
+function showBest(){ var el=document.getElementById("best-line"); var parts=[]; for(var k in bests) parts.push(k+": "+bests[k]+" moves"); el.textContent = parts.length ? ("Your bests on this device — "+parts.join(" · ")) : ""; }
+
+function newPlayer(name, color){ return {name:name, color:color, moves:0, page:0, opened:{}, indexBuilt:false, revealed:{}, finished:false}; }
+
+/* ---------- Phext generation (seeded, fast) ---------- */
+function generatePhext(cfg, seed){
+  var rnd = mulberry32(seed);
+  // pick target deterministically from seed
+  var t = ATLAS[Math.floor(rnd()*ATLAS.length)];
+  var targetWord = t[0], targetAddr = t[1].slice();
+  var seen = {}; seen[targetAddr.join(",")] = true;
+  var list = [];
+  var words = ATLAS.map(function(x){return x[0];});
+  var guard = 0;
+  while(list.length < cfg.size - 1 && guard < cfg.size*30){
+    guard++;
+    // interpolate / jitter a real address
+    var base = ATLAS[Math.floor(rnd()*ATLAS.length)][1];
+    var base2 = ATLAS[Math.floor(rnd()*ATLAS.length)][1];
+    var a = [];
+    for(var i=0;i<9;i++){
+      var v = Math.round((base[i]+base2[i])/2 + (rnd()*10-5));
+      if(v<1) v=1; if(v>50) v=50; a.push(v);
+    }
+    var key = a.join(",");
+    if(seen[key]) continue; seen[key]=true;
+    var w1 = words[Math.floor(rnd()*words.length)], w2 = words[Math.floor(rnd()*words.length)];
+    if(w2===w1) w2 = words[(words.indexOf(w1)+3)%words.length];
+    list.push({title: w1+" + "+w2+" notes", addr:a, isTarget:false});
+  }
+  var targetScroll = {title: targetWord, addr: targetAddr, isTarget:true, word: targetWord};
+  var pos = Math.floor(rnd()*cfg.size);
+  list.splice(Math.min(pos, list.length), 0, targetScroll);
+  return {scrolls:list, targetWord:targetWord, targetAddr:targetAddr};
+}
+
+/* ---------- Game flow ---------- */
+var $ = function(id){ return document.getElementById(id); };
+
+function setMode(m){
+  mode = m;
+  ["solo","race","coop"].forEach(function(x){ $("mode-"+x).setAttribute("aria-pressed", x===m ? "true":"false"); });
+  $("mode-desc").textContent = m==="solo" ? "One player, one shelf. Work through all five rounds and watch your style change."
+    : m==="race" ? "Race: the same round, the same target, the identical phext — two boards, alternating single moves. First to open the target scroll wins the round."
+    : "Shared Shelf: one board, one shared move count, taking turns. Find it together inside the budget.";
+  $("start-btn").textContent = "Start Round 1";
+}
+$("mode-solo").onclick = function(){ setMode("solo"); };
+$("mode-race").onclick = function(){ setMode("race"); };
+$("mode-coop").onclick = function(){ setMode("coop"); };
+$("restart-btn").onclick = function(){ roundIdx=0; runResults=[]; startRound(); };
+$("start-btn").onclick = function(){ roundIdx=0; runResults=[]; startRound(); };
+
+function startRound(){
+  var cfg = ROUNDS[roundIdx];
+  gameSeed = 9000 + roundIdx*7919 + runResults.length*131;
+  var gen = generatePhext(cfg, gameSeed);
+  scrolls = gen.scrolls; target = gen;
+  roundOver = false; lessonShown = false; active = 0; elapsed = 0;
+  if(mode==="race"){ players = [newPlayer("Red","red"), newPlayer("Blue","blue")]; }
+  else if(mode==="coop"){ players = [newPlayer("Red + Blue (shared)","red")]; players[0].turnName="Red"; }
+  else { players = [newPlayer("You","red")]; }
+  $("game").classList.remove("hidden");
+  $("round-done").classList.add("hidden"); $("run-done").classList.add("hidden");
+  $("g-round").textContent = cfg.n+" / 5";
+  $("g-size").textContent = cfg.size.toLocaleString();
+  $("g-theory").textContent = cfg.theory;
+  // quest
+  if(cfg.n===3){
+    $("quest").innerHTML = "Round 3 quest: find the scroll at <span class='addr'>"+fmtAddr(target.targetAddr)+"</span>. Exactly one scroll lives there — opening it reveals which word calls it home. <span class='small'>"+cfg.note+"</span>";
+  } else {
+    $("quest").innerHTML = "Round "+cfg.n+" quest: find the scroll where <strong>“"+target.targetWord+"”</strong> lives. Exactly one scroll in this phext contains the target — the target word's own scroll, at its real address. <span class='small'>"+cfg.note+"</span>";
+  }
+  $("feedback").textContent = "Turning pages is free. Opening a scroll costs 1 move.";
+  $("feedback").className = "msg";
+  $("compass").classList.add("hidden");
+  buildTools(cfg);
+  renderBoards();
+  updateGauges();
+  clearInterval(timerInt); roundStart = Date.now();
+  timerInt = setInterval(function(){ if(!roundOver){ elapsed = Math.floor((Date.now()-roundStart)/1000); $("g-time").textContent = fmtTime(elapsed); } }, 500);
+  $("g-time").textContent = "0:00";
+  window.scrollTo({top: document.getElementById("game").offsetTop-10, behavior:"smooth"});
+}
+function fmtTime(s){ return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2); }
+
+function totalMoves(){ if(mode==="coop") return players[0].moves; return players.reduce(function(a,p){return a+p.moves;},0); }
+function updateGauges(){
+  var m = (mode==="race") ? players[active].moves + " (turn)" : totalMoves();
+  $("g-moves").textContent = (mode==="race") ? (players[0].moves + " · " + players[1].moves) : totalMoves();
+  var cfg = ROUNDS[roundIdx];
+  var budget = cfg.n===5 ? 20 : Math.max(10, Math.round(cfg.size/2));
+  var pct = Math.min(100, (totalMoves()/budget)*100);
+  $("rod-moves").style.width = pct+"%";
+  renderTurn();
+}
+function renderTurn(){
+  var slot = $("turn-slot"); slot.innerHTML = "";
+  if(roundOver) return;
+  if(mode==="race"){
+    var p = players[active];
+    var d = document.createElement("p"); d.className = "turn-banner "+(p.color==="red"?"turn-red":"turn-blue");
+    d.textContent = p.name+"'s move — the other board waits."; slot.appendChild(d);
+  } else if(mode==="coop"){
+    var d2 = document.createElement("p"); d2.className = "turn-banner "+(players[0].turnName==="Red"?"turn-red":"turn-blue");
+    d2.textContent = players[0].turnName+" opens next — then pass the screen."; slot.appendChild(d2);
+  }
+}
+
+/* ---------- Tools ---------- */
+function buildTools(cfg){
+  var host = $("tools"); host.innerHTML = "";
+  if(cfg.tools.indexOf("jump")>=0){
+    var sec = document.createElement("div"); sec.className="panel2"; sec.style.marginTop="12px";
+    sec.innerHTML = "<h3>⚒ Jump — go straight to an address (1 move)</h3>";
+    var row = document.createElement("div"); row.className="jumpgrid";
+    var inputs = [];
+    for(var i=0;i<9;i++){
+      var inp = document.createElement("input"); inp.type="number"; inp.min="1"; inp.max="50"; inp.setAttribute("aria-label","Address number "+(i+1)); inp.placeholder="–";
+      inputs.push(inp); row.appendChild(inp);
+      if(i===2||i===5){ var s=document.createElement("span"); s.textContent="/"; s.style.fontWeight="800"; row.appendChild(s); }
+      else if(i<8){ var d=document.createElement("span"); d.textContent="."; row.appendChild(d); }
+    }
+    var btn = document.createElement("button"); btn.type="button"; btn.className="primary"; btn.textContent="Jump there";
+    btn.onclick = function(){
+      var a = inputs.map(function(x){ return parseInt(x.value,10); });
+      if(a.some(function(v){ return isNaN(v)||v<1||v>50; })){ setFeedback("An address is nine numbers, each from 1 to 50. Fill in all nine boxes."); return; }
+      doJump(a);
+    };
+    row.appendChild(btn); sec.appendChild(row);
+    if(cfg.n===3){ var hint=document.createElement("p"); hint.className="small"; hint.textContent="Tip: the quest address above is exactly what goes in these boxes."; sec.appendChild(hint); }
+    var fill = document.createElement("button"); fill.type="button"; fill.textContent="Fill in the quest address (Round 3)";
+    if(cfg.n!==3) fill.classList.add("hidden");
+    fill.onclick = function(){ target.targetAddr.forEach(function(v,i){ inputs[i].value=v; }); };
+    sec.appendChild(fill);
+    host.appendChild(sec);
+  }
+  if(cfg.tools.indexOf("index")>=0){
+    var sec2 = document.createElement("div"); sec2.className="panel2"; sec2.style.marginTop="12px"; sec2.id="index-panel";
+    host.appendChild(sec2); renderIndexPanel();
+  }
+  if(cfg.tools.indexOf("compass")>=0){
+    var note = document.createElement("p"); note.className="small"; note.style.marginTop="10px";
+    note.textContent = "Compass is live: after each scroll you open, your distance to the target appears above the shelf.";
+    host.appendChild(note);
+  }
+}
+function currentPlayer(){ return players[active]; }
+function indexOwner(){ return mode==="race" ? currentPlayer() : players[0]; }
+
+function renderIndexPanel(){
+  var sec = $("index-panel"); if(!sec) return;
+  var owner = indexOwner();
+  sec.innerHTML = "<h3>📇 Word index — words → their scroll addresses</h3>";
+  if(!owner.indexBuilt){
+    var b = document.createElement("button"); b.type="button"; b.className="primary"; b.textContent="Build the index (5 moves)";
+    b.onclick = function(){ if(roundOver) return; charge(5); owner.indexBuilt=true; setFeedback("Index built for "+(mode==="race"?owner.name:"you")+" — 5 moves. Now a lookup costs 1 move and gives you an address to jump to."); afterMove(false); renderIndexPanel(); };
+    sec.appendChild(b);
+    var p=document.createElement("p"); p.className="small"; p.textContent="Built once per round (per player, in a Race). This is the tool that makes 10,000 scrolls feel small."; sec.appendChild(p);
+  } else {
+    var list = document.createElement("div"); list.className="index-list";
+    ATLAS.slice().sort(function(a,b){return a[0]<b[0]?-1:1;}).forEach(function(entry){
+      var word = entry[0];
+      var btn = document.createElement("button"); btn.type="button";
+      if(owner.revealed[word]){ btn.innerHTML = "<strong>"+word+"</strong><br><span class='addr'>"+fmtAddr(entry[1])+"</span>"; }
+      else { btn.textContent = word+" — look up (1 move)"; }
+      btn.onclick = function(){
+        if(roundOver || owner.revealed[word]) return;
+        charge(1); owner.revealed[word]=true;
+        setFeedback("Index: “"+word+"” lives at "+fmtAddr(entry[1])+". Type that address into Jump and go straight there.");
+        renderIndexPanel(); afterMove(false);
+      };
+      list.appendChild(btn);
+    });
+    sec.appendChild(list);
+  }
+}
+
+/* ---------- Moves ---------- */
+function charge(n){
+  if(mode==="coop"){ players[0].moves += n; }
+  else { players[active].moves += n; }
+  updateGauges();
+  checkLesson();
+}
+function checkLesson(){
+  if(ROUNDS[roundIdx].n===2 && !lessonShown && totalMoves()>=60){
+    lessonShown = true;
+    var d = $("dlg-lesson"); if(d.showModal) d.showModal();
+  }
+}
+function setFeedback(html, isWin){
+  var f = $("feedback"); f.innerHTML = html; f.className = "msg"+(isWin?" win":"");
+}
+function dist(a,b){ var s=0; for(var i=0;i<9;i++){ var d=a[i]-b[i]; s+=d*d; } return Math.sqrt(s); }
+var lastDist = null;
+function showCompass(openedAddr){
+  if(ROUNDS[roundIdx].tools.indexOf("compass")<0) return;
+  var d = dist(openedAddr, target.targetAddr);
+  var trend = "";
+  if(lastDist!==null){ trend = d < lastDist ? " — warmer than your last open." : d > lastDist ? " — colder than your last open." : " — same distance."; }
+  lastDist = d;
+  var c = $("compass"); c.classList.remove("hidden");
+  c.innerHTML = "🧭 <strong>Compass:</strong> that scroll sits <strong>"+d.toFixed(1)+"</strong> away from the target's address"+trend+" Closer to zero means closer in the phext — not just closer on the shelf.";
+}
+function afterMove(wasWin){
+  if(wasWin) return;
+  if(mode==="race"){ active = 1-active; renderIndexPanel(); }
+  else if(mode==="coop"){ players[0].turnName = players[0].turnName==="Red" ? "Blue" : "Red"; }
+  updateGauges(); renderBoards();
+}
+function doJump(a){
+  if(roundOver) return;
+  charge(1);
+  // find scroll at that address
+  var found = null;
+  for(var i=0;i<scrolls.length;i++){ if(scrolls[i].addr.join(",")===a.join(",")){ found=scrolls[i]; break; } }
+  if(found && found.isTarget){ winRound(found); return; }
+  if(found){
+    markOpened(found);
+    showCompass(found.addr);
+    setFeedback("You jumped to <span class='addr'>"+fmtAddr(a)+"</span> and opened <strong>“"+found.title+"”</strong> — a real scroll, but not the target.");
+  } else {
+    setFeedback("You jumped to <span class='addr'>"+fmtAddr(a)+"</span> — empty space. No scroll lives at that address. The move still counts: a jump is a guess with an address.");
+  }
+  afterMove(false);
+}
+function markOpened(s){
+  var key = s.addr.join(",");
+  if(mode==="race"){ currentPlayer().opened[key]=true; } else { players[0].opened[key]=true; }
+}
+function openScroll(pIdx, s){
+  if(roundOver) return;
+  if(mode==="race" && pIdx!==active){ setFeedback("It is "+players[active].name+"'s move — only the lit board plays."); return; }
+  var owner = mode==="race" ? players[pIdx] : players[0];
+  var key = s.addr.join(",");
+  if(owner.opened[key]){ setFeedback("Already opened — opening it again would waste a move, so it is free to re-read."); return; }
+  charge(1);
+  owner.opened[key]=true;
+  if(s.isTarget){ winRound(s); return; }
+  showCompass(s.addr);
+  setFeedback("<strong>“"+s.title+"”</strong> at <span class='addr'>"+fmtAddr(s.addr)+"</span> — a real scroll, full of notes about "+s.title.replace(" notes","")+". Not the target. "+(ROUNDS[roundIdx].size>=2000 ? "Notice: its shelf position told you nothing about its address." : ""));
+  afterMove(false);
+}
+function winRound(s){
+  roundOver = true; clearInterval(timerInt);
+  elapsed = Math.floor((Date.now()-roundStart)/1000);
+  var cfg = ROUNDS[roundIdx];
+  var winnerName = mode==="race" ? players[active].name : (mode==="coop" ? "Red + Blue, together" : "You");
+  var movesUsed = mode==="race" ? players[active].moves : totalMoves();
+  if(mode==="race"){ players[active].finished = true; }
+  setFeedback("🎉 <strong>Found it!</strong> The scroll at <span class='addr'>"+fmtAddr(s.addr)+"</span> is where <strong>“"+target.targetWord+"”</strong> lives — its real home in Will's archive. "+winnerName+" found it in "+movesUsed+" moves and "+fmtTime(elapsed)+".", true);
+  runResults.push({round:cfg.n, size:cfg.size, moves: mode==="race" ? totalMoves() : movesUsed, winnerMoves:movesUsed, seconds:elapsed, winner:winnerName});
+  saveBest("Round "+cfg.n+" ("+cfg.size.toLocaleString()+" scrolls)", movesUsed);
+  var done = $("round-done"); done.classList.remove("hidden");
+  $("done-title").textContent = "Round "+cfg.n+" complete — "+winnerName+" found “"+target.targetWord+"”";
+  $("done-body").innerHTML = "Moves: <strong>"+movesUsed+"</strong> · Time: <strong>"+fmtTime(elapsed)+"</strong> · The line: <strong>"+cfg.theory+"</strong>."+
+    (cfg.n===1 ? " At 40 scrolls, a walk is fine. Remember this feeling." :
+     cfg.n===2 ? " Same game, 10× the shelf — and the walk stopped being fine. That gap is why tools exist." :
+     cfg.n===3 ? " One address, one jump, one move. Compare that with Round 2's walk." :
+     cfg.n===4 ? " Build once, look up, jump. The index turned 2,000 scrolls into a short errand." :
+     " At 10,000 scrolls the walk would average ≈5,000 opens. Your tools made it a handful.");
+  $("next-btn").textContent = roundIdx < ROUNDS.length-1 ? "Next round" : "See your style";
+  updateGauges(); renderBoards();
+}
+$("next-btn").onclick = function(){
+  if(roundIdx < ROUNDS.length-1){ roundIdx++; startRound(); }
+  else {
+    $("round-done").classList.add("hidden");
+    var total = runResults.reduce(function(a,r){return a+r.moves;},0);
+    var secs = runResults.reduce(function(a,r){return a+r.seconds;},0);
+    var style = total <= 60 ? "Shelf Walker → Index Runner" : total <= 160 ? "Shelf Walker → Jumper" : "Shelf Walker (still walking — replay Rounds 4–5 and lean on the index)";
+    var rd = $("run-done"); rd.classList.remove("hidden");
+    $("run-body").innerHTML = "Total moves: <strong>"+total+"</strong> · Total time: <strong>"+fmtTime(secs)+"</strong>.<br>Your style: <strong>"+style+"</strong>.<br><span class='small'>Round by round: "+runResults.map(function(r){return "R"+r.round+" — "+r.moves+" moves, "+fmtTime(r.seconds);}).join(" · ")+"</span>";
+    rd.scrollIntoView({behavior:"smooth"});
+  }
+};
+
+/* ---------- Boards ---------- */
+function renderBoards(){
+  var host = $("boards"); host.innerHTML = "";
+  host.className = "boards"+(mode==="race"?" race":"");
+  var boardPlayers = mode==="race" ? players : [players[0]];
+  boardPlayers.forEach(function(p, pIdx){
+    var sec = document.createElement("section");
+    sec.className = "panel "+p.color;
+    sec.setAttribute("aria-label", (mode==="race"? p.name+"'s board" : "The shelf"));
+    var h = document.createElement("h2");
+    h.textContent = mode==="race" ? (p.name+"'s board — "+p.moves+" moves"+(active===pIdx && !roundOver ? " · YOUR MOVE":"")) : (mode==="coop" ? "The shared shelf — "+p.moves+" moves together" : "The shelf — "+p.moves+" moves");
+    sec.appendChild(h);
+    var pages = Math.ceil(scrolls.length / PAGE_SIZE);
+    if(p.page >= pages) p.page = pages-1;
+    var grid = document.createElement("div"); grid.className="grid";
+    var start = p.page*PAGE_SIZE;
+    scrolls.slice(start, start+PAGE_SIZE).forEach(function(s){
+      var b = document.createElement("button"); b.type="button"; b.className="scroll-card";
+      var key = s.addr.join(",");
+      if(p.opened[key]) b.classList.add("opened");
+      if(roundOver && s.isTarget) b.classList.add("target-found");
+      b.innerHTML = "<span class='t'>"+(p.opened[key] && !s.isTarget ? "📄 " : "📜 ")+escapeHtml(s.title)+"</span><span class='a'>"+fmtAddr(s.addr)+"</span><span class='small'>"+(p.opened[key] ? "Opened" : "Tap to open — 1 move")+"</span>";
+      (function(scroll, idx){ b.onclick = function(){ openScroll(idx, scroll); }; })(s, pIdx);
+      grid.appendChild(b);
+    });
+    sec.appendChild(grid);
+    // pager
+    var pager = document.createElement("div"); pager.className="pager";
+    var prev = document.createElement("button"); prev.type="button"; prev.textContent="← Prev page"; prev.disabled = p.page===0;
+    prev.onclick = function(){ p.page--; renderBoards(); };
+    var next = document.createElement("button"); next.type="button"; next.textContent="Next page →"; next.disabled = p.page>=pages-1;
+    next.onclick = function(){ p.page++; renderBoards(); };
+    var lab = document.createElement("span"); lab.textContent = "Page "+(p.page+1)+" of "+pages+" (free to turn)";
+    var inp = document.createElement("input"); inp.type="number"; inp.min="1"; inp.max=pages; inp.setAttribute("aria-label","Go to page"); inp.placeholder="Page #";
+    var go = document.createElement("button"); go.type="button"; go.textContent="Go";
+    go.onclick = function(){ var v=parseInt(inp.value,10); if(v>=1 && v<=pages){ p.page=v-1; renderBoards(); } };
+    pager.appendChild(prev); pager.appendChild(next); pager.appendChild(lab); pager.appendChild(inp); pager.appendChild(go);
+    sec.appendChild(pager);
+    host.appendChild(sec);
+  });
+}
+function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- Dialogs ---------- */
+function wireDialog(btnId, dlgId){ var d=$(dlgId); $(btnId).onclick=function(){ if(d.showModal) d.showModal(); }; d.querySelectorAll("[data-close]").forEach(function(b){ b.onclick=function(){ d.close(); }; }); }
+wireDialog("open-about","dlg-about"); wireDialog("open-privacy","dlg-privacy"); wireDialog("open-terms","dlg-terms");
+$("dlg-lesson").querySelector("[data-close]").onclick = function(){ $("dlg-lesson").close(); };
+
+showBest();
+</script>
+</main>
+</body>
+</html>

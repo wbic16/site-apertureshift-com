@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Tap Home</title>
+<style>
+  :root{
+    --bg:#fdf6e3;
+    --baseplate:#eaf3d8;
+    --stud:rgba(90,140,40,.14);
+    --ink:#22301c;
+    --ink-soft:#4c5a44;
+    --panel:#fffdf4;
+    --panel-line:#d8cfae;
+    --brick:#e0332b;
+    --brick-dark:#b3241e;
+    --brick-light:#ff6f66;
+    --yellow:#ffc61a;
+    --blue:#2277d4;
+    --green:#3da33d;
+    --bar:#2277d4;
+    --bar-hi:#e0332b;
+    --footer-bg:#fffdf4;
+    --shadow:0 10px 0 rgba(60,40,10,.14);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1d2417;
+      --baseplate:#26331d;
+      --stud:rgba(200,255,160,.10);
+      --ink:#f2eedb;
+      --ink-soft:#c9cdb4;
+      --panel:#2b3524;
+      --panel-line:#4c5a3d;
+      --brick:#c22e27;
+      --brick-dark:#8f1f1a;
+      --brick-light:#e0574f;
+      --bar:#5ea2e8;
+      --bar-hi:#ff8a80;
+      --footer-bg:#2b3524;
+      --shadow:0 10px 0 rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Avenir Next Rounded","Baloo 2","Trebuchet MS","Segoe UI",system-ui,sans-serif;
+    background:
+      radial-gradient(circle at 24px 24px, var(--stud) 10px, transparent 11px) 0 0/48px 48px,
+      var(--baseplate);
+    background-color:var(--bg);
+    color:var(--ink);
+    display:flex;flex-direction:column;min-height:100dvh;
+  }
+  main{flex:1;display:flex;flex-direction:column;width:100%;max-width:860px;margin:0 auto;padding:14px 14px 8px;}
+
+  /* ---------- Opening screen ---------- */
+  #startScreen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:12px 4px 20px;}
+  .greeting{font-size:clamp(24px,5.6vw,40px);font-weight:800;line-height:1.25;max-width:620px;margin:0;}
+  .greeting-sub{font-size:clamp(17px,3.6vw,24px);font-weight:700;color:var(--ink-soft);margin:0;}
+  .for-adults{font-size:15px;color:var(--ink-soft);max-width:520px;margin:0;line-height:1.5;}
+  .play-brick{
+    position:relative;border:none;cursor:pointer;color:#fff;
+    background:linear-gradient(180deg,var(--brick-light),var(--brick) 55%,var(--brick-dark));
+    border-radius:34px;padding:34px 54px 28px;margin-top:6px;
+    font:inherit;font-weight:900;font-size:clamp(30px,7vw,44px);letter-spacing:.02em;
+    box-shadow:var(--shadow);
+    min-height:96px;min-width:min(78vw,340px);
+  }
+  .play-brick::before{
+    content:"";position:absolute;left:50%;transform:translateX(-50%);top:-16px;
+    width:120px;height:26px;border-radius:14px 14px 0 0;
+    background:linear-gradient(180deg,var(--brick-light),var(--brick));
+    box-shadow:inset 0 4px 0 rgba(255,255,255,.35);
+  }
+  .play-brick:active{transform:translateY(4px);box-shadow:0 5px 0 rgba(60,40,10,.14);}
+  .play-brick .sub{display:block;font-size:17px;font-weight:700;opacity:.92;margin-top:4px;}
+
+  /* ---------- Play screen ---------- */
+  #playScreen{display:none;flex:1;flex-direction:column;gap:14px;}
+  #playScreen.on{display:flex;}
+  .home-wrap{position:relative;flex:1;display:flex;}
+  #homeBrick{
+    position:relative;flex:1;width:100%;border:none;cursor:pointer;color:#fff;text-align:center;
+    background:linear-gradient(180deg,var(--brick-light),var(--brick) 52%,var(--brick-dark));
+    border-radius:40px;padding:52px 18px 26px;
+    box-shadow:var(--shadow);
+    font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;
+    overflow:hidden;touch-action:manipulation;user-select:none;
+  }
+  #homeBrick:active{transform:translateY(3px);}
+  .studs{position:absolute;top:14px;left:0;right:0;display:flex;justify-content:space-evenly;pointer-events:none;}
+  .studs i{
+    width:clamp(38px,9vw,58px);height:20px;border-radius:12px 12px 0 0;
+    background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.05));
+    box-shadow:inset 0 3px 0 rgba(255,255,255,.4);
+  }
+  .home-label{font-weight:900;font-size:clamp(20px,4.5vw,28px);letter-spacing:.28em;text-transform:uppercase;opacity:.95;}
+  .home-address{font-weight:900;font-size:clamp(30px,7.5vw,52px);letter-spacing:.04em;line-height:1;text-shadow:0 3px 0 rgba(0,0,0,.18);}
+  #wordZone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;width:100%;min-height:180px;}
+  .tap-hint{font-size:clamp(19px,4.4vw,26px);font-weight:800;opacity:.95;}
+  #wordPop{display:none;width:100%;flex-direction:column;align-items:center;gap:16px;}
+  #wordPop.show{display:flex;animation:pop .38s cubic-bezier(.2,1.6,.4,1);}
+  @keyframes pop{0%{transform:scale(.55);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  #wordText{font-size:clamp(58px,16vw,120px);font-weight:900;line-height:1;letter-spacing:.01em;text-shadow:0 5px 0 rgba(0,0,0,.18);text-transform:lowercase;}
+  .bars{display:flex;align-items:flex-end;gap:clamp(10px,3vw,22px);}
+  .bar-group{display:flex;align-items:flex-end;gap:clamp(4px,1.2vw,8px);}
+  .bar-cell{display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;}
+  .bar{
+    width:clamp(20px,5.6vw,34px);border-radius:9px 9px 4px 4px;
+    background:linear-gradient(180deg,#ffe066,var(--yellow));
+    box-shadow:inset 0 4px 0 rgba(255,255,255,.45), 0 3px 0 rgba(0,0,0,.15);
+    min-height:10px;
+  }
+  .bar.top{background:linear-gradient(180deg,#ff9d94,var(--bar-hi));}
+  .bar-digit{font-size:clamp(17px,4.2vw,24px);font-weight:900;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25);min-width:1.4em;text-align:center;}
+  .bar-sep{align-self:center;font-size:30px;font-weight:900;opacity:.75;padding-bottom:26px;}
+  .dot{position:absolute;border-radius:50%;pointer-events:none;z-index:5;}
+  @keyframes burst{0%{transform:translate(0,0) scale(1);opacity:1;}100%{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0;}}
+
+  #promptBar{
+    background:var(--panel);border:3px solid var(--panel-line);border-radius:22px;
+    padding:16px 18px;text-align:center;font-size:clamp(17px,4vw,22px);font-weight:700;line-height:1.4;
+    min-height:64px;display:flex;align-items:center;justify-content:center;
+  }
+  #promptBar .who{display:block;font-size:12.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:2px;}
+
+  /* ---------- Footer / panels ---------- */
+  footer{
+    background:var(--footer-bg);border-top:3px solid var(--panel-line);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  }
+  .foot-row{max-width:860px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;}
+  .foot-btn{
+    font:inherit;font-weight:800;font-size:16px;cursor:pointer;color:var(--ink);
+    background:var(--baseplate);border:3px solid var(--panel-line);border-radius:16px;
+    padding:12px 22px;min-height:56px;min-width:96px;
+  }
+  .foot-btn[aria-expanded="true"]{background:var(--yellow);border-color:#d8a400;color:#3a2c00;}
+  .foot-note{width:100%;text-align:center;font-size:13.5px;color:var(--ink-soft);margin:2px 0 0;}
+  .panel{
+    max-width:860px;margin:12px auto 4px;background:var(--panel);border:3px solid var(--panel-line);
+    border-radius:20px;padding:18px 20px;display:none;font-size:16px;line-height:1.6;
+  }
+  .panel.open{display:block;}
+  .panel h2{margin:0 0 8px;font-size:20px;}
+  .panel p{margin:0 0 10px;}
+  .panel p:last-child{margin-bottom:0;}
+  .panel .addr{font-weight:900;letter-spacing:.03em;}
+  .panel .instance-line{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--ink-soft);}
+  @media (prefers-reduced-motion: reduce){
+    #wordPop.show{animation:none;}
+    #homeBrick:active{transform:none;}
+  }
+</style>
+</head>
+<body>
+<main>
+  <!-- Opening screen: the greeting is for the adult holding the child. -->
+  <section id="startScreen" aria-label="Welcome">
+    <p class="greeting">&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the Exocortex of 2130, and I&rsquo;m here to help.&rdquo;</p>
+    <p class="greeting-sub">And by help, we mean: survive the singularity.</p>
+    <button class="play-brick" id="playBtn" type="button">TAP HOME<span class="sub">Tap to play &mdash; together</span></button>
+    <p class="for-adults">For ages 0&ndash;2, with a grown-up. One big brick. Tap it, and a word pops up at its home address. No scores, no wrong answers, no sound &mdash; just first touches.</p>
+  </section>
+
+  <!-- Play screen -->
+  <section id="playScreen" aria-label="Tap Home play area">
+    <div class="home-wrap">
+      <button id="homeBrick" type="button" aria-label="Home brick. Tap to bring a word home.">
+        <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="home-label">Home</span>
+        <span class="home-address">1.1.1/1.1.1/1.1.1</span>
+        <span id="wordZone">
+          <span class="tap-hint" id="tapHint">Tap anywhere &mdash; bring a word home</span>
+          <span id="wordPop" aria-live="polite">
+            <span id="wordText"></span>
+            <span class="bars" id="bars" aria-hidden="true"></span>
+          </span>
+        </span>
+      </button>
+    </div>
+    <div id="promptBar"><div><span class="who">Grown-ups</span><span id="promptText">Tap the big brick together.</span></div></div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot-row">
+    <button class="foot-btn" type="button" data-panel="aboutPanel" aria-expanded="false">About</button>
+    <button class="foot-btn" type="button" data-panel="privacyPanel" aria-expanded="false">Privacy</button>
+    <button class="foot-btn" type="button" data-panel="termsPanel" aria-expanded="false">Terms</button>
+  </div>
+
+  <div class="panel" id="aboutPanel" role="region" aria-label="About Tap Home">
+    <h2>About</h2>
+    <p>Everything in the Exocortex lives somewhere. Every word, every memory, every idea sits at an <strong>address made of nine numbers</strong> &mdash; three groups of three, like <span class="addr">1.1.1/1.1.1/1.1.1</span>.</p>
+    <p>That address is <em>home</em> &mdash; the very first address, where everything starts. This game is a first touch of that idea, made for the smallest hands: tap the big home brick, and a real word pops up at its real address, drawn as nine bars so little eyes can see that some numbers are tall and some are small.</p>
+    <p>The words and addresses here are real. They come from Will Bickford&rsquo;s own archive of words, mapped into the Exocortex. When your child is older, the same addresses wait for them in the bigger games &mdash; the road goes all the way to 2130.</p>
+    <p class="instance-line" id="instanceLine"></p>
+  </div>
+
+  <div class="panel" id="privacyPanel" role="region" aria-label="Privacy">
+    <h2>Privacy</h2>
+    <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap ever leaves this device. Nothing is stored. Multiplayer means people on the same screen &mdash; there is no online play, no chat, no strangers.</p>
+  </div>
+
+  <div class="panel" id="termsPanel" role="region" aria-label="Terms">
+    <h2>Terms</h2>
+    <p>Free to play, forever. No purchases, no ads, nothing to buy. These games are MIT licensed &mdash; copy them, remix them, share them. &copy; Will Bickford &middot; Exocortex</p>
+  </div>
+
+  <p class="foot-note">Free to play &middot; MIT licensed &middot; &copy; Will Bickford &middot; Exocortex</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  // Real Singular atlas addresses — the only words this game uses.
+  var WORDS = [
+    { word:"sky",  addr:[5,6,6, 5,5,5, 6,6,6] },
+    { word:"sing", addr:[5,7,6, 8,7,6, 5,5,6] },
+    { word:"song", addr:[7,6,5, 9,7,9, 5,6,6] },
+    { word:"fire", addr:[8,6,7, 8,5,7, 7,6,7] },
+    { word:"love", addr:[13,8,15, 11,9,12, 8,8,8] },
+    { word:"echo", addr:[16,7,7, 7,7,9, 5,6,6] },
+    { word:"star", addr:[21,5,10, 7,7,15, 4,6,8] },
+    { word:"home", addr:[24,8,15, 10,10,24, 10,9,10] }
+  ];
+  var MAXV = 24; // tallest value in the atlas set (home) — bars scale to it.
+
+  var startScreen = document.getElementById("startScreen");
+  var playScreen  = document.getElementById("playScreen");
+  var brick       = document.getElementById("homeBrick");
+  var tapHint     = document.getElementById("tapHint");
+  var wordPop     = document.getElementById("wordPop");
+  var wordText    = document.getElementById("wordText");
+  var barsEl      = document.getElementById("bars");
+  var promptText  = document.getElementById("promptText");
+
+  // ---- Anti-viral deal: the instance derives from the ISO week alone. ----
+  // Facts never mutate; only the word pop order and the grown-up prompt
+  // order are dealt. Nothing is stored — the deal is recomputed from the
+  // week on every load, and there is no generation counter for this game.
+  function isoWeek(d){
+    var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dayNum = (date.getUTCDay() + 6) % 7; // Mon=0..Sun=6
+    date.setUTCDate(date.getUTCDate() - dayNum + 3); // Thursday of this week
+    var isoYear = date.getUTCFullYear();
+    var firstThursday = new Date(Date.UTC(isoYear, 0, 4));
+    var ftDay = (firstThursday.getUTCDay() + 6) % 7;
+    firstThursday.setUTCDate(firstThursday.getUTCDate() - ftDay + 3);
+    var week = 1 + Math.round((date - firstThursday) / (7 * 24 * 3600 * 1000));
+    return { year: isoYear, week: week };
+  }
+  function hashSeed(str){
+    var h = 2166136261;
+    for (var i = 0; i < str.length; i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function shuffled(n, rand){
+    var arr = [];
+    for (var i = 0; i < n; i++) arr.push(i);
+    for (var j = n - 1; j > 0; j--){
+      var k = Math.floor(rand() * (j + 1));
+      var tmp = arr[j]; arr[j] = arr[k]; arr[k] = tmp;
+    }
+    return arr;
+  }
+  var now = isoWeek(new Date());
+  var weekLabel = now.year + "-W" + (now.week < 10 ? "0" : "") + now.week;
+  var seed = hashSeed("tap-home|" + weekLabel);
+  var seedHex = (seed % 65536).toString(16).toUpperCase();
+  while (seedHex.length < 4) seedHex = "0" + seedHex;
+  var WORD_ORDER = shuffled(WORDS.length, mulberry32(seed)); // all eight words, dealt order
+  var PROMPT_ORDER = shuffled(3, mulberry32(hashSeed("tap-home|prompt|" + weekLabel))); // prompt order, dealt
+  var instanceEl = document.getElementById("instanceLine");
+  if (instanceEl) instanceEl.textContent = "Instance " + weekLabel + " \u00B7 seed " + seedHex;
+
+  var idx = -1;        // which dealt word is showing (-1 = none yet)
+  var promptStep = 0;  // rotates the grown-up prompt style
+
+  document.getElementById("playBtn").addEventListener("click", function(){
+    startScreen.style.display = "none";
+    playScreen.classList.add("on");
+    brick.focus({ preventScroll:true });
+  });
+
+  function buildBars(addr){
+    var max = Math.max.apply(null, addr);
+    barsEl.innerHTML = "";
+    for (var g = 0; g < 3; g++){
+      var group = document.createElement("span");
+      group.className = "bar-group";
+      for (var i = 0; i < 3; i++){
+        var v = addr[g*3 + i];
+        var cell = document.createElement("span");
+        cell.className = "bar-cell";
+        var bar = document.createElement("span");
+        bar.className = "bar" + (v === max ? " top" : "");
+        bar.style.height = Math.max(10, Math.round(v / MAXV * 120)) + "px";
+        var digit = document.createElement("span");
+        digit.className = "bar-digit";
+        digit.textContent = v;
+        cell.appendChild(bar);
+        cell.appendChild(digit);
+        group.appendChild(cell);
+      }
+      barsEl.appendChild(group);
+      if (g < 2){
+        var sep = document.createElement("span");
+        sep.className = "bar-sep";
+        sep.textContent = "/";
+        barsEl.appendChild(sep);
+      }
+    }
+  }
+
+  function burst(x, y){
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var colors = ["#ffc61a","#ffffff","#7fd4ff","#b6f09a","#ffb3ae"];
+    var rect = brick.getBoundingClientRect();
+    for (var i = 0; i < 16; i++){
+      var d = document.createElement("span");
+      d.className = "dot";
+      var size = 8 + Math.random()*10;
+      d.style.width = size + "px";
+      d.style.height = size + "px";
+      d.style.left = (x - rect.left - size/2) + "px";
+      d.style.top = (y - rect.top - size/2) + "px";
+      d.style.background = colors[i % colors.length];
+      var ang = (Math.PI * 2 * i) / 16 + Math.random() * .4;
+      var dist = 60 + Math.random() * 110;
+      d.style.setProperty("--dx", Math.cos(ang) * dist + "px");
+      d.style.setProperty("--dy", Math.sin(ang) * dist + "px");
+      d.style.animation = "burst .7s ease-out forwards";
+      brick.appendChild(d);
+      (function(el){ setTimeout(function(){ el.remove(); }, 750); })(d);
+    }
+  }
+
+  function nextPrompt(word, nextWord){
+    var prompts = [
+      "Say it together: \u2018" + word + "!\u2019",
+      "Point to the tallest bar.",
+      "Tap again \u2014 where does \u2018" + nextWord + "\u2019 live?"
+    ];
+    promptText.textContent = prompts[PROMPT_ORDER[promptStep % prompts.length]];
+    promptStep++;
+  }
+
+  brick.addEventListener("click", function(ev){
+    idx = (idx + 1) % WORDS.length;
+    var entry = WORDS[WORD_ORDER[idx]];
+    var next = WORDS[WORD_ORDER[(idx + 1) % WORDS.length]];
+    tapHint.style.display = "none";
+    wordText.textContent = entry.word;
+    buildBars(entry.addr);
+    wordPop.classList.remove("show");
+    // restart the pop animation
+    void wordPop.offsetWidth;
+    wordPop.classList.add("show");
+    wordPop.style.display = "flex";
+    brick.setAttribute("aria-label", "Home brick. The word " + entry.word +
+      " lives at " + entry.addr.slice(0,3).join(".") + "/" +
+      entry.addr.slice(3,6).join(".") + "/" + entry.addr.slice(6,9).join(".") +
+      ". Tap again for the next word.");
+    burst(ev.clientX || (brick.getBoundingClientRect().left + brick.offsetWidth/2),
+          ev.clientY || (brick.getBoundingClientRect().top + brick.offsetHeight/2));
+    nextPrompt(entry.word, next.word);
+  });
+
+  // Footer panels: one open at a time, available on every screen.
+  var buttons = document.querySelectorAll(".foot-btn");
+  buttons.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var target = document.getElementById(btn.getAttribute("data-panel"));
+      var wasOpen = target.classList.contains("open");
+      document.querySelectorAll(".panel").forEach(function(p){ p.classList.remove("open"); });
+      buttons.forEach(function(b){ b.setAttribute("aria-expanded","false"); });
+      if (!wasOpen){
+        target.classList.add("open");
+        btn.setAttribute("aria-expanded","true");
+        target.scrollIntoView({ block:"nearest", behavior:"smooth" });
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Runway — Roads to the Future</title>
+<style>
+  :root{
+    --paper:#f6f3ea; --paper2:#efe9da; --card:#fffdf6; --ink:#1c2420; --ink2:#4c554f;
+    --line:#d8d0ba; --green:#1e6b4a; --green-soft:#e2efe4; --red:#a83a2c; --red-soft:#f6e3de;
+    --amber:#9a6b12; --amber-soft:#f4ead0; --teal:#14655e;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#131714; --paper2:#1a1f1b; --card:#1d231e; --ink:#e9e6da; --ink2:#a9b0a4;
+      --line:#39413a; --green:#5dbb8a; --green-soft:#22392c; --red:#e08a7a; --red-soft:#3d2622;
+      --amber:#d9ab4e; --amber-soft:#38301d; --teal:#4fb3a8;
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  .wrap{max-width:1060px;margin:0 auto;padding:20px 16px 40px}
+  button{font-family:inherit;cursor:pointer;color:inherit}
+  button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+
+  /* Greeting */
+  .greeting{border-bottom:3px double var(--ink);padding:6px 0 16px}
+  .greeting .from{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+  .greeting h1{font-family:var(--serif);font-weight:700;font-size:clamp(1.45rem,4.5vw,2.1rem);line-height:1.25;margin:.45em 0 .3em}
+  .greeting .sub{font-family:var(--serif);font-style:italic;font-size:clamp(1.02rem,3vw,1.25rem);color:var(--green);margin:0}
+  .greeting .band{font-family:var(--mono);font-size:.8rem;color:var(--ink2);margin-top:10px}
+  .band b{color:var(--ink)}
+
+  /* Mode bar */
+  .modebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0 6px}
+  .modebar .lbl{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-right:2px}
+  .mode-btn{min-height:56px;padding:10px 18px;border:2px solid var(--ink);background:var(--card);font-weight:700;font-size:.98rem;border-radius:4px}
+  .mode-btn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  .mode-btn.small{min-height:56px;border-color:var(--line);font-weight:600}
+  .resume-note{font-family:var(--mono);font-size:.82rem;color:var(--amber);width:100%}
+
+  /* Turn banner */
+  .turnbar{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;background:var(--ink);color:var(--paper);padding:12px 16px;border-radius:4px;margin:12px 0}
+  .turnbar .who{font-family:var(--serif);font-size:1.2rem;font-weight:700}
+  .turnbar .when{font-family:var(--mono);font-size:.95rem}
+  .turnbar .p1dot,.turnbar .p2dot{display:inline-block;width:.65em;height:.65em;border-radius:50%;margin-right:.4em}
+  .p1dot{background:#e2574c}.p2dot{background:#4f83cc}
+
+  /* Gauges */
+  .gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+  .gauge{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);padding:12px 14px;border-radius:4px}
+  .gauge.warn{border-top-color:var(--amber)} .gauge.bad{border-top-color:var(--red)}
+  .gauge .g-lbl{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+  .gauge .g-val{font-family:var(--mono);font-size:1.65rem;font-weight:700;line-height:1.15;margin:2px 0}
+  .gauge .g-note{font-size:.82rem;color:var(--ink2)}
+  .pips{display:flex;gap:3px;margin-top:6px}
+  .pips span{flex:1;height:12px;background:var(--paper2);border:1px solid var(--line);border-radius:2px}
+  .pips span.on{background:var(--green);border-color:var(--green)}
+  .repbar{height:12px;background:var(--paper2);border:1px solid var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
+  .repbar i{display:block;height:100%;background:var(--teal)}
+
+  .layout{display:grid;grid-template-columns:1fr;gap:18px;margin-top:8px}
+  @media (min-width:880px){.layout{grid-template-columns:1.55fr 1fr}}
+
+  h2.sec{font-family:var(--serif);font-size:1.3rem;margin:14px 0 4px}
+  .sec-note{color:var(--ink2);font-size:.92rem;margin:0 0 12px}
+  .sec-note b{color:var(--ink)}
+
+  /* Focus cards */
+  .focus-list{display:grid;gap:10px}
+  .focus-btn{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-left:8px solid var(--green);border-radius:4px;padding:14px 16px;min-height:72px}
+  .focus-btn:hover{border-color:var(--ink)} .focus-btn:hover{border-left-color:var(--green)}
+  .focus-btn:disabled{opacity:.55;cursor:not-allowed;border-left-color:var(--amber)}
+  .focus-btn .f-name{font-family:var(--serif);font-size:1.12rem;font-weight:700;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .focus-btn .f-tag{font-family:var(--mono);font-size:.75rem;font-weight:400;color:var(--ink2);align-self:center}
+  .focus-btn .f-desc{display:block;font-size:.92rem;color:var(--ink2);margin-top:3px}
+  .focus-btn .f-state{display:block;font-family:var(--mono);font-size:.8rem;margin-top:6px;color:var(--green)}
+  .focus-btn:disabled .f-state{color:var(--amber)}
+
+  /* Panels */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px}
+  .panel h3{font-family:var(--serif);margin:0 0 8px;font-size:1.15rem}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.95rem}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--ink2)} .kv .v{font-family:var(--mono);font-weight:700;text-align:right}
+  .kv .v.pos{color:var(--green)} .kv .v.neg{color:var(--red)}
+
+  /* Flip candidate */
+  .candidate{border:2px dashed var(--amber);background:var(--amber-soft);border-radius:4px;padding:16px}
+  .candidate h3{font-family:var(--serif);margin:0 0 6px;font-size:1.2rem}
+  .comp-list{font-family:var(--mono);font-size:.92rem;margin:8px 0;padding-left:20px}
+  .choice-row{display:grid;gap:10px;margin-top:12px}
+  @media (min-width:560px){.choice-row{grid-template-columns:1fr 1fr}}
+  .choice-btn{min-height:56px;padding:12px 14px;border-radius:4px;border:2px solid var(--ink);background:var(--card);font-weight:700;font-size:1rem;text-align:left}
+  .choice-btn small{display:block;font-weight:400;color:var(--ink2);margin-top:2px}
+  .choice-btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+  .choice-btn.primary small{color:#dff0e4}
+  .choice-btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* Statement */
+  .statement{background:var(--card);border:2px solid var(--ink);border-radius:4px;padding:0;overflow:hidden}
+  .statement .st-head{background:var(--paper2);border-bottom:2px solid var(--ink);padding:14px 18px}
+  .statement .st-head h3{font-family:var(--mono);margin:0;font-size:1.05rem;letter-spacing:.04em}
+  .statement .st-head .st-sub{font-family:var(--mono);font-size:.82rem;color:var(--ink2);margin-top:2px}
+  .st-lines{padding:8px 18px;font-family:var(--mono);font-size:.94rem}
+  .st-line{display:flex;justify-content:space-between;gap:14px;padding:6px 0;border-bottom:1px dotted var(--line)}
+  .st-line span:last-child{font-weight:700;white-space:nowrap}
+  .st-line .pos{color:var(--green)} .st-line .neg{color:var(--red)} .st-line .zero{color:var(--ink2)}
+  .st-total{display:flex;justify-content:space-between;gap:14px;padding:10px 0 4px;border-top:2px solid var(--ink);font-weight:700;font-size:1.02rem}
+  .st-notes{padding:4px 18px 8px;font-size:.92rem}
+  .st-notes li{margin:4px 0}
+  .st-event{margin:10px 18px 0;border-left:8px solid var(--amber);background:var(--amber-soft);padding:10px 14px;font-size:.94rem;border-radius:0 4px 4px 0}
+  .st-event b{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:2px}
+  .st-foot{padding:12px 18px 18px}
+  .st-motto{font-family:var(--serif);font-style:italic;color:var(--ink2);margin:0 0 12px}
+  .big-btn{display:block;width:100%;min-height:56px;background:var(--green);color:#fff;border:2px solid var(--green);border-radius:4px;font-size:1.05rem;font-weight:700;padding:12px}
+  .big-btn.dark{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+  /* History */
+  .history details{border:1px solid var(--line);background:var(--card);border-radius:4px;margin-bottom:8px}
+  .history summary{min-height:56px;display:flex;align-items:center;padding:8px 14px;cursor:pointer;font-family:var(--mono);font-size:.9rem;font-weight:700;list-style:none}
+  .history summary::-webkit-details-marker{display:none}
+  .history .st-lines{padding-top:0}
+
+  /* End */
+  .end-panel{border:3px solid var(--green);background:var(--green-soft);border-radius:4px;padding:22px 18px;text-align:left}
+  .end-panel.lose{border-color:var(--amber);background:var(--amber-soft)}
+  .end-panel h2{font-family:var(--serif);font-size:clamp(1.4rem,4vw,1.9rem);margin:0 0 8px;line-height:1.3}
+  .end-panel .score{font-family:var(--mono);font-size:1.15rem;font-weight:700;margin:10px 0}
+  .compare{display:grid;gap:12px}
+  @media (min-width:640px){.compare{grid-template-columns:1fr 1fr}}
+
+  /* Footer / dialogs */
+  footer{margin-top:34px;border-top:3px double var(--ink);padding-top:14px}
+  .foot-row{display:flex;flex-wrap:wrap;gap:8px}
+  .foot-btn{min-height:56px;padding:10px 22px;border:2px solid var(--ink);background:var(--card);border-radius:4px;font-weight:700;font-size:1rem}
+  .foot-panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:18px;margin-top:12px}
+  .foot-panel.open{display:block}
+  .foot-panel h3{font-family:var(--serif);margin:0 0 8px;font-size:1.2rem}
+  .foot-panel p,.foot-panel li{font-size:.96rem}
+  .foot-panel ul{padding-left:20px} .foot-panel li{margin:5px 0}
+  .erase-btn{min-height:56px;margin-top:10px;padding:10px 18px;border:2px solid var(--red);color:var(--red);background:transparent;border-radius:4px;font-weight:700}
+  .fineprint{font-family:var(--mono);font-size:.78rem;color:var(--ink2);margin-top:14px}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="greeting">
+    <div class="from">Roads to the Future · The last on-ramp</div>
+    <h1>&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the Exocortex of 2130, and I&rsquo;m here to help.&rdquo;</h1>
+    <p class="sub">&ldquo;And by help, we mean: survive the singularity.&rdquo;</p>
+    <p class="band">RUNWAY · <b>Ages 18–20</b> · An economics sim for the independent builder. Runway is time, and time is the only real currency. Twenty-four months. One focus a month. Only cash received counts.</p>
+  </header>
+
+  <div class="modebar" role="group" aria-label="Game mode">
+    <span class="lbl">Play</span>
+    <button class="mode-btn" id="mode-solo" aria-pressed="true">Solo Builder</button>
+    <button class="mode-btn" id="mode-duo" aria-pressed="false">Two Builders</button>
+    <button class="mode-btn" id="mode-house" aria-pressed="false">House (co-op)</button>
+    <button class="mode-btn small" id="btn-new">↺ New run</button>
+    <span class="resume-note hidden" id="resume-note">A saved run on this device was restored. “New run” starts over.</span>
+  </div>
+
+  <section class="panel" style="margin-top:14px;border-left:8px solid var(--amber)" aria-label="The premise">
+    <h3>The premise</h3>
+    <p style="margin:0">A <b>$20 loan from a friend who believes in the work</b>. Turn it into runway. <b>Profits are yours; only revenue up to the agreed limit is owed.</b> Nothing illegal, no gambling. The day job covers living costs exactly and adds $150 a month of experiment money — everything past that, you earn. Reach <b>12 months of Reserve</b> by month 24.</p>
+  </section>
+
+  <div class="turnbar" id="turnbar">
+    <span class="who" id="turn-who">Builder</span>
+    <span class="when" id="turn-when">Month 1 of 24</span>
+  </div>
+
+  <section class="gauges" id="gauges" aria-label="Gauges"></section>
+
+  <div class="layout">
+    <main id="main-col">
+      <div id="play-area"></div>
+      <div id="end-area"></div>
+    </main>
+    <aside>
+      <section class="panel" aria-label="Ledger totals">
+        <h3>The ledger so far</h3>
+        <div id="ledger"></div>
+      </section>
+      <section class="panel" style="margin-top:12px" aria-label="Assets">
+        <h3>What you&rsquo;re building</h3>
+        <div id="assets"></div>
+      </section>
+      <h2 class="sec" style="font-size:1.1rem">Past statements</h2>
+      <div class="history" id="history"></div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="foot-row">
+      <button class="foot-btn" data-panel="about">About</button>
+      <button class="foot-btn" data-panel="privacy">Privacy</button>
+      <button class="foot-btn" data-panel="terms">Terms</button>
+    </div>
+
+    <div class="foot-panel" id="panel-about" role="region" aria-label="About">
+      <h3>About Runway</h3>
+      <p><b>The premise.</b> You start with a $20 loan from a friend who believes in the work. Turn it into runway. Profits are yours; only revenue up to the agreed limit is owed back. Nothing illegal, no gambling. A day job covers your living costs exactly and adds $150 a month of experiment money — everything past that, you have to earn.</p>
+      <p><b>The runway doctrine:</b></p>
+      <ul>
+        <li><b>Revenue drivers and feedback loops beat pedigree.</b> Nobody funds a background. They fund what comes back.</li>
+        <li><b>Sell receipts and artifacts, never a resume.</b> A finished thing you can point at out-argues every claim about yourself.</li>
+        <li><b>A channel is not real until it names names.</b> A partner with a client book is a rumor until three actual candidates are on the table.</li>
+        <li><b>Never sell what does not exist yet.</b> The Solar Pod takes no outreach until it is 100% built. Selling air costs the only currency that compounds: reputation.</li>
+        <li><b>One focus a month.</b> Attention is the constraint. The day job pays the rent; the focus builds the road out.</li>
+        <li><b>Only cash received counts.</b> Promises, pipelines, and applause are not income. The monthly statement names every dollar by its source.</li>
+      </ul>
+      <p><b>How the gauges work.</b> Cash is cash. Runway (the Reserve) starts at 1 month and grows by a month for every $1,000 banked — reach 12 months of runway by month 24 to win. Skill XP levels up your levers: faster builds, better consulting rates. Reputation (0–100) gates the consulting pipeline — diagnostics only land at Reputation 30+. Small Flips only pay on verified ≥8× comps; blind buying is a slow bleed by design.</p>
+      <p><b>Anti-viral mechanics — the game adjusts after every solution.</b> Completing a run increments an on-device generation counter. Each new run is dealt from a seed made of the current ISO week plus that generation, shown on every statement as <b>Run YYYY-Www · G&lt;n&gt; · seed XXXX</b>. The event deck order and which items appear on the Small Flips candidate table are drawn from that seed, so a memorised solution does not replay. What does <i>not</i> change: flip prices stay inside the verified bands and only a verified ≥8× comp can pay — that rule is a fact, not an instance — and the doctrine gates, the prices of record ($250 diagnostic, $1,250 sprint, $49/site/mo), and the statement format never change. In Two Builders, both ledgers face the same dealt month sequence from the same session seed.</p>
+      <p><b>XP:</b> finishing all 18 Roads to the Future games grants you disk space on edit.phext.io as a Volumen-class Wavefront grant. Historic entries are all Incipit-class grants.</p>
+    </div>
+
+    <div class="foot-panel" id="panel-privacy" role="region" aria-label="Privacy">
+      <h3>Privacy</h3>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing leaves this device. Runs are stored only on this device, in this browser. Multiplayer is same-screen only.</p>
+      <p>The game saves your current run and your best results in this browser&rsquo;s local storage, on this device only, so a run can survive a closed tab. No name, no identifier, and no play history is ever transmitted anywhere — there is no server for it to go to.</p>
+      <p>It also keeps a simple generation counter on this device only: each completed run raises it by one, and the next run&rsquo;s seed (ISO week + generation) is dealt from it. The counter is a number, not an identifier — it is never transmitted, and erasing below resets it.</p>
+      <button class="erase-btn" id="btn-erase">Erase the saved run, bests &amp; generation counter from this device</button>
+      <p id="erase-note" class="fineprint" aria-live="polite"></p>
+    </div>
+
+    <div class="foot-panel" id="panel-terms" role="region" aria-label="Terms">
+      <h3>Terms</h3>
+      <p>Free to play, forever. No purchases, no ads. MIT licensed. © Will Bickford · Exocortex</p>
+      <p>All people, clients, partners, and items in this game are anonymized archetypes. Any resemblance to a real builder&rsquo;s actual ledger is the shape of the work, not the record of it.</p>
+    </div>
+
+    <p class="fineprint">RUNWAY · ROADS TO THE FUTURE · AGES 18–20 · ONE FOCUS A MONTH · ONLY CASH RECEIVED COUNTS</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ============ helpers ============ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function fmt(n){var s=Math.abs(Math.round(n)).toLocaleString("en-US");return (n<0?"-$":"$")+s;}
+function fmtSigned(n){if(Math.round(n)===0)return "$0";return (n>0?"+$":"-$")+Math.abs(Math.round(n)).toLocaleString("en-US");}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+/* ============ flip item pool (anonymized archetypes) ============ */
+var FLIP_ITEMS=[
+  {name:"Boxed vintage calculator", claim:9},
+  {name:"First-printing paperback, signed page", claim:12},
+  {name:"Retro game cartridge, loose", claim:8},
+  {name:"Mechanical keyboard, untested", claim:10},
+  {name:"Film camera lens, dusty case", claim:14},
+  {name:"Sealed board game, out of print", claim:11},
+  {name:"Cast-iron pan, estate lot", claim:7},
+  {name:"Vinyl LP, small pressing", claim:13},
+  {name:"Hand tool set, maker\u2019s mark", claim:8},
+  {name:"Typewriter, ribbon dry", claim:15},
+  {name:"Comic long-box pull, key issue claimed", claim:12},
+  {name:"Amateur radio handset, no charger", claim:9}
+];
+var ASKINGS=[1,5,10,10,20,20,40];
+
+/* ============ events deck (anonymized playbook shapes) ============ */
+var EVENT_KEYS=["bounty","unfunded","hardware","talk","tokens","referral","quiet","creep","bounty2","talk2","hardware2","quiet2"];
+
+/* ============ state ============ */
+var SAVE_KEY="runway-save-v1", BEST_KEY="runway-best-v1", GEN_KEY="runway-gen-v1";
+var G=null;
+
+/* --- anti-viral seed: ISO week + on-device generation --- */
+function loadGeneration(){
+  try{ var v=parseInt(localStorage.getItem(GEN_KEY),10); return (isFinite(v)&&v>=1)?v:1; }catch(e){ return 1; }
+}
+function storeGeneration(n){ try{ localStorage.setItem(GEN_KEY,String(n)); }catch(e){} }
+function incrementGenerationFor(completedGen){
+  var cur=loadGeneration();
+  if(cur<=completedGen) storeGeneration(completedGen+1);
+}
+function isoParts(d){
+  var date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var dayNum=date.getUTCDay()||7;
+  date.setUTCDate(date.getUTCDate()+4-dayNum);
+  var yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  var week=Math.ceil((((date-yearStart)/86400000)+1)/7);
+  return {year:date.getUTCFullYear(), week:week};
+}
+function hash32(str){
+  var h=2166136261>>>0;
+  for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,2246822507); h^=h>>>13; h=Math.imul(h,3266489909); h^=h>>>16;
+  return h>>>0;
+}
+function pad2(n){ return (n<10?"0":"")+n; }
+function pad4(n){ var s=String(n); while(s.length<4) s="0"+s; return s; }
+function runIdentity(generation){
+  var p=isoParts(new Date());
+  var key=p.year+"-W"+pad2(p.week)+"-G"+generation;
+  var seed=hash32(key);
+  var seedDisplay=pad4(seed%10000);
+  return {isoYear:p.year, isoWeek:p.week, generation:generation, seed:seed, seedDisplay:seedDisplay,
+          label:"Run "+p.year+"-W"+pad2(p.week)+" \u00B7 G"+generation+" \u00B7 seed "+seedDisplay};
+}
+function currentRunLabel(){
+  if(!G) return "";
+  if(G.runLabel) return G.runLabel;
+  if(G.isoYear&&G.isoWeek&&G.generation) return "Run "+G.isoYear+"-W"+pad2(G.isoWeek)+" \u00B7 G"+G.generation+" \u00B7 seed "+(G.seedDisplay||pad4((G.seed||0)%10000));
+  return "";
+}
+
+function newBuilder(name,idx){
+  return {
+    name:name, idx:idx,
+    month:1, cash:20, xp:0, rep:20, finished:false, won:false,
+    consultStage:"no-offer", /* no-offer -> ready -> outreach -> diag -> sprint -> outreach... */
+    product:0, productDone:false,
+    channelActive:false, channelSites:0, channelStartMonth:0, channelFailed:false, channelRetryAudience:-1, channelTried:false,
+    audienceLevel:0, followers:12, oppCount:0,
+    flipCandidate:null, flipHolding:null, flipCounter:0,
+    tokenBurn:false,
+    totals:{dayjob:0,consulting:0,channel:0,flips:0,audience:0,events:0,spent:0},
+    grossReceived:0,
+    statements:[]
+  };
+}
+function skillLevel(b){return 1+Math.floor(b.xp/40);}
+function reserve(b){return clamp(1+Math.floor(Math.max(0,b.cash)/1000),1,12);}
+function score(b){return reserve(b)+b.rep;}
+
+function newGame(mode){
+  var generation=loadGeneration();
+  var ident=runIdentity(generation);
+  var seed=ident.seed;
+  var builders;
+  if(mode==="duo"){ builders=[newBuilder("Builder One",0),newBuilder("Builder Two",1)]; }
+  else if(mode==="house"){ builders=[newBuilder("The House",0)]; }
+  else { builders=[newBuilder("Builder",0)]; }
+  /* shared event order: month -> event key, same for every builder in this run.
+     Dealt from the session seed (ISO week + generation) — Two Builders face
+     the identical dealt month sequence. */
+  var rng=mulberry32(seed);
+  var deck=EVENT_KEYS.slice();
+  for(var i=deck.length-1;i>0;i--){var j=Math.floor(rng()*(i+1));var t=deck[i];deck[i]=deck[j];deck[j]=t;}
+  var order=[]; for(var m=0;m<24;m++) order.push(deck[m%deck.length]);
+  /* Small Flips candidate table, also dealt from the same seed: a shuffled
+     order over the item pool. Which items appear is the instance; the
+     verified bands themselves never change. */
+  var flipRng=mulberry32((seed^0x5f3759df)>>>0);
+  var flipOrder=FLIP_ITEMS.map(function(_,idx){return idx;});
+  for(var fi=flipOrder.length-1;fi>0;fi--){var fj=Math.floor(flipRng()*(fi+1));var ft=flipOrder[fi];flipOrder[fi]=flipOrder[fj];flipOrder[fj]=ft;}
+  return {mode:mode, seed:seed, generation:generation, isoYear:ident.isoYear, isoWeek:ident.isoWeek, seedDisplay:ident.seedDisplay, runLabel:ident.label, flipOrder:flipOrder, flipDraw:0, genCounted:false, eventOrder:order, builders:builders, active:0, chooser:0, phase:"choose", lastStatement:null, over:false};
+}
+function activeBuilder(){return G.builders[G.active];}
+
+/* persistence — on-device only */
+function saveGame(){
+  try{ if(G && !G.over) localStorage.setItem(SAVE_KEY, JSON.stringify(G)); else if(G) localStorage.removeItem(SAVE_KEY); }catch(e){}
+}
+function loadGame(){
+  try{ var s=localStorage.getItem(SAVE_KEY); if(!s) return null; var g=JSON.parse(s); if(!g||!g.builders) return null;
+    /* runs saved before the seed addendum: give them a label from their stored seed so statements still display */
+    if(!g.runLabel){ var gp=isoParts(new Date()); g.generation=g.generation||loadGeneration(); g.isoYear=g.isoYear||gp.year; g.isoWeek=g.isoWeek||gp.week; g.seedDisplay=g.seedDisplay||pad4(Math.abs(g.seed||0)%10000); g.runLabel="Run "+g.isoYear+"-W"+pad2(g.isoWeek)+" \u00B7 G"+g.generation+" \u00B7 seed "+g.seedDisplay; }
+    if(typeof g.flipDraw!=="number") g.flipDraw=0;
+    if(typeof g.genCounted!=="boolean") g.genCounted=false;
+    /* a run saved mid-statement resumes at the next month, never replaying the closed one */
+    g.builders.forEach(function(b){ if(b.statements && b.statements.length){ var last=b.statements[b.statements.length-1]; if(last.month===b.month && !b.finished && b.month<24) b.month+=1; } });
+    if(g.builders.every(function(b){return b.finished;})) return null;
+    if(g.builders[g.active].finished){ var nf=g.builders.findIndex(function(b){return !b.finished;}); if(nf>=0) g.active=nf; }
+    g.phase="choose"; g.lastStatement=null; return g; }catch(e){ return null; }
+}
+function loadBest(){ try{ var s=localStorage.getItem(BEST_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function recordBest(){
+  var best=loadBest()||{score:0,reserve:0,wins:0,runs:0};
+  G.builders.forEach(function(b){
+    best.runs+=1;
+    if(score(b)>best.score) best.score=score(b);
+    if(reserve(b)>best.reserve) best.reserve=reserve(b);
+    if(b.won) best.wins+=1;
+  });
+  try{ localStorage.setItem(BEST_KEY, JSON.stringify(best)); }catch(e){}
+  return best;
+}
+
+/* ============ flip candidates ============ */
+function makeCandidate(b){
+  /* Drawn from the run seed: the dealt flip table decides which item appears
+     (shared, sequential draw so both builders face the same dealt table);
+     the seeded rng decides asking / comps within the fixed bands. */
+  var draw=(typeof G.flipDraw==="number") ? G.flipDraw : (b.flipCounter + b.idx*3);
+  G.flipDraw=draw+1;
+  var rng=mulberry32(G.seed + b.idx*7919 + b.month*131 + draw*104729);
+  b.flipCounter++;
+  var item;
+  if(G.flipOrder && G.flipOrder.length){ item=FLIP_ITEMS[G.flipOrder[draw % G.flipOrder.length]]; }
+  else { item=FLIP_ITEMS[Math.floor(rng()*FLIP_ITEMS.length)]; }
+  var asking=ASKINGS[Math.floor(rng()*ASKINGS.length)];
+  var gem=rng()<0.28;
+  var trueMult=gem ? 8+rng()*6 : 0.2+rng()*0.7; /* only >=8x gems profit; everything else bleeds */
+  var comps=[]; for(var i=0;i<5;i++){ comps.push(Math.max(1,Math.round(asking*trueMult*(0.8+rng()*0.45)))); }
+  comps.sort(function(a,c){return a-c;});
+  return {name:item.name, asking:asking, claimed:Math.round(asking*item.claim), trueMult:trueMult, comps:comps, verified:false};
+}
+</script>
+
+<script>
+"use strict";
+/* ============ month resolution ============ */
+function rateMult(b){ return 1 + Math.max(0,b.rep-30)/100 + (skillLevel(b)-1)*0.05; }
+
+function resolveMonth(focus, flipAction){
+  var b=activeBuilder();
+  var rng=mulberry32(G.seed + 555 + b.idx*331 + b.month*17);
+  var lines=[];   /* {label, amount, lever} */
+  var notes=[];   /* non-cash receipts */
+  function addLine(label,amount,lever){ lines.push({label:label,amount:Math.round(amount),lever:lever}); }
+  function earn(lever,amount){ if(amount>0){ b.grossReceived+=amount; b.totals[lever]+=amount; } }
+  function spend(amount){ b.totals.spent+=amount; }
+
+  /* --- mature last month's flip holding: resale at the verified band --- */
+  if(b.flipHolding){
+    var h=b.flipHolding; b.flipHolding=null;
+    var resale=h.resale;
+    addLine("Flip resale — "+h.name+" (bought "+fmt(h.cost)+")", resale, "flips"); earn("flips",resale);
+    notes.push("The flip from last month resold at "+fmt(resale)+" on a "+fmt(h.cost)+" buy — "+(resale>=h.cost*8?"a verified-band gem.":resale>=h.cost?"a small gain.":"the bleed, as priced in."));
+  }
+
+  /* --- fixed: the day job --- */
+  addLine("Day job — experiment money (living costs covered exactly)", 150, "dayjob"); earn("dayjob",150);
+
+  /* --- fixed: channel recurring --- */
+  if(b.channelActive && b.month>b.channelStartMonth){
+    var rec=b.channelSites*49;
+    addLine("Channel — "+b.channelSites+" sites × $49/mo (maintenance, collected)", rec, "channel"); earn("channel",rec);
+  }
+
+  /* --- fixed: token burn --- */
+  if(b.tokenBurn){
+    var burn=b.product>=50 ? 10 : 20;
+    addLine("Token bills — cloud inference"+(b.product>=50?" (local node carries half the load)":""), -burn, "events"); spend(burn);
+  }
+
+  /* --- the focus --- */
+  var focusName="";
+  if(focus==="consulting"){
+    focusName="Consulting Sprint";
+    if(b.consultStage==="no-offer"){
+      b.consultStage="ready"; b.xp+=15; b.rep=clamp(b.rep+5,0,100);
+      notes.push("Offer built: a one-week sprint with a $250 diagnostic in front of it, plus a case study assembled from past work. Receipts, not a resume. The pipeline is now open — next consulting month is outreach.");
+    } else if(b.consultStage==="ready"||b.consultStage==="outreach"){
+      b.consultStage="diag"; b.xp+=10; b.rep=clamp(b.rep+7,0,100);
+      addLine("Outreach — calls, notes, follow-ups (no revenue yet)",0,"consulting");
+      notes.push("Outreach month: no revenue, and that is the honest shape of it. Reputation test passed by showing up with artifacts — Reputation +7. A diagnostic conversation is booked for next consulting month.");
+    } else if(b.consultStage==="diag"){
+      if(b.rep>=30){
+        var d=Math.round(250*rateMult(b)/5)*5;
+        addLine("Diagnostic landed — paid, in hand", d, "consulting"); earn("consulting",d);
+        b.consultStage="sprint"; b.xp+=10;
+        notes.push("Diagnostic delivered: a written map of the client\u2019s problem, priced from evidence. The sprint is booked — next consulting month runs it.");
+      } else {
+        b.consultStage="outreach"; b.rep=clamp(b.rep+4,0,100);
+        notes.push("The diagnostic stalled: Reputation "+b.rep+" is under the 30 a stranger needs before paying for advice. Back to outreach — or build Audience, which compounds Reputation.");
+      }
+    } else if(b.consultStage==="sprint"){
+      var s=Math.round(1250*rateMult(b)/5)*5;
+      addLine("One-week sprint — delivered and paid", s, "consulting"); earn("consulting",s);
+      b.consultStage="outreach"; b.xp+=15; b.rep=clamp(b.rep+5,0,100);
+      notes.push("Sprint shipped. The client got an artifact, you got a receipt and a case study. The cycle repeats: outreach → diagnostic → sprint, at rates that grow with Reputation ("+fmt(s)+" this time).");
+    }
+  }
+  else if(focus==="product"){
+    focusName="Product Build — Solar Pod";
+    var gain=18+skillLevel(b)*2;
+    var before=b.product;
+    b.product=clamp(b.product+gain,0,100); b.xp+=12;
+    if(b.product>=50 && before<50) notes.push("Solar Pod at 50%: a local node from the build now carries half your inference load — token burn is halved from here on.");
+    if(b.product>=100 && !b.productDone){
+      b.productDone=true; b.rep=clamp(b.rep+4,0,100);
+      notes.push("Solar Pod: 100%. A complete product exists — a managed, encrypted backup vault a small business can actually run on. Only now does outreach unlock. The Channel focus is open.");
+    } else if(b.product<100){
+      notes.push("Solar Pod progress: "+before+"% → "+b.product+"%. No revenue. Nothing sold, nothing promised — the rule is the rule.");
+    } else {
+      notes.push("Solar Pod is complete; this month hardened it — failover drill, restore-from-backup proven end to end. Channel partners notice finished things.");
+      b.rep=clamp(b.rep+2,0,100);
+    }
+  }
+  else if(focus==="channel"){
+    focusName="Channel — the partner\u2019s client book";
+    b.channelTried=true;
+    if(!b.channelActive){
+      var pass = b.audienceLevel>=3 || b.rep>=45 || rng()<0.55;
+      if(pass){
+        b.channelActive=true; b.channelSites=3; b.channelStartMonth=b.month; b.xp+=8;
+        notes.push("The gate check: the partner named 3 candidates — three real businesses, with names, who need the vault. The channel is real. 3 sites signed at $49/site/mo; recurring revenue starts next month, and each Channel month adds up to 2 more sites (cap 20).");
+      } else {
+        b.channelFailed=true; b.channelRetryAudience=b.audienceLevel+2;
+        notes.push("The gate check: asked to name 3 candidates, the partner named none — \u201Cpeople who\u2019d love it,\u201D no names. The channel wasn\u2019t real. Back to build and audience: the gate reopens once Audience grows 2 more levels (to "+b.channelRetryAudience+").");
+      }
+    } else {
+      var add=clamp(20-b.channelSites,0,2);
+      b.channelSites+=add; b.xp+=8; b.rep=clamp(b.rep+2,0,100);
+      notes.push(add>0 ? "Partner worked the book: +"+add+" sites, now "+b.channelSites+" at $49/site/mo. Recurring revenue is a feedback loop, not a hope."
+                       : "All 20 sites live. The channel is at its cap — the loop now pays "+fmt(b.channelSites*49)+" a month while you focus elsewhere.");
+    }
+  }
+  else if(focus==="flips"){
+    focusName="Small Flips — the $1-slot table";
+    var c=b.flipCandidate;
+    if(flipAction==="pass"){
+      notes.push("Passed on the slot. Verification told you the band, the band said no, and knowing when not to buy is the whole table.");
+    } else if(flipAction==="verify"){
+      c.verified=true; b.xp+=8;
+      notes.push("Verified before buying: the true sold comps for \u201C"+c.name+"\u201D are "+c.comps.map(fmt).join(", ")+" against a "+fmt(c.asking)+" ask. That is a "+(c.trueMult>=8?c.trueMult.toFixed(1)+"× band — a gem, worth buying next slot.":"~"+c.trueMult.toFixed(1)+"× band — under 8×, so it cannot pay. Walk away; verification just saved you the bleed."));
+    } else if(flipAction==="buy"){
+      spend(c.asking);
+      addLine("Flip buy — "+c.name+(c.verified?" (verified band)":" (blind)"), -c.asking, "flips");
+      var resale=Math.max(1,Math.round(c.asking*c.trueMult));
+      b.flipHolding={name:c.name, cost:c.asking, resale:resale};
+      b.xp+=4;
+      notes.push(c.verified ? "Bought the verified slot at "+fmt(c.asking)+". It resells next month inside the band you already saw."
+                            : "Bought blind at "+fmt(c.asking)+" on a claimed comp of "+fmt(c.claimed)+". Claims are not comps. It resells next month at whatever the real band is.");
+      b.flipCandidate=null;
+    }
+    if(flipAction==="verify"){ /* candidate stays on the table */ }
+  }
+  else if(focus==="audience"){
+    focusName="Audience — Wavefront";
+    var prevLvl=b.audienceLevel;
+    b.audienceLevel+=1; b.xp+=6; b.rep=clamp(b.rep+4,0,100);
+    var gained=Math.round(25 + b.audienceLevel*18 + rng()*20);
+    b.followers+=gained;
+    notes.push("Published, answered, showed the work in public. Following +"+gained+" (now "+b.followers.toLocaleString("en-US")+"), Reputation +4. Slow, and it compounds.");
+    if(b.audienceLevel%5===0 && b.audienceLevel>prevLvl){
+      b.oppCount++;
+      var kind=b.oppCount%3;
+      if(kind===1){ addLine("Opportunity card — a bounty your post surfaced, escrowed and paid",75,"audience"); earn("audience",75); notes.push("Opportunity card (Audience "+b.audienceLevel+"): a reader posted a bounty that fits your skills — $75, escrowed, done and paid."); }
+      else if(kind===2){ b.rep=clamp(b.rep+8,0,100); notes.push("Opportunity card (Audience "+b.audienceLevel+"): a collaboration with a builder whose audience trusts them — Reputation +8 by association earned in public."); }
+      else { if(b.consultStage==="ready"||b.consultStage==="outreach"){ b.consultStage="diag"; notes.push("Opportunity card (Audience "+b.audienceLevel+"): an inbound client — they read the case study and asked for the diagnostic directly. The pipeline skips outreach."); } else { b.rep=clamp(b.rep+5,0,100); notes.push("Opportunity card (Audience "+b.audienceLevel+"): an inbound client lead, banked as goodwill while the pipeline is mid-cycle — Reputation +5."); } }
+    }
+  }
+
+  /* --- the event (same deck order for every builder, by month) --- */
+  var evKey=G.eventOrder[(b.month-1)%24];
+  var evText="";
+  if(evKey==="bounty"||evKey==="bounty2"){
+    addLine("Event — platform bounty, escrowed, paid on merge",50,"events"); earn("events",50);
+    evText="A platform bounty fits your skills — $50, escrowed. Small, real, and it leaves a public receipt behind.";
+  } else if(evKey==="unfunded"){
+    b.rep=clamp(b.rep+3,0,100);
+    evText="An unfunded listing tempts: someone wants you to sell a product that does not exist yet, for a cut. You decline — never sell what does not exist yet. Reputation +3 among the people who heard about it.";
+  } else if(evKey==="hardware"||evKey==="hardware2"){
+    var hit=Math.min(120, Math.max(0,b.cash));
+    if(hit>0){ addLine("Event — hardware dies (drive, out of warranty)",-hit,"events"); spend(hit); }
+    evText="Hardware dies at the worst hour of the month. "+(hit>0?("Replacement: "+fmt(hit)+", paid from cash. This is what the Reserve is for."):"The shelf spare covers it — no cash hit this time.");
+  } else if(evKey==="talk"||evKey==="talk2"){
+    b.audienceLevel+=1; b.followers+=Math.round(30+rng()*30);
+    evText="A talk invitation — no cash, and you take it anyway. Audience +1 level from the room and the recording. Some months pay in reach.";
+  } else if(evKey==="tokens"){
+    if(!b.tokenBurn){ b.tokenBurn=true; evText="Token bills rise: cloud inference now costs $20 a month, every month, until a local node takes the load — a Solar Pod at 50%+ halves the bill. It starts on next month\u2019s statement."; }
+    else evText="Token bills stay high — the meter runs until the local build carries the load.";
+  } else if(evKey==="referral"){
+    b.rep=clamp(b.rep+6,0,100);
+    evText="A past client says your name in a room you weren\u2019t in. Reputation +6. Receipts travel further than resumes.";
+  } else if(evKey==="creep"){
+    var c2=Math.min(30,Math.max(0,b.cash));
+    if(c2>0){ addLine("Event — tool subscriptions crept up",-c2,"events"); spend(c2); }
+    evText="Tool subscriptions quietly crept: "+fmt(c2)+" of small charges you forgot you authorized. The statement catches what attention misses.";
+  } else {
+    evText="A quiet month. Nothing knocked. The loop you chose is the news.";
+  }
+
+  /* --- settle --- */
+  var delta=0; lines.forEach(function(l){delta+=l.amount;});
+  b.cash=Math.max(0,b.cash+delta);
+  var st={month:b.month, builder:b.name, focus:focusName, lines:lines, notes:notes, event:evText, delta:delta, cashAfter:b.cash, reserveAfter:reserve(b),
+          runLabel:currentRunLabel(), generation:G.generation||null, seedDisplay:G.seedDisplay||null,
+          chooser:(G.mode==="house" ? (G.chooser%2===0?"Player One":"Player Two") : null)};
+  b.statements.push(st);
+  G.lastStatement={builderIdx:b.idx, st:st};
+
+  if(reserve(b)>=12){ b.won=true; b.finished=true; }
+  if(b.month>=24){ b.finished=true; }
+  G.phase="statement";
+  saveGame();
+  render();
+}
+</script>
+
+<script>
+"use strict";
+/* ============ rendering ============ */
+function pipsHTML(b){
+  var r=reserve(b), h="";
+  for(var i=0;i<12;i++) h+="<span class='"+(i<r?"on":"")+"'></span>";
+  return h;
+}
+function renderGauges(){
+  var b=activeBuilder();
+  var g=el("gauges");
+  var cashCls=b.cash<200?"bad":(b.cash<1000?"warn":"");
+  g.innerHTML=
+    "<div class='gauge "+cashCls+"'><div class='g-lbl'>Cash</div><div class='g-val'>"+fmt(b.cash)+"</div><div class='g-note'>Seed loan: $20 · Day job: +$150/mo</div></div>"+
+    "<div class='gauge'><div class='g-lbl'>Runway — Reserve</div><div class='g-val'>"+reserve(b)+" mo</div><div class='g-note'>+1 month per $1,000 banked · win at 12</div><div class='pips'>"+pipsHTML(b)+"</div></div>"+
+    "<div class='gauge'><div class='g-lbl'>Skill XP</div><div class='g-val'>Lv "+skillLevel(b)+" · "+b.xp+" XP</div><div class='g-note'>Levels raise build speed &amp; rates</div></div>"+
+    "<div class='gauge'><div class='g-lbl'>Reputation</div><div class='g-val'>"+b.rep+" / 100</div><div class='g-note'>Diagnostics land at 30+</div><div class='repbar'><i style='width:"+b.rep+"%'></i></div></div>"+
+    "<div class='gauge'><div class='g-lbl'>Month</div><div class='g-val'>"+Math.min(b.month,24)+" / 24</div><div class='g-note'>"+(b.finished?"Ledger closed":"One focus this month")+"</div></div>";
+  var who=el("turn-who"), when=el("turn-when");
+  if(G.mode==="duo"){
+    who.innerHTML="<span class='p"+(b.idx+1)+"dot'></span>"+esc(b.name)+(G.builders[1-b.idx].finished?"":" · "+esc(G.builders[1-b.idx].name)+" waits");
+  } else if(G.mode==="house"){
+    who.textContent="The House — "+(G.chooser%2===0?"Player One":"Player Two")+" chooses this month";
+  } else who.textContent="Solo Builder";
+  when.textContent="Month "+Math.min(b.month,24)+" of 24 · Reserve "+reserve(b)+" of 12 months";
+}
+
+function renderLedger(){
+  var b=activeBuilder(), t=b.totals;
+  function row(k,v,cls){return "<div class='kv'><span class='k'>"+k+"</span><span class='v "+(cls||"")+"'>"+v+"</span></div>";}
+  el("ledger").innerHTML=
+    row("Day job experiment money", fmt(t.dayjob), "pos")+
+    row("Consulting received", fmt(t.consulting), "pos")+
+    row("Channel received", fmt(t.channel), "pos")+
+    row("Flips received", fmt(t.flips), "pos")+
+    row("Audience opportunities", fmt(t.audience), "pos")+
+    row("Events received", fmt(t.events), "pos")+
+    row("Total spent / lost", t.spent>0 ? "-"+fmt(t.spent) : "$0", t.spent>0?"neg":"")+
+    row("Score so far (runway + reputation)", String(score(b)), "");
+  var a=el("assets");
+  a.innerHTML=
+    row("Consulting offer", b.consultStage==="no-offer"?"Not built yet":(b.consultStage==="ready"?"Built — pipeline open":b.consultStage==="outreach"?"Outreach done — diagnostic next":b.consultStage==="diag"?"Diagnostic next":"Sprint next"))+
+    row("Solar Pod build", b.product+"%")+
+    row("Channel", b.channelActive? b.channelSites+" sites · "+fmt(b.channelSites*49)+"/mo" : (b.productDone? (b.channelFailed&&b.audienceLevel<b.channelRetryAudience? "Gate failed — needs Audience "+b.channelRetryAudience : "Unlocked — gate check waiting") : "Locked until Pod is 100%"))+
+    row("Audience", "Level "+b.audienceLevel+" · "+b.followers.toLocaleString("en-US")+" following")+
+    row("Flip on the table", b.flipCandidate? esc(b.flipCandidate.name)+(b.flipCandidate.verified?" (verified)":"") : "—")+
+    row("Flip holding (resells next mo.)", b.flipHolding? esc(b.flipHolding.name)+" · bought "+fmt(b.flipHolding.cost) : "—")+
+    row("Token burn", b.tokenBurn? (b.product>=50?"$10/mo (Pod carries half)":"$20/mo") : "None");
+}
+
+function renderHistory(){
+  var b=activeBuilder(), h=el("history");
+  if(!b.statements.length){ h.innerHTML="<p class='sec-note'>No statements yet. Your first month closes when you pick a focus.</p>"; return; }
+  h.innerHTML=b.statements.slice().reverse().map(function(st){
+    var lines=st.lines.map(function(l){return stLineHTML(l);}).join("");
+    return "<details><summary>Month "+st.month+" — "+esc(st.focus)+" · "+fmtSigned(st.delta)+"</summary><div class='st-lines'>"+lines+"</div></details>";
+  }).join("");
+}
+function stLineHTML(l){
+  var cls=l.amount>0?"pos":(l.amount<0?"neg":"zero");
+  return "<div class='st-line'><span>"+esc(l.label)+"</span><span class='"+cls+"'>"+fmtSigned(l.amount)+"</span></div>";
+}
+
+function focusState(){
+  var b=activeBuilder();
+  return [
+    {id:"consulting", name:"Consulting Sprint", tag:"pipeline · cash", desc:"Sell a diagnostic, then a one-week sprint, to people who can point at your past work.",
+     state: b.consultStage==="no-offer" ? "First use: spend the month building the offer + case study" :
+            b.consultStage==="ready" ? "Next: outreach month (no revenue — Reputation test)" :
+            b.consultStage==="diag" ? (b.rep>=30 ? "Next: the $250 diagnostic lands (Rep "+b.rep+" ✓)" : "Next: diagnostic — needs Reputation 30 (you have "+b.rep+")") :
+            b.consultStage==="sprint" ? "Next: the $1,250 one-week sprint" : "Next: outreach month",
+     disabled:false, why:""},
+    {id:"product", name:"Product Build", tag:"Solar Pod · no revenue yet", desc:"Build the Solar Pod vault. Hard rule: no outreach, no sales, nothing promised before 100%.",
+     state:"Progress "+b.product+"% · +"+(18+skillLevel(b)*2)+"% this month"+(b.product>=100?" · complete":""), disabled:false, why:""},
+    {id:"channel", name:"Channel", tag:"partner\u2019s client book · $49/site/mo", desc:"A partner with a client book resells the finished Pod. First month is the gate: they must name 3 candidates.",
+     state: b.channelActive ? b.channelSites+" sites live · recurring "+fmt(b.channelSites*49)+"/mo" :
+            !b.productDone ? "" : (b.channelFailed&&b.audienceLevel<b.channelRetryAudience ? "" : "Gate check: will they name 3 candidates?"),
+     disabled: !b.productDone || (b.channelFailed&&b.audienceLevel<b.channelRetryAudience),
+     why: !b.productDone ? "Locked — no outreach before product. The Pod is at "+b.product+"%." :
+          "Locked — the partner named no one. Audience "+b.channelRetryAudience+" reopens the gate (now "+b.audienceLevel+")."},
+    {id:"flips", name:"Small Flips", tag:"the $1-slot table · verify first", desc:"One candidate a month. Verify the true sold comps, or buy blind on a claimed comp. Only verified ≥8× pays.",
+     state: b.flipCandidate ? "On the table: "+b.flipCandidate.name+" — ask "+fmt(b.flipCandidate.asking)+(b.flipCandidate.verified?" · VERIFIED":"") : "A new candidate is on the table this month",
+     disabled:false, why:""},
+    {id:"audience", name:"Audience — Wavefront", tag:"slow · compounding", desc:"Publish the work, in public, on schedule. Every 5 levels opens an opportunity card.",
+     state:"Level "+b.audienceLevel+" · "+b.followers.toLocaleString("en-US")+" following · next card at level "+(Math.floor(b.audienceLevel/5)*5+5),
+     disabled:false, why:""}
+  ];
+}
+
+function renderPlay(){
+  var area=el("play-area"), b=activeBuilder();
+  el("end-area").innerHTML="";
+  if(G.phase==="statement" && G.lastStatement){ renderStatement(area); return; }
+  if(G.over){ area.innerHTML=""; return; }
+  var fs=focusState();
+  var html="<h2 class='sec'>Month "+b.month+": choose the one focus</h2>"+
+    "<p class='sec-note'>Attention is the constraint — <b>one focus, like a daily goal</b>. The day job pays +$150 no matter what. An event lands after the focus resolves, and the month closes with a signed statement.</p>"+
+    "<div class='focus-list'>";
+  fs.forEach(function(f){
+    html+="<button class='focus-btn' data-focus='"+f.id+"' "+(f.disabled?"disabled":"")+">"+
+      "<span class='f-name'>"+f.name+"<span class='f-tag'>"+f.tag+"</span></span>"+
+      "<span class='f-desc'>"+f.desc+"</span>"+
+      "<span class='f-state'>"+(f.disabled? f.why : f.state)+"</span></button>";
+  });
+  html+="</div><div id='flip-zone'></div>";
+  area.innerHTML=html;
+  area.querySelectorAll("[data-focus]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var f=btn.getAttribute("data-focus");
+      if(f==="flips"){ renderFlipChoice(); }
+      else resolveMonth(f,null);
+    });
+  });
+}
+
+function renderFlipChoice(){
+  var b=activeBuilder();
+  if(!b.flipCandidate) b.flipCandidate=makeCandidate(b);
+  var c=b.flipCandidate, zone=el("flip-zone");
+  var compsHTML=c.verified ? "<p style='margin:8px 0 0'><b>Verified sold comps (real, recent, sold):</b></p><ul class='comp-list'>"+c.comps.map(function(x){return "<li>"+fmt(x)+"</li>";}).join("")+"</ul><p style='margin:4px 0 0'>True band ≈ <b>"+c.trueMult.toFixed(1)+"×</b> the ask — "+(c.trueMult>=8?"<b>a gem: ≥8×.</b>":"under 8×, so it cannot pay by design.")+"</p>" : "";
+  zone.innerHTML="<div class='candidate' style='margin-top:14px'><h3>On the table: "+esc(c.name)+"</h3>"+
+    "<p style='margin:0'>Asking price: <b>"+fmt(c.asking)+"</b> · Seller\u2019s claimed comp: <b>"+fmt(c.claimed)+"</b> (a claim is not a comp)."+(b.flipHolding?"<br>Note: last month\u2019s holding resells on this month\u2019s statement either way.":"")+"</p>"+compsHTML+
+    "<div class='choice-row'>"+
+    (c.verified
+      ? "<button class='choice-btn primary' id='flip-buy'>Buy the verified slot — "+fmt(c.asking)+"<small>Resells next month inside the band above.</small></button>"+
+        "<button class='choice-btn' id='flip-pass'>Pass &amp; end the month<small>Verified and still not right? Walk away. The month closes with the day-job line and an event.</small></button>"
+      : "<button class='choice-btn' id='flip-verify'>Verify the comps<small>Costs the month. See the true sold-comp distribution before a dollar moves.</small></button>"+
+        "<button class='choice-btn' id='flip-buy'>Buy blind — "+fmt(c.asking)+"<small>Trust the claimed comp. Resells next month at the real band, whatever it is.</small></button>")+
+    "</div></div>";
+  zone.scrollIntoView({behavior:"smooth",block:"nearest"});
+  el("flip-buy").addEventListener("click",function(){ resolveMonth("flips","buy"); });
+  var v=el("flip-verify"); if(v) v.addEventListener("click",function(){ resolveMonth("flips","verify"); });
+  var p=el("flip-pass"); if(p) p.addEventListener("click",function(){ b.flipCandidate=null; resolveMonth("flips","pass"); });
+}
+
+function renderStatement(area){
+  var ls=G.lastStatement, st=ls.st, b=G.builders[ls.builderIdx];
+  var lines=st.lines.map(stLineHTML).join("");
+  var notes=st.notes.map(function(n){return "<li>"+esc(n)+"</li>";}).join("");
+  area.innerHTML="<div class='statement' role='status'>"+
+    "<div class='st-head'><h3>STATEMENT — MONTH "+st.month+" OF 24</h3><div class='st-sub'>"+esc(st.runLabel||currentRunLabel())+"</div><div class='st-sub'>"+esc(st.builder)+" · Focus: "+esc(st.focus)+(st.chooser?" · Chosen by "+st.chooser:"")+" · Signed by the ledger</div></div>"+
+    "<div class='st-event'><b>Event</b>"+esc(st.event)+"</div>"+
+    "<div class='st-lines'>"+lines+
+    "<div class='st-total'><span>Month delta</span><span>"+fmtSigned(st.delta)+"</span></div>"+
+    "<div class='st-line'><span>Cash after</span><span>"+fmt(st.cashAfter)+"</span></div>"+
+    "<div class='st-line'><span>Runway (Reserve) after</span><span>"+st.reserveAfter+" months</span></div></div>"+
+    (notes?"<ul class='st-notes'>"+notes+"</ul>":"")+
+    "<div class='st-foot'><p class='st-motto'>Only cash received counts.</p>"+
+    "<button class='big-btn' id='btn-continue'>"+continueLabel()+"</button></div></div>";
+  el("btn-continue").addEventListener("click",afterStatement);
+}
+function continueLabel(){
+  var b=activeBuilder();
+  if(G.mode==="duo"){
+    var other=G.builders[1-G.active];
+    if(b.finished && other.finished) return "Close the ledgers — final comparison";
+    if(b.won) return "Close the ledgers — final comparison";
+    if(!other.finished) return "Pass the ledger to "+other.name;
+    return b.finished ? "Close the ledgers — final comparison" : "Begin month "+(b.month+1);
+  }
+  if(b.won) return "Collect the year of runway";
+  if(b.finished) return "Close the ledger — final statement";
+  return "Begin month "+(b.month+1);
+}
+
+function afterStatement(){
+  var b=activeBuilder();
+  b.month+= (b.month<24?1:0);
+  if(G.mode==="house") G.chooser+=1;
+  if(G.mode==="duo"){
+    var other=G.builders[1-G.active];
+    var curDone=b.finished;
+    if(b.won || (curDone && other.finished)){ endGame(); return; }
+    if(!other.finished){ G.active=1-G.active; }
+    else if(curDone){ endGame(); return; }
+  } else {
+    if(b.finished){ endGame(); return; }
+  }
+  G.phase="choose"; G.lastStatement=null;
+  saveGame(); render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ============ end ============ */
+function leverStory(b){
+  var parts=[];
+  var total=Math.max(1,b.grossReceived);
+  var ranked=[["Consulting",b.totals.consulting],["Day job",b.totals.dayjob],["Channel",b.totals.channel],["Flips",b.totals.flips],["Audience",b.totals.audience],["Events",b.totals.events]].sort(function(x,y){return y[1]-x[1];});
+  if(ranked[0][1]>0) parts.push(ranked[0][0]+" carried "+Math.round(ranked[0][1]/total*100)+"% of everything ("+fmt(ranked[0][1])+" of "+fmt(b.grossReceived)+" received).");
+  if(b.channelActive) parts.push("The channel named names: "+b.channelSites+" sites paying "+fmt(b.channelSites*49)+"/mo by the end.");
+  else if(b.productDone) parts.push("The Pod got built, but the channel never named names.");
+  else parts.push("The channel never named names — the Pod stalled at "+b.product+"%, so it never got the chance.");
+  if(b.totals.flips>0) parts.push("Flips received "+fmt(b.totals.flips)+" all told.");
+  if(b.consultStage==="no-offer") parts.push("The consulting offer was never built — that pipeline never opened.");
+  return parts;
+}
+function endGame(){
+  /* Completing a run increments the on-device generation counter — exactly
+     once per completed run — so the next run is dealt from a new seed. */
+  if(G && !G.genCounted){ G.genCounted=true; incrementGenerationFor(G.generation||loadGeneration()); }
+  G.over=true; G.phase="end";
+  var best=recordBest();
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  renderGauges(); renderLedger(); renderHistory();
+  el("play-area").innerHTML="";
+  var area=el("end-area");
+  function builderEnd(b){
+    var story=leverStory(b).map(function(s){return "<li>"+esc(s)+"</li>";}).join("");
+    return "<div class='end-panel "+(b.won?"":"lose")+"'>"+
+      (G.mode==="duo"?"<h2>"+esc(b.name)+"</h2>":"")+
+      (b.won
+        ? "<h2>Runway: a year of experiments, bought with receipts.</h2><p>"+esc(b.name)+" banked "+fmt(b.cash)+" — 12 months of experiments that no employer, gatekeeper, or pedigree market can take back. The $20 loan did its job: only revenue up to the agreed limit is owed; the profits, and the road, are yours.</p>"
+        : "<h2>Month 24: the ledger closes at "+reserve(b)+" months of runway.</h2><p>Not the year — this time. The statement totals say exactly what happened, which is more road than most builders ever get:</p>")+
+      "<ul>"+story+"</ul>"+
+      "<p class='score'>Final score: "+reserve(b)+" runway + "+b.rep+" reputation = "+score(b)+"</p>"+
+      "<p>Best on this device: score "+best.score+" · best runway "+best.reserve+" months · "+best.wins+" winning run"+(best.wins===1?"":"s")+" in "+best.runs+" finished ledgers.</p>"+
+      "</div>";
+  }
+  var html="";
+  if(G.mode==="duo"){
+    var a=G.builders[0], c=G.builders[1];
+    var verdict = a.won&&c.won ? "Both builders bought the year." : a.won ? a.name+" bought the year." : c.won ? c.name+" bought the year." :
+      score(a)===score(c) ? "Dead even on score — compare the statements; the roads differed even when the totals didn\u2019t." :
+      (score(a)>score(c)?a.name:c.name)+" closes ahead on score. Compare the statements: the totals by lever are the real result.";
+    html="<h2 class='sec'>Two Builders — final comparison</h2><p class='sec-note'><b>"+esc(verdict)+"</b></p><div class='compare'>"+builderEnd(a)+builderEnd(c)+"</div>";
+  } else {
+    html=builderEnd(G.builders[0]);
+    if(G.mode==="house") html+="<p class='sec-note' style='margin-top:10px'>Signed by both players — the House chose together, month about, and the statement carries both names.</p>";
+  }
+  html+="<p class='sec-note' style='margin-top:12px'>"+esc(currentRunLabel())+" — completed. The generation counter on this device has advanced, so the next run is dealt fresh from its new ISO week + generation seed: a different event order and a different Small Flips table. The verified ≥8× rule, the doctrine gates, and the prices of record do not change.</p>";
+  html+="<button class='big-btn dark' id='btn-again' style='margin-top:14px'>Start a new run</button>";
+  area.innerHTML=html;
+  el("btn-again").addEventListener("click",function(){ startRun(G.mode,false); });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function render(){ renderGauges(); renderLedger(); renderHistory(); renderPlay(); }
+
+/* ============ controls ============ */
+function setModeButtons(){
+  ["solo","duo","house"].forEach(function(m){
+    el("mode-"+m).setAttribute("aria-pressed", G.mode===m ? "true":"false");
+  });
+}
+function startRun(mode,resumed){
+  G=newGame(mode); G.phase="choose";
+  setModeButtons(); saveGame(); render();
+  el("resume-note").classList.toggle("hidden",!resumed);
+  window.scrollTo({top:0});
+}
+["solo","duo","house"].forEach(function(m){
+  el("mode-"+m).addEventListener("click",function(){ startRun(m,false); });
+});
+el("btn-new").addEventListener("click",function(){ startRun(G?G.mode:"solo",false); });
+
+document.querySelectorAll("[data-panel]").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    var id="panel-"+btn.getAttribute("data-panel");
+    document.querySelectorAll(".foot-panel").forEach(function(p){ p.classList.toggle("open", p.id===id && !p.classList.contains("open")); });
+  });
+});
+el("btn-erase").addEventListener("click",function(){
+  try{ localStorage.removeItem(SAVE_KEY); localStorage.removeItem(BEST_KEY); localStorage.removeItem(GEN_KEY); }catch(e){}
+  el("erase-note").textContent="Erased. Nothing about your runs remains on this device.";
+  startRun(G?G.mode:"solo",false);
+});
+
+/* ============ init ============ */
+var restored=loadGame();
+if(restored){ G=restored; setModeButtons(); render(); el("resume-note").classList.remove("hidden"); }
+else { G=newGame("solo"); setModeButtons(); saveGame(); render(); }
+</script>
+</body>
+</html>

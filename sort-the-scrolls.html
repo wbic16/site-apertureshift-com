@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Sort the Scrolls</title>
+<style>
+  :root{
+    --bg:#fdf3d7;
+    --base:#f7e8b8;
+    --ink:#22304a;
+    --ink-soft:#4a5872;
+    --card:#ffffff;
+    --red:#e23b2e;
+    --blue:#2b6fd6;
+    --yellow:#f5b921;
+    --green:#2fa84f;
+    --orange:#f07300;
+    --purple:#7a4fd0;
+    --rod:#9aa3ad;
+    --rod-joint:#dfe3e8;
+    --panel:#ffffff;
+    --shadow:0 6px 0 rgba(34,48,74,.16);
+    --radius:26px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1d2436;
+      --base:#2a3350;
+      --ink:#f2ecdc;
+      --ink-soft:#c6cde0;
+      --card:#2f3a5c;
+      --panel:#2f3a5c;
+      --shadow:0 6px 0 rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Arial Rounded MT Bold","Trebuchet MS",Verdana,system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100dvh;
+    background-image:radial-gradient(circle at 14px 14px, rgba(34,48,74,.10) 5px, transparent 6px);
+    background-size:34px 34px;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:18px 16px 28px}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  button:focus-visible,[tabindex]:focus-visible{outline:4px solid var(--blue);outline-offset:2px}
+
+  /* ---------- Home ---------- */
+  .greeting{
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:26px 22px 22px;text-align:center;position:relative;margin-top:8px;
+  }
+  .greeting::before{
+    content:"";position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+    width:120px;height:16px;border-radius:8px 8px 0 0;background:var(--yellow);
+    background-image:radial-gradient(circle at 16px 8px, rgba(0,0,0,.13) 5px, transparent 6px),radial-gradient(circle at 48px 8px, rgba(0,0,0,.13) 5px, transparent 6px),radial-gradient(circle at 80px 8px, rgba(0,0,0,.13) 5px, transparent 6px),radial-gradient(circle at 108px 8px, rgba(0,0,0,.13) 5px, transparent 6px);
+  }
+  .greeting .hi{font-size:1.32rem;line-height:1.45;margin:0 0 10px;font-weight:700}
+  .greeting .help{font-size:1.05rem;line-height:1.45;margin:0;color:var(--ink-soft)}
+  .play-brick{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    width:100%;min-height:84px;margin-top:22px;border-radius:22px;
+    background:var(--green);color:#fff;font-size:1.7rem;font-weight:800;letter-spacing:.02em;
+    box-shadow:0 7px 0 #1e7038;position:relative;padding-top:12px;
+  }
+  .play-brick::before{
+    content:"";position:absolute;top:6px;left:0;right:0;height:14px;
+    background-image:radial-gradient(circle at 30px 7px, rgba(255,255,255,.4) 6px, transparent 7px),radial-gradient(circle at 90px 7px, rgba(255,255,255,.4) 6px, transparent 7px),radial-gradient(circle at 150px 7px, rgba(255,255,255,.4) 6px, transparent 7px),radial-gradient(circle at 210px 7px, rgba(255,255,255,.4) 6px, transparent 7px),radial-gradient(circle at 270px 7px, rgba(255,255,255,.4) 6px, transparent 7px),radial-gradient(circle at 330px 7px, rgba(255,255,255,.4) 6px, transparent 7px),radial-gradient(circle at 390px 7px, rgba(255,255,255,.4) 6px, transparent 7px),radial-gradient(circle at 450px 7px, rgba(255,255,255,.4) 6px, transparent 7px),radial-gradient(circle at 510px 7px, rgba(255,255,255,.4) 6px, transparent 7px);
+  }
+  .play-brick:active{transform:translateY(4px);box-shadow:0 3px 0 #1e7038}
+  .ages{text-align:center;color:var(--ink-soft);font-size:.95rem;margin:14px 0 0}
+  .preview{display:flex;justify-content:center;gap:10px;margin-top:18px}
+  .preview .mini{flex:1;max-width:150px}
+
+  /* ---------- Word cards ---------- */
+  .card{
+    background:var(--card);border-radius:20px;box-shadow:0 5px 0 rgba(34,48,74,.18);
+    padding:12px 10px 10px;text-align:center;position:relative;user-select:none;
+    min-height:64px;width:100%;
+  }
+  .card .studs{display:flex;justify-content:center;gap:10px;margin-bottom:6px}
+  .card .studs i{width:16px;height:9px;border-radius:5px 5px 0 0;background:rgba(34,48,74,.14);display:block}
+  .card .word{font-size:1.35rem;font-weight:800;line-height:1.1;margin:0 0 8px;text-transform:lowercase}
+  .bars{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:74px}
+  .bar-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .bar{width:10px;border-radius:4px 4px 2px 2px;background:var(--blue);min-height:5px}
+  .bar-col:first-child .bar{width:15px;background:var(--red);box-shadow:0 0 0 3px rgba(226,59,46,.25)}
+  .preview .mini{min-width:0}
+  .preview .bars{gap:2px}
+  .preview .bar{width:7px}
+  .preview .bar-col:first-child .bar{width:10px}
+  .preview .bar-num{font-size:.5rem}
+  .preview .card .word{font-size:1.05rem}
+  .preview .card{padding:10px 4px 8px}
+  .bar-num{font-size:.62rem;font-weight:700;color:var(--ink-soft);margin-top:3px;line-height:1;font-family:Verdana,system-ui,sans-serif}
+  .bar-col:first-child .bar-num{color:var(--red);font-size:.72rem}
+  .card.c-red{border-top:10px solid var(--red)} .card.c-blue{border-top:10px solid var(--blue)}
+  .card.c-yellow{border-top:10px solid var(--yellow)} .card.c-green{border-top:10px solid var(--green)}
+  .card.c-orange{border-top:10px solid var(--orange)} .card.c-purple{border-top:10px solid var(--purple)}
+  button.card{transition:transform .15s ease, box-shadow .15s ease}
+  button.card.selected{transform:translateY(-10px) scale(1.04);box-shadow:0 14px 0 rgba(34,48,74,.2),0 0 0 5px var(--yellow)}
+  button.card:active{transform:scale(.97)}
+  button.card.selected:active{transform:translateY(-10px) scale(1.02)}
+  @keyframes bounceBack{0%{transform:translateX(0)}25%{transform:translateX(-12px)}55%{transform:translateX(10px)}80%{transform:translateX(-5px)}100%{transform:translateX(0)}}
+  .bounce{animation:bounceBack .45s ease}
+  @keyframes shakeSoft{0%,100%{transform:rotate(0)}30%{transform:rotate(-3deg)}70%{transform:rotate(3deg)}}
+  .shake{animation:shakeSoft .4s ease}
+  @keyframes popIn{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  .pop{animation:popIn .35s ease}
+  @keyframes cheerJump{0%,100%{transform:translateY(0)}40%{transform:translateY(-16px)}}
+  .cheer-jump{animation:cheerJump .5s ease 2}
+
+  /* ---------- Game layout ---------- */
+  .top-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .home-btn{min-width:64px;min-height:64px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);font-size:1.7rem;display:flex;align-items:center;justify-content:center}
+  .round-title{font-size:1.45rem;font-weight:800;margin:0;flex:1;text-align:center}
+  .sound-btn{min-width:64px;min-height:64px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);font-size:1.5rem;display:flex;align-items:center;justify-content:center}
+  /* K'Nex progress rod */
+  .rod-wrap{display:flex;align-items:center;justify-content:center;gap:0;margin:12px 0 18px}
+  .rod-seg{height:10px;width:34px;background:var(--rod);border-radius:5px;opacity:.35}
+  .rod-seg.on{opacity:1;background:var(--green)}
+  .rod-joint{width:24px;height:24px;border-radius:50%;background:var(--rod-joint);border:4px solid var(--rod);opacity:.45;flex:none;z-index:1}
+  .rod-joint.on{opacity:1;border-color:var(--green);background:#bfe8cc}
+
+  .tray{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+  .tray.two{grid-template-columns:repeat(2,1fr);max-width:380px;margin-left:auto;margin-right:auto}
+  @media (max-width:420px){.tray{grid-template-columns:repeat(2,1fr)}}
+
+  .shelves{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .shelf{
+    border-radius:22px;padding:14px 10px 12px;min-height:190px;text-align:center;
+    background:var(--card);box-shadow:var(--shadow);position:relative;width:100%;
+  }
+  .shelf .rod{height:12px;border-radius:6px;background:var(--rod);margin:10px 4px 12px;position:relative}
+  .shelf .rod::before,.shelf .rod::after{content:"";position:absolute;top:50%;width:22px;height:22px;border-radius:50%;background:var(--rod-joint);border:4px solid var(--rod);transform:translateY(-50%)}
+  .shelf .rod::before{left:-4px}.shelf .rod::after{right:-4px}
+  .shelf-icon{display:flex;align-items:flex-end;justify-content:center;gap:6px;height:58px}
+  .shelf-icon .ib{width:22px;border-radius:5px 5px 2px 2px}
+  .shelf-icon .ib.tall{height:56px;background:var(--red)}
+  .shelf-icon .ib.small{height:16px;background:var(--red)}
+  .shelf-icon .ib.mid{height:32px;background:rgba(34,48,74,.18)}
+  .shelf .placed{display:flex;flex-direction:column;gap:8px;align-items:center}
+  .shelf .placed .card{max-width:150px}
+  button.shelf{transition:box-shadow .15s ease}
+  button.shelf.armed{box-shadow:0 0 0 5px var(--yellow),var(--shadow)}
+
+  .sample-zone{max-width:230px;margin:0 auto 18px}
+  .sample-label{text-align:center;font-size:2rem;margin:0 0 4px}
+  .lineup-rod{display:flex;align-items:center;gap:8px;margin:6px 0 18px}
+  .lineup-rod .track{flex:1;height:12px;border-radius:6px;background:var(--rod);opacity:.4;position:relative;overflow:visible}
+  .lineup-rod .fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--green);width:0%;transition:width .4s ease}
+  .lineup-slots{display:flex;justify-content:center;gap:10px;margin-bottom:18px;min-height:40px}
+  .slot{min-width:64px;min-height:64px;border-radius:16px;background:rgba(34,48,74,.08);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--ink-soft);padding:6px}
+  .slot.filled{background:var(--green);color:#fff}
+
+  .hint-line{text-align:center;color:var(--ink-soft);font-size:1rem;margin:0 0 14px;min-height:1.4em}
+
+  /* Cheer burst */
+  .burst{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60}
+  .burst span{position:absolute;font-size:2rem;animation:burstFly 1s ease-out forwards}
+  @keyframes burstFly{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(200deg);opacity:0}}
+
+  /* ---------- End ---------- */
+  .end-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:34px 22px;text-align:center;margin-top:26px}
+  .end-card .big{font-size:2.6rem;margin:0 0 8px}
+  .end-card .stars{font-size:2.4rem;letter-spacing:.2em;margin:0 0 10px}
+  .end-card p{color:var(--ink-soft);font-size:1.05rem;line-height:1.5;margin:0}
+  .again-brick{display:flex;align-items:center;justify-content:center;width:100%;min-height:76px;margin-top:22px;border-radius:22px;background:var(--blue);color:#fff;font-size:1.5rem;font-weight:800;box-shadow:0 7px 0 #1a4f9e}
+  .again-brick:active{transform:translateY(4px);box-shadow:0 3px 0 #1a4f9e}
+
+  /* ---------- Footer & panels ---------- */
+  footer{margin-top:30px}
+  .foot-btns{display:flex;gap:10px}
+  .foot-btns button{flex:1;min-height:64px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);font-size:1.05rem;font-weight:800}
+  .foot-note{text-align:center;color:var(--ink-soft);font-size:.85rem;margin:12px 0 0}
+  .panel-overlay{position:fixed;inset:0;background:rgba(20,26,40,.55);display:none;align-items:flex-end;justify-content:center;z-index:80}
+  .panel-overlay.open{display:flex}
+  .panel{background:var(--panel);color:var(--ink);border-radius:26px 26px 0 0;max-width:560px;width:100%;max-height:82dvh;overflow:auto;padding:24px 22px 30px}
+  .panel h2{margin:0 0 12px;font-size:1.4rem}
+  .panel p,.panel li{font-size:1rem;line-height:1.6;color:var(--ink-soft)}
+  .panel p strong,.panel li strong{color:var(--ink)}
+  .panel ul{padding-left:20px;margin:8px 0}
+  .panel .close-btn{display:flex;width:100%;min-height:64px;align-items:center;justify-content:center;border-radius:18px;background:var(--yellow);color:#22304a;font-size:1.15rem;font-weight:800;margin-top:16px}
+  .hidden{display:none !important}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HOME ================= -->
+  <section id="screen-home">
+    <div class="greeting">
+      <p class="hi">Hi, I&rsquo;m Will Bickford. I&rsquo;m from the Exocortex of 2130, and I&rsquo;m here to help.</p>
+      <p class="help">And by help, we mean: survive the singularity.</p>
+    </div>
+
+    <div class="preview" aria-hidden="true">
+      <div class="mini" id="preview-1"></div>
+      <div class="mini" id="preview-2"></div>
+      <div class="mini" id="preview-3"></div>
+    </div>
+
+    <button class="play-brick" id="btn-play" type="button">▶ &nbsp;Play</button>
+    <p class="ages">For ages 3–5 · Grown-ups welcome · Tap a card, tap a shelf</p>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="screen-game" class="hidden">
+    <div class="top-row">
+      <button class="home-btn" id="btn-home" type="button" aria-label="Back to start">🏠</button>
+      <h1 class="round-title" id="round-title">Tall or small?</h1>
+      <button class="sound-btn" id="btn-sound" type="button" aria-label="Hear the title spoken">🔊</button>
+    </div>
+    <div class="rod-wrap" id="rod" aria-hidden="true"></div>
+    <p class="hint-line" id="hint-line"></p>
+    <div id="stage"></div>
+  </section>
+
+  <!-- ================= END ================= -->
+  <section id="screen-end" class="hidden">
+    <div class="end-card">
+      <p class="big">🎉</p>
+      <h1 class="big" style="font-size:2.1rem">All sorted!</h1>
+      <p class="stars" aria-hidden="true">⭐ ⭐ ⭐</p>
+      <p>Every scroll found its shelf.<br />You sorted by the bars — just like the big kids&rsquo; games.</p>
+      <button class="again-brick" id="btn-again" type="button">↻ &nbsp;Play again</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-btns">
+      <button type="button" data-panel="about">About</button>
+      <button type="button" data-panel="privacy">Privacy</button>
+      <button type="button" data-panel="terms">Terms</button>
+    </div>
+    <p class="foot-note">Sort the Scrolls · Roads to the Future · Free to play, forever</p>
+  </footer>
+</div>
+
+<!-- Panels -->
+<div class="panel-overlay" id="overlay">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+    <h2 id="panel-title"></h2>
+    <div id="panel-body"></div>
+    <button class="close-btn" id="panel-close" type="button">Close</button>
+  </div>
+</div>
+
+<div class="burst hidden" id="burst"></div>
+
+<script>
+"use strict";
+/* ============ DATA — real Singular atlas addresses ============ */
+/* bars = the nine numbers of the address; FIRST bar is the sorting feature */
+var WORDS = {
+  sky:    { word:"sky",    bars:[5,6,6, 5,5,5, 6,6,6],    color:"c-blue"   },
+  sing:   { word:"sing",   bars:[5,7,6, 8,7,6, 5,5,6],    color:"c-green"  },
+  song:   { word:"song",   bars:[7,6,5, 9,7,9, 5,6,6],    color:"c-yellow" },
+  fire:   { word:"fire",   bars:[8,6,7, 8,5,7, 7,6,7],    color:"c-red"    },
+  heart:  { word:"heart",  bars:[9,8,14, 11,10,12, 7,8,7],color:"c-purple" },
+  earth:  { word:"earth",  bars:[10,4,4, 5,4,5, 4,4,6],   color:"c-orange" },
+  future: { word:"future", bars:[17,8,21, 12,10,13, 11,9,11], color:"c-blue" },
+  star:   { word:"star",   bars:[21,5,10, 7,7,15, 4,6,8], color:"c-yellow" },
+  home:   { word:"home",   bars:[24,8,15, 10,10,24, 10,9,10], color:"c-green" },
+  time:   { word:"time",   bars:[27,11,17, 11,11,15, 12,11,14], color:"c-purple" },
+  build:  { word:"build",  bars:[40,13,8, 20,9,28, 6,10,9], color:"c-orange" },
+  map:    { word:"map",    bars:[42,3,5, 7,5,8, 4,3,7],   color:"c-red"    }
+};
+function isTall(w){ return WORDS[w].bars[0] >= 17; }
+/* Set membership is a fact, derived from the real first bars — never mutated. */
+var LOW  = Object.keys(WORDS).filter(function(w){ return !isTall(w); });
+var HIGH = Object.keys(WORDS).filter(function(w){ return  isTall(w); });
+
+/* ============ ANTI-VIRAL DEALER ============
+   Facts are fixed; instances are perishable. Cards are dealt, not fixed:
+   the deal is generated from (ISO week + on-device generation counter).
+   The only thing stored anywhere is that one counter. */
+var GEN_KEY = 'sort-the-scrolls-generation';
+var memGen = null;
+function loadGen(){
+  if(memGen !== null) return memGen;
+  var v = 1;
+  try{ var p = parseInt(localStorage.getItem(GEN_KEY), 10); if(isFinite(p) && p >= 1) v = p; }catch(e){}
+  memGen = v; return v;
+}
+function saveGen(g){ memGen = g; try{ localStorage.setItem(GEN_KEY, String(g)); }catch(e){} }
+function isoWeekParts(date){
+  var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  var dayNum = (d.getUTCDay() + 6) % 7;               /* Monday = 0 */
+  d.setUTCDate(d.getUTCDate() - dayNum + 3);          /* this week's Thursday */
+  var firstThu = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  var fDay = (firstThu.getUTCDay() + 6) % 7;
+  firstThu.setUTCDate(firstThu.getUTCDate() - fDay + 3);
+  var week = 1 + Math.round((d - firstThu) / (7 * 24 * 3600 * 1000));
+  return { year: d.getUTCFullYear(), week: week };
+}
+function hashSeed(str){
+  var h = 2166136261;
+  for(var i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function currentInstance(){
+  var iw = isoWeekParts(new Date());
+  var label = iw.year + '-W' + (iw.week < 10 ? '0' : '') + iw.week;
+  var gen = loadGen();
+  var seedInt = hashSeed(label + '|G' + gen + '|sort-the-scrolls');
+  var seedHex = ('0000' + (seedInt % 65536).toString(16).toUpperCase()).slice(-4);
+  return { label: label, gen: gen, seedInt: seedInt, seedHex: seedHex };
+}
+function instanceText(){
+  var i = currentInstance();
+  return 'Instance ' + i.label + ' · G' + i.gen + ' · seed ' + i.seedHex;
+}
+function shuffle(a, rng){
+  a = a.slice();
+  for(var i=a.length-1;i>0;i--){ var j = Math.floor(rng()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+
+/* One whole game, dealt at Play time from the current instance. */
+var deal = null, gameDone = false;
+function buildDeal(){
+  var info = currentInstance();
+  var rng = mulberry32(info.seedInt);
+  /* Round 1: 6 cards — 3 small-first-bar from LOW, 3 tall-first-bar from HIGH */
+  var r1 = shuffle(LOW, rng).slice(0,3).concat(shuffle(HIGH, rng).slice(0,3));
+  /* Round 2: sample + trio per round; exactly one choice shares the sample's
+     size family — true by construction (answer from its family, two from the other). */
+  var samples = shuffle(Object.keys(WORDS), rng).slice(0,4);
+  var r2 = samples.map(function(sample){
+    var tall = isTall(sample);
+    var sameFamily = (tall ? HIGH : LOW).filter(function(w){ return w !== sample; });
+    var otherFamily = tall ? LOW : HIGH;
+    var answer = shuffle(sameFamily, rng)[0];
+    var distractors = shuffle(otherFamily, rng).slice(0,2);
+    return { sample: sample, choices: [answer].concat(distractors), answer: answer };
+  });
+  /* Round 3: two triples of distinct words, orderable because every first bar
+     in a triple is distinct (sky and sing share a 5 — never dealt together). */
+  var pool = shuffle(Object.keys(WORDS), rng).slice(0,6);
+  var t1 = pool.slice(0,3), t2 = pool.slice(3,6);
+  function hasTie(t){ return t.indexOf('sky') >= 0 && t.indexOf('sing') >= 0; }
+  if(hasTie(t1) || hasTie(t2)){
+    var tied = hasTie(t1) ? t1 : t2, other = hasTie(t1) ? t2 : t1;
+    var si = tied.indexOf('sing');
+    for(var k=0;k<other.length;k++){
+      if(other[k] !== 'sky' && other[k] !== 'sing'){ var tmp = tied[si]; tied[si] = other[k]; other[k] = tmp; break; }
+    }
+  }
+  return { info: info, rng: rng, r1: r1, r2: r2, r3: [t1, t2] };
+}
+
+/* ============ CARD RENDERING ============ */
+var MAXBAR = 42;
+function barsHTML(w){
+  var d = WORDS[w], html = '<div class="bars" aria-hidden="true">';
+  for(var i=0;i<9;i++){
+    var h = 6 + Math.round((d.bars[i]/MAXBAR)*62);
+    html += '<div class="bar-col"><div class="bar" style="height:'+h+'px"></div><div class="bar-num">'+d.bars[i]+'</div></div>';
+  }
+  return html + '</div>';
+}
+function cardHTML(w){
+  var d = WORDS[w];
+  return '<div class="studs" aria-hidden="true"><i></i><i></i><i></i></div>' +
+         '<p class="word">'+d.word+'</p>' + barsHTML(w);
+}
+function makeCardButton(w, extraClass){
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'card ' + WORDS[w].color + (extraClass ? ' '+extraClass : '');
+  b.innerHTML = cardHTML(w);
+  b.setAttribute('aria-label', 'Card: ' + WORDS[w].word + '. First bar is ' + WORDS[w].bars[0] + '.');
+  b.dataset.word = w;
+  return b;
+}
+function makeCardDiv(w){
+  var d = document.createElement('div');
+  d.className = 'card ' + WORDS[w].color;
+  d.innerHTML = cardHTML(w);
+  return d;
+}
+
+/* ============ SOUND (tiny synthesized cheers, no files) ============ */
+var audioCtx = null, soundOn = true;
+function tone(freq, t, dur){
+  if(!soundOn) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, audioCtx.currentTime + t);
+    g.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(audioCtx.currentTime + t); o.stop(audioCtx.currentTime + t + dur + 0.05);
+  }catch(e){ /* sound is a bonus, never a blocker */ }
+}
+function cheerSound(){ tone(523,0,0.22); tone(659,0.1,0.22); tone(784,0.2,0.34); }
+function popSound(){ tone(392,0,0.12); tone(587,0.06,0.14); }
+function softSound(){ tone(330,0,0.15); }
+function speak(text){
+  try{
+    if('speechSynthesis' in window){ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+  }catch(e){}
+}
+
+/* ============ CHEER BURST ============ */
+var BURST_CHARS = ['⭐','🎉','🟥','🟦','🟨','🟩','✨'];
+function cheer(){
+  cheerSound();
+  var burst = document.getElementById('burst');
+  burst.innerHTML = ''; burst.classList.remove('hidden');
+  for(var i=0;i<16;i++){
+    var s = document.createElement('span');
+    s.textContent = BURST_CHARS[Math.floor(Math.random()*BURST_CHARS.length)];
+    s.style.left = (15 + Math.random()*70) + '%';
+    s.style.top = (30 + Math.random()*30) + '%';
+    s.style.setProperty('--dx', (Math.random()*220-110) + 'px');
+    s.style.setProperty('--dy', (Math.random()*-220-40) + 'px');
+    burst.appendChild(s);
+  }
+  setTimeout(function(){ burst.classList.add('hidden'); burst.innerHTML=''; }, 1100);
+}
+
+/* ============ SCREENS ============ */
+var screens = { home:'screen-home', game:'screen-game', end:'screen-end' };
+function show(name){
+  for(var k in screens) document.getElementById(screens[k]).classList.toggle('hidden', k !== name);
+  window.scrollTo(0,0);
+}
+
+/* ============ GAME FLOW ============ */
+/* Steps: 0 = Round 1 sort · 1-4 = Round 2 match · 5-6 = Round 3 line up */
+var TOTAL_STEPS = 7;
+var step = 0, selectedCard = null;
+
+function setRod(){
+  var rod = document.getElementById('rod'); rod.innerHTML = '';
+  for(var i=0;i<TOTAL_STEPS;i++){
+    if(i>0){ var seg = document.createElement('div'); seg.className = 'rod-seg' + (i<=step ? ' on' : ''); rod.appendChild(seg); }
+    var j = document.createElement('div'); j.className = 'rod-joint' + (i<step ? ' on' : ''); rod.appendChild(j);
+  }
+}
+function setStage(title, hint, builder){
+  document.getElementById('round-title').textContent = title;
+  document.getElementById('hint-line').textContent = hint || '';
+  var stage = document.getElementById('stage'); stage.innerHTML = '';
+  builder(stage);
+  setRod();
+}
+function nextStep(){
+  step++;
+  if(step >= TOTAL_STEPS){
+    /* Completing the whole game advances the generation exactly once (guarded),
+       so the next play is re-dealt fresh — never a rerun. */
+    if(!gameDone){ gameDone = true; saveGen(loadGen() + 1); }
+    show('end'); return;
+  }
+  runStep();
+}
+function runStep(){
+  if(!deal) deal = buildDeal();
+  selectedCard = null;
+  if(step === 0) roundSort();
+  else if(step >= 1 && step <= 4) roundMatch(step - 1);
+  else roundLineup(step - 5);
+}
+
+/* ---------- ROUND 1 — Tall or small? ---------- */
+function roundSort(){
+  var set = deal.r1;
+  var remaining = set.length;
+  setStage('Tall or small?', 'Tap a card, then tap its shelf. Look at the tall red bar!', function(stage){
+    var tray = document.createElement('div'); tray.className = 'tray';
+    shuffle(set, deal.rng).forEach(function(w){
+      var c = makeCardButton(w);
+      c.addEventListener('click', function(){
+        if(selectedCard) selectedCard.classList.remove('selected');
+        selectedCard = c; c.classList.add('selected'); popSound();
+        document.querySelectorAll('.shelf').forEach(function(s){ s.classList.add('armed'); });
+      });
+      tray.appendChild(c);
+    });
+    stage.appendChild(tray);
+
+    var shelves = document.createElement('div'); shelves.className = 'shelves';
+    [['small','<div class="ib mid"></div><div class="ib small"></div><div class="ib mid"></div>','Small bars shelf'],
+     ['tall','<div class="ib mid"></div><div class="ib tall"></div><div class="ib mid"></div>','Tall bars shelf']
+    ].forEach(function(cfg){
+      var shelf = document.createElement('button');
+      shelf.type = 'button'; shelf.className = 'shelf'; shelf.dataset.kind = cfg[0];
+      shelf.setAttribute('aria-label', cfg[2]);
+      shelf.innerHTML = '<div class="shelf-icon" aria-hidden="true">'+cfg[1]+'</div><div class="rod"></div><div class="placed"></div>';
+      shelf.addEventListener('click', function(){
+        if(!selectedCard) return;
+        var w = selectedCard.dataset.word;
+        var wantTall = cfg[0] === 'tall';
+        if(isTall(w) === wantTall){
+          var placedCard = makeCardDiv(w); placedCard.classList.add('pop');
+          shelf.querySelector('.placed').appendChild(placedCard);
+          selectedCard.remove(); selectedCard = null;
+          document.querySelectorAll('.shelf').forEach(function(s){ s.classList.remove('armed'); });
+          popSound(); remaining--;
+          if(remaining === 0){ cheer(); setTimeout(nextStep, 1200); }
+        } else {
+          selectedCard.classList.remove('bounce'); void selectedCard.offsetWidth;
+          selectedCard.classList.add('bounce'); softSound();
+        }
+      });
+      shelves.appendChild(shelf);
+    });
+    stage.appendChild(shelves);
+  });
+}
+
+/* ---------- ROUND 2 — Match the shelf ---------- */
+/* Sample and trio are dealt per round; exactly one choice shares the sample's
+   first-bar family (small ≤10 / tall ≥17) — preserved by construction. */
+function roundMatch(idx){
+  var r = deal.r2[idx];
+  setStage('Match the shelf', 'Find the card whose red bar is the same size family.', function(stage){
+    var label = document.createElement('p'); label.className = 'sample-label'; label.textContent = '👇';
+    label.setAttribute('aria-hidden','true');
+    var zone = document.createElement('div'); zone.className = 'sample-zone';
+    var sample = makeCardDiv(r.sample); sample.classList.add('cheer-jump');
+    zone.appendChild(sample);
+    stage.appendChild(label); stage.appendChild(zone);
+
+    var tray = document.createElement('div'); tray.className = 'tray';
+    shuffle(r.choices, deal.rng).forEach(function(w){
+      var c = makeCardButton(w);
+      c.addEventListener('click', function(){
+        if(w === r.answer){
+          c.classList.add('selected'); popSound(); cheer();
+          tray.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+          setTimeout(nextStep, 1200);
+        } else {
+          c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); softSound();
+        }
+      });
+      tray.appendChild(c);
+    });
+    stage.appendChild(tray);
+  });
+}
+
+/* ---------- ROUND 3 — Line them up ---------- */
+function roundLineup(idx){
+  var set = deal.r3[idx];
+  var order = set.slice().sort(function(a,b){ return WORDS[a].bars[0] - WORDS[b].bars[0]; });
+  var pos = 0;
+  setStage('Line them up', 'Tap the cards: smallest red bar first, tallest last.', function(stage){
+    var rod = document.createElement('div'); rod.className = 'lineup-rod';
+    rod.innerHTML = '<span aria-hidden="true">🐜</span><div class="track"><div class="fill"></div></div><span aria-hidden="true">🦒</span>';
+    stage.appendChild(rod);
+    var fill = rod.querySelector('.fill');
+
+    var slots = document.createElement('div'); slots.className = 'lineup-slots';
+    order.forEach(function(_, i){
+      var s = document.createElement('div'); s.className = 'slot'; s.textContent = (i+1); slots.appendChild(s);
+    });
+    stage.appendChild(slots);
+
+    var tray = document.createElement('div'); tray.className = 'tray';
+    shuffle(set, deal.rng).forEach(function(w){
+      var c = makeCardButton(w);
+      c.addEventListener('click', function(){
+        if(w === order[pos]){
+          c.remove(); popSound();
+          var slot = slots.children[pos]; slot.classList.add('filled'); slot.textContent = WORDS[w].word;
+          pos++;
+          fill.style.width = (pos / order.length * 100) + '%';
+          if(pos === order.length){ cheer(); setTimeout(nextStep, 1200); }
+        } else {
+          c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); softSound();
+        }
+      });
+      tray.appendChild(c);
+    });
+    stage.appendChild(tray);
+  });
+}
+
+/* ============ WIRING ============ */
+function startGame(){
+  gameDone = false;
+  deal = buildDeal();   /* a fresh deal from the current week + generation */
+  step = 0; show('game'); runStep();
+}
+document.getElementById('btn-play').addEventListener('click', function(){
+  popSound(); startGame();
+});
+document.getElementById('btn-again').addEventListener('click', function(){
+  popSound(); startGame();
+});
+document.getElementById('btn-home').addEventListener('click', function(){ show('home'); });
+document.getElementById('btn-sound').addEventListener('click', function(){
+  speak(document.getElementById('round-title').textContent + '. ' + document.getElementById('hint-line').textContent);
+});
+
+/* Home preview cards (decorative samples of real words) */
+['sky','home','build'].forEach(function(w, i){
+  var host = document.getElementById('preview-' + (i+1));
+  var c = makeCardDiv(w); host.appendChild(c);
+});
+
+/* ============ PANELS ============ */
+var PANELS = {
+  about: {
+    title: 'About — for grown-ups',
+    body: '<p><strong>Sort the Scrolls</strong> is the first road into the Exocortex, made for ages 3–5 — before reading, before numbers need to mean anything.</p>' +
+      '<p><strong>Every word lives at an address of nine numbers.</strong> In Will Bickford&rsquo;s Singular atlas, each word was placed by every place it appears in his writing — and its address can be drawn as nine bars. <strong>The bars ARE the address: the height of each bar is the number.</strong> The digits sit under the bars for exposure, but no child needs to read them to play.</p>' +
+      '<p>The first bar is the sorting feature. Sorting cards by that one bar — small, tall, same, in order — is <strong>the first step of thinking in addresses</strong>: one dimension at a time, then more. Older kids take the same idea further in Word Home and Nine Numbers, where all nine numbers become the game.</p>' +
+      '<p>The addresses in this game are real: sky lives at 5.6.6/5.5.5/6.6.6, build at 40.13.8/20.9.28/6.10.9, map at 42.3.5/7.5.8/4.3.7 — and every other card is drawn from the same atlas.</p>' +
+      '<p>There are no scores, no timers, and no way to lose. A card on the wrong shelf simply bounces back. Grown-ups: play it together, on the same screen — that is the multiplayer.</p>' +
+      '<p>The cards are dealt fresh for each generation of play, so a remembered run is never a rerun. This copy of the game is:</p>' +
+      '<p><strong id="instance-line"></strong></p>'
+  },
+  privacy: {
+    title: 'Privacy',
+    body: '<p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap ever leaves this device. Multiplayer means people on the same screen — no online play, no chat, no strangers.</p>' +
+      '<p>The one thing stored, on this device only, is a generation counter: a single number that goes up by one each time the whole game is finished, so the next play is dealt fresh cards.</p>'
+  },
+  terms: {
+    title: 'Terms',
+    body: '<p>Free to play, forever. No purchases, no ads, nothing to buy. These games are MIT licensed. © Will Bickford · Exocortex</p>' +
+      '<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this game, to use, copy, modify, and share it, subject to the MIT License terms. The game is provided &ldquo;as is,&rdquo; without warranty of any kind.</p>'
+  }
+};
+var overlay = document.getElementById('overlay');
+document.querySelectorAll('[data-panel]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var p = PANELS[btn.dataset.panel];
+    document.getElementById('panel-title').textContent = p.title;
+    document.getElementById('panel-body').innerHTML = p.body;
+    var il = document.getElementById('instance-line');
+    if(il) il.textContent = instanceText();
+    overlay.classList.add('open');
+  });
+});
+document.getElementById('panel-close').addEventListener('click', function(){ overlay.classList.remove('open'); });
+overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.classList.remove('open'); });
+</script>
+</body>
+</html>

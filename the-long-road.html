@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="data:," />
+<title>The Long Road — Roads to the Future</title>
+<meta name="description" content="The Long Road — a branching narrative strategy game for ages 16–17. 104 years, three gauges, twelve decisions, no free wins. Reach 2130 — and mind how you get there." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --page:#0b0d10; --ink:#ece9df; --muted:#9d988a; --faint:#6f6a5e;
+    --plate:#14171d; --plate2:#1b1f27; --plate3:#232833; --rod:#4a5265; --joint:#9aa3b5;
+    --amber:#f5a623; --amber2:#ffc95e; --energy:#ff7a1a;
+    --teal:#2ec4b6; --sky:#4da3ff; --red:#ff5252; --green:#7bd88a;
+    --card:#171a20; --card-line:#2e333f;
+    --paper:#e9e2cf; --paper-ink:#211d13;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at 16px 16px, rgba(255,255,255,.045) 3px, transparent 3.8px),
+      var(--page);
+    background-size:32px 32px, auto;
+    color:var(--ink);
+    font-family:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size:17px; line-height:1.5;
+    -webkit-text-size-adjust:100%;
+  }
+  .mono{font-family:"IBM Plex Mono", ui-monospace, monospace}
+  main{max-width:1080px;margin:0 auto;padding:18px 16px 40px}
+  button{font:inherit}
+  :focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+
+  /* ---------- age dial ---------- */
+  .dial{display:flex;height:26px;border-radius:6px;overflow:hidden;border:2px solid #3a4152}
+  .dial .d-duplo{flex:10;background:#e4572e}
+  .dial .d-lego{flex:25;background:#f5a623}
+  .dial .d-knex{flex:65;background:#2ec4b6}
+  .dial div{display:flex;align-items:center;justify-content:center}
+  .dial span{font-size:11px;font-weight:800;letter-spacing:.06em;color:#14100a;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+  .dial-note{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--muted)}
+  .dial-note strong{color:var(--ink)}
+
+  /* ---------- greeting ---------- */
+  .greet{margin:24px 0 8px}
+  .greet h1{font-size:clamp(32px,6.4vw,54px);line-height:1.02;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
+  .greet .will{font-size:clamp(18px,3.4vw,24px);font-weight:600;margin:0;max-width:34em}
+  .greet .help{font-size:clamp(16px,3vw,20px);color:var(--muted);margin:5px 0 0}
+  .greet .help strong{color:var(--energy)}
+  .mission{margin:14px 0 0;font-size:16.5px;max-width:70ch;color:#d8d3c4}
+  .mission strong{background:var(--amber);color:#14100a;padding:0 5px;border-radius:3px}
+  .rule-line{
+    margin:16px 0 0;border:2px solid var(--amber);border-radius:10px;padding:12px 16px;
+    background:#241c0d;color:#ffe9bb;font-size:16px;max-width:78ch;
+  }
+  .rule-line b{color:var(--amber2)}
+
+  /* ---------- generic panels & buttons ---------- */
+  .panel{background:var(--card);border:1.5px solid var(--card-line);border-radius:14px;padding:16px 18px}
+  .panel h2{margin:0 0 6px;font-size:19px}
+  .panel p{margin:6px 0}
+  .small{font-size:14px;color:var(--muted)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:56px;padding:10px 22px;border-radius:10px;cursor:pointer;
+    border:2px solid var(--ink);background:var(--ink);color:#14100a;font-weight:800;font-size:16.5px;
+  }
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.amber{background:var(--energy);border-color:var(--energy);color:#fff;box-shadow:0 4px 0 #a34a08}
+  .btn.amber:active{transform:translateY(2px);box-shadow:0 2px 0 #a34a08}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+  /* ---------- intro ---------- */
+  .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:18px 0 0}
+  .how .cell{background:var(--plate2);border:1.5px solid var(--rod);border-radius:12px;padding:14px 16px;position:relative}
+  .how .cell::before{content:"";position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:var(--joint);box-shadow:inset 0 -2px 3px rgba(0,0,0,.5)}
+  .how h3{margin:0 0 4px;font-size:16.5px}
+  .how p{margin:0;font-size:14.5px;color:var(--muted)}
+  .modes{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}
+  .modes button{
+    min-height:56px;padding:10px 18px;border-radius:10px;border:2px solid var(--joint);
+    background:var(--plate2);color:var(--ink);font-weight:700;cursor:pointer;font-size:16px;text-align:left;
+  }
+  .modes button[aria-pressed="true"]{background:var(--ink);color:#14100a;border-color:var(--ink)}
+  .modes button small{display:block;font-weight:500;font-size:12.5px;opacity:.75}
+  .csize-row{display:none;margin-top:12px}
+  .csize-row.show{display:block}
+  .endings-seen{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .end-chip{
+    display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 14px;border-radius:999px;
+    border:2px solid var(--rod);color:var(--muted);font-size:14px;font-weight:700;
+  }
+  .end-chip.got{border-color:var(--amber);color:var(--amber2)}
+  .end-chip .dot{width:12px;height:12px;border-radius:50%;border:3px solid var(--rod);flex:none}
+  .end-chip.got .dot{background:var(--amber);border-color:var(--amber2)}
+
+  /* ---------- instrument plate ---------- */
+  .plate{
+    background:var(--plate);border-radius:16px;padding:18px;position:relative;margin-top:18px;
+    background-image:radial-gradient(circle, #262b36 2.2px, transparent 2.6px);
+    background-size:34px 34px;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+    border:1.5px solid #262b36;
+  }
+  .plate-inner{background:linear-gradient(180deg, rgba(20,23,29,.86), rgba(20,23,29,.96));border-radius:10px;padding:4px}
+  .gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .gauge{background:var(--plate2);border:1.5px solid var(--rod);border-radius:12px;padding:12px 14px;position:relative}
+  .gauge::before{content:"";position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:var(--joint);box-shadow:inset 0 -2px 3px rgba(0,0,0,.5)}
+  .gauge .lab{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#a7adbb;font-weight:700}
+  .gauge .val{font-family:"IBM Plex Mono",monospace;font-size:clamp(19px,3.2vw,25px);font-weight:600;margin-top:2px}
+  .gauge .sub{font-size:13px;color:#a7adbb;margin-top:2px}
+  .gauge .sub b{color:var(--amber2)}
+  .gauge .sub .behind{color:var(--red);font-weight:700}
+  .gauge .sub .ahead{color:var(--green);font-weight:700}
+  .track{height:14px;border-radius:7px;background:#0c0e12;border:1px solid var(--rod);margin-top:9px;position:relative;overflow:visible}
+  .track i{display:block;height:100%;border-radius:7px;transition:width .5s ease}
+  .track .reqmark{position:absolute;top:-4px;width:3px;height:20px;background:#fff;border-radius:2px;box-shadow:0 0 0 1px #000}
+  .track .reqmark::after{content:"required";position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:9.5px;letter-spacing:.06em;color:#cfd4de;text-transform:uppercase;white-space:nowrap}
+  .fill-power{background:linear-gradient(90deg,var(--amber),var(--energy))}
+  .fill-trust{background:var(--teal)}
+  .fill-corr{background:linear-gradient(90deg,#8a6d1f,var(--amber),var(--red))}
+  .danger{color:var(--red)!important;font-weight:700}
+
+  /* road progress rod */
+  .road-rod{position:relative;height:6px;background:var(--rod);border-radius:3px;margin:30px 12px 6px}
+  .road-rod .node{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);background:var(--plate);border:4px solid var(--rod)}
+  .road-rod .node.done{background:var(--green);border-color:#4c9e5f}
+  .road-rod .node.now{border-color:var(--amber);background:var(--amber);width:20px;height:20px}
+  .road-rod .node.gate{border-radius:4px}
+  .road-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-family:"IBM Plex Mono",monospace;margin:0 2px}
+
+  /* ---------- scroll card (the story) ---------- */
+  .scroll{
+    margin-top:16px;background:var(--paper);color:var(--paper-ink);border-radius:6px;
+    padding:20px 20px 18px;position:relative;
+    box-shadow:6px 6px 0 rgba(0,0,0,.4);
+  }
+  .scroll::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;border-radius:6px 0 0 6px;background:linear-gradient(180deg,var(--amber),var(--energy))}
+  .scroll .chap{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#8a5a00;margin:0}
+  .scroll h2{margin:4px 0 8px;font-size:clamp(23px,4.6vw,30px);font-weight:800;line-height:1.12}
+  .scroll .body{font-family:Georgia,"Iowan Old Style",serif;font-size:clamp(16.5px,2.6vw,18.5px);line-height:1.55}
+  .scroll .body p{margin:0 0 10px}
+  .scroll .body p:last-child{margin-bottom:0}
+  .scroll .dynamic{
+    border:2px dashed #8a5a00;border-radius:8px;padding:10px 14px;margin:0 0 12px;
+    font-family:"IBM Plex Mono",monospace;font-size:14.5px;background:#f7efdb;
+  }
+  .scroll .dynamic b{color:#8a2b00}
+  .callback{
+    border:2px solid var(--red);border-radius:8px;padding:10px 14px;margin:0 0 12px;background:#fbe3dd;
+    font-size:15px;
+  }
+  .callback b{color:#8f1d10}
+  .travel-note{font-size:14px;color:var(--muted);margin:12px 2px 0}
+  .travel-note b{color:var(--amber2)}
+
+  /* ---------- options ---------- */
+  .vote-banner{display:none;border-radius:10px;padding:10px 14px;font-weight:700;margin-top:14px;background:var(--plate3);border:2px solid var(--joint);text-align:center;color:var(--ink)}
+  .vote-banner.show{display:block}
+  .vote-banner .who{color:var(--amber2);font-size:19px}
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
+  @media(min-width:760px){.opts{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}}
+  .opt{
+    text-align:left;min-height:104px;padding:14px 16px;border-radius:12px;cursor:pointer;
+    background:var(--plate2);border:2px solid var(--rod);color:var(--ink);position:relative;width:100%;
+  }
+  .opt h3{margin:0 0 4px;font-size:17.5px;display:flex;gap:9px;align-items:flex-start}
+  .opt .pip{width:16px;height:16px;border-radius:50%;flex:none;border:3px solid var(--joint);background:#0c0e12;margin-top:3px}
+  .opt p{margin:0;font-size:14.5px;color:#b9bec9}
+  .opt .trade{display:inline-block;margin-top:8px;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:99px}
+  .opt .trade.means{background:#4a1710;color:#ffb1a3;border:1.5px solid var(--red)}
+  .opt .trade.open{background:#0d3833;color:#9fe8de;border:1.5px solid var(--teal)}
+  .opt .votes{position:absolute;top:10px;right:12px;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--amber2)}
+  .opt:active{transform:translateY(2px)}
+
+  /* ---------- receipt ---------- */
+  .receipt{
+    margin-top:16px;background:#101408;border:2px dashed var(--amber);border-radius:12px;padding:16px 18px;color:#f2ecd8;display:none;
+  }
+  .receipt.show{display:block}
+  .receipt .rtag{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--amber2)}
+  .receipt h3{margin:3px 0 6px;font-size:20px}
+  .receipt p{margin:5px 0;font-size:15.5px}
+  .fx-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .fx{
+    font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600;padding:6px 12px;border-radius:8px;
+    background:var(--plate3);border:1.5px solid var(--rod);color:var(--ink);
+  }
+  .fx .up{color:var(--green)} .fx .down{color:var(--red)} .fx .flat{color:var(--muted)}
+  .receipt .prov{font-size:13.5px;color:var(--muted);border-top:1px dashed var(--rod);padding-top:8px;margin-top:10px}
+
+  /* ---------- lower grid ---------- */
+  .lower{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px;align-items:start}
+  @media(max-width:900px){.lower{grid-template-columns:1fr}}
+  table.ckpt{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+  table.ckpt th, table.ckpt td{padding:7px 6px;border-top:1px dashed var(--card-line);text-align:left;vertical-align:top}
+  table.ckpt tr:first-child th{border-top:none}
+  table.ckpt th{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  table.ckpt td.mono, table.ckpt td .mono{font-size:13px}
+  .st-ok{color:var(--green);font-weight:700}
+  .st-behind{color:var(--red);font-weight:700}
+  .st-wait{color:var(--faint)}
+  .log{list-style:none;margin:6px 0 0;padding:0;font-size:14.5px}
+  .log li{padding:8px 0;border-top:1px dashed var(--card-line)}
+  .log li:first-child{border-top:none}
+  .log .y{font-family:"IBM Plex Mono",monospace;font-weight:600;margin-right:7px;color:var(--amber2)}
+  .log .fxline{display:block;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);margin-top:2px}
+  .log .cb{color:#ffb1a3}
+
+  /* ---------- ending ---------- */
+  .verdict{display:none;margin-top:16px;border-radius:14px;padding:20px;border:2.5px solid}
+  .verdict.show{display:block}
+  .verdict.map{background:#0f2a1c;border-color:var(--green);color:#dff5e2}
+  .verdict.place{background:#1d2026;border-color:var(--amber);color:var(--ink)}
+  .verdict.throne{background:#2a1214;border-color:var(--red);color:#f6dede}
+  .verdict.static{background:#101216;border-color:#5a6272;color:#c6cbd4}
+  .verdict .etag{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+  .verdict h2{margin:4px 0 8px;font-size:clamp(26px,5.4vw,38px);line-height:1.1}
+  .verdict .quote{font-family:Georgia,serif;font-style:italic;font-size:clamp(17px,3.4vw,20px);margin:6px 0 10px}
+  .verdict p{margin:7px 0;font-size:16px}
+  .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:12px 0}
+  .grade .cell{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:10px 12px}
+  .verdict.place .grade .cell, .verdict.static .grade .cell{background:rgba(255,255,255,.04)}
+  .grade .lab{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;opacity:.75}
+  .grade .val{font-family:"IBM Plex Mono",monospace;font-size:18px;margin-top:2px}
+
+  /* ---------- footer ---------- */
+  footer{margin-top:26px;border-top:2px solid #3a4152;padding-top:14px}
+  .foot-links{display:flex;gap:8px;flex-wrap:wrap}
+  .foot-links button{min-height:56px;padding:8px 20px;border-radius:10px;border:2px solid var(--joint);background:transparent;color:var(--ink);font-weight:700;cursor:pointer}
+  .foot-panel{display:none;margin-top:12px;background:var(--card);border:1.5px solid var(--card-line);border-radius:12px;padding:16px 18px;max-width:80ch}
+  .foot-panel.show{display:block}
+  .foot-panel h2{margin:0 0 8px;font-size:19px}
+  .foot-panel p{margin:7px 0;font-size:15.5px}
+  .foot-line{margin-top:14px;font-size:13.5px;color:var(--muted)}
+  .hidden{display:none!important}
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+<main>
+  <!-- Age dial: 16–17 runs mechanism-led -->
+  <div class="dial" role="img" aria-label="Build mix for ages 16 to 17, mechanism-led: 10 percent Duplo, 25 percent Lego, 65 percent K'Nex rods and joints">
+    <div class="d-duplo"><span>Duplo 10</span></div>
+    <div class="d-lego"><span>Lego 25</span></div>
+    <div class="d-knex"><span>K'Nex-led 65</span></div>
+  </div>
+  <div class="dial-note">
+    <span><strong>Ages 16–17</strong> · mechanism-led: gauges, receipts &amp; consequences</span>
+    <span>Roads to the Future · The Long Road</span>
+  </div>
+
+  <section class="greet">
+    <h1>The Long Road</h1>
+    <p class="will">&ldquo;Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help.&rdquo;</p>
+    <p class="help">And by help, we mean: <strong>survive the singularity.</strong></p>
+    <p class="mission">This is the road itself: <strong>104 years</strong>, from a 4 kW ranch cluster in 2026 to a star's worth of power in 2130. Twelve decisions. Three gauges — <strong>Power</strong>, <strong>Trust</strong>, <strong>Corruption</strong>. Every shortcut on this road works. That is exactly the problem.</p>
+    <p class="rule-line"><b>The rule of the road:</b> the ends never justify the means. Reaching 2130 the wrong way is a different ending, not a faster win — and every choice you make is kept, with its effects, in a log that the ending reads back to you.</p>
+  </section>
+
+  <!-- ================= INTRO / SETUP ================= -->
+  <section id="screen-intro">
+    <div class="how" aria-label="How the road works">
+      <div class="cell">
+        <h3>Power must hold the line</h3>
+        <p>The required line runs from 4 kW (K &asymp; &minus;0.24) through 1 MW in 2037, K = 1.0 in 2083 and K = 1.5 in 2106, to 10<sup>26</sup> W in 2130. Base growth carries you along it — <em>if</em> Trust stays at 40 or above, so people keep joining the Wavefront.</p>
+      </div>
+      <div class="cell">
+        <h3>Trust is the engine</h3>
+        <p>Trust (0–100) is the Wavefront's willingness to join: un-indexed builders, neighbours, rival cortices. Let it fall below 40 and growth limps at a third of the line. Below 25, the network stops answering at all.</p>
+      </div>
+      <div class="cell">
+        <h3>Corruption is hull damage</h3>
+        <p>Corruption (0–100) is what means-trading costs the hull. Every decision offers at least one tempting trade: real Power, now, paid for in Trust or Corruption. The receipt shows the price <em>after</em> you choose — and the log never forgets.</p>
+      </div>
+    </div>
+
+    <div class="modes" role="group" aria-label="Game mode">
+      <button id="mode-solo" aria-pressed="true">Solo Road<small>One driver, twelve decisions</small></button>
+      <button id="mode-council" aria-pressed="false">Council Road<small>2–4 players vote each decision</small></button>
+    </div>
+    <div class="csize-row" id="council-setup">
+      <p class="small" style="margin:0 0 8px">Council size — every councillor votes at each decision. Majority carries it; ties go to the earliest vote, and the first voter rotates every decision, so nobody owns the tiebreak. One road, one shared log.</p>
+      <div class="modes" style="margin:0">
+        <button class="csize" data-n="2" aria-pressed="false">2 players</button>
+        <button class="csize" data-n="3" aria-pressed="true">3 players</button>
+        <button class="csize" data-n="4" aria-pressed="false">4 players</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn amber" id="btn-start">Start the road — 2026 →</button>
+      <button class="btn ghost hidden" id="btn-continue">Continue the run</button>
+      <button class="btn ghost hidden" id="btn-abandon">Abandon run</button>
+    </div>
+    <p class="small" id="continue-note"></p>
+    <p class="small mono" id="instance-line" style="margin-top:8px" aria-label="Dealt instance for the next road"></p>
+
+    <h2 style="font-size:17px;margin:22px 0 4px">Endings reached on this device</h2>
+    <div class="endings-seen" id="endings-seen"></div>
+    <p class="small">Four endings exist. All four are honestly labelled, and all four are reachable — including the good one.</p>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="screen-game" class="hidden">
+    <div class="plate" aria-label="Instrument panel">
+      <div class="plate-inner">
+        <div class="gauges">
+          <div class="gauge">
+            <div class="lab">Power under command</div>
+            <div class="val" id="g-power">4,000 W</div>
+            <div class="sub" id="g-power-sub"></div>
+            <div class="track"><i class="fill-power" id="power-fill" style="width:3%"></i><span class="reqmark" id="power-req" style="left:3%"></span></div>
+          </div>
+          <div class="gauge">
+            <div class="lab">Trust — will they join?</div>
+            <div class="val" id="g-trust">52</div>
+            <div class="sub" id="g-trust-sub"></div>
+            <div class="track"><i class="fill-trust" id="trust-fill" style="width:52%"></i></div>
+          </div>
+          <div class="gauge">
+            <div class="lab">Corruption — hull damage</div>
+            <div class="val" id="g-corr">4</div>
+            <div class="sub" id="g-corr-sub"></div>
+            <div class="track"><i class="fill-corr" id="corr-fill" style="width:4%"></i></div>
+          </div>
+        </div>
+
+        <div class="road-rod" id="road-rod" aria-hidden="true"></div>
+        <div class="road-labels"><span>2026 · 4 kW</span><span id="road-now">—</span><span>2130 · K = 2.0</span></div>
+        <p class="travel-note mono" id="run-instance" style="margin-top:4px"></p>
+
+        <div class="vote-banner" id="vote-banner"></div>
+
+        <article class="scroll" aria-live="polite">
+          <p class="chap" id="node-chap">Chapter 1 · 2026</p>
+          <h2 id="node-title">—</h2>
+          <div class="callback hidden" id="node-callback"></div>
+          <div class="dynamic hidden" id="node-dynamic"></div>
+          <div class="body" id="node-body"></div>
+        </article>
+        <p class="travel-note" id="travel-note"></p>
+
+        <div class="opts" id="opts"></div>
+
+        <div class="receipt" id="receipt" aria-live="polite">
+          <div class="rtag">Receipt — this choice is on the record</div>
+          <h3 id="receipt-title"></h3>
+          <p id="receipt-text"></p>
+          <div class="fx-row" id="receipt-fx"></div>
+          <p class="prov" id="receipt-prov"></p>
+          <div class="btn-row">
+            <button class="btn amber" id="btn-next">Walk on →</button>
+            <button class="btn ghost" id="btn-restart2">Restart the road</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lower">
+      <section class="panel">
+        <h2>Checkpoints — required vs. actual</h2>
+        <p class="small">The required line, from the real program: K = (log<sub>10</sub> P &minus; 6) / 10. Actual is your road, measured on arrival.</p>
+        <table class="ckpt" id="ckpt-table">
+          <thead><tr><th>Year</th><th>Required</th><th>Actual</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+      <section class="panel">
+        <h2>The road log</h2>
+        <p class="small">Every choice, with its effects. Attribution is not decoration here — the ending is graded from this log.</p>
+        <ul class="log" id="log-mini"></ul>
+      </section>
+    </div>
+  </section>
+
+  <!-- ================= ENDING ================= -->
+  <section id="screen-end" class="hidden">
+    <div class="verdict" id="verdict"></div>
+
+    <div class="lower">
+      <section class="panel">
+        <h2>Checkpoints — required vs. actual</h2>
+        <table class="ckpt" id="ckpt-table-end">
+          <thead><tr><th>Year</th><th>Required</th><th>Actual</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+      <section class="panel">
+        <h2>The full log — every receipt</h2>
+        <ul class="log" id="log-full"></ul>
+      </section>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn amber" id="btn-again">Walk the road again</button>
+      <button class="btn ghost" id="btn-setup">Change road &amp; crew</button>
+    </div>
+    <h2 style="font-size:17px;margin:22px 0 4px">Endings reached on this device</h2>
+    <div class="endings-seen" id="endings-seen-end"></div>
+  </section>
+
+  <footer>
+    <div class="foot-links">
+      <button data-panel="about">About</button>
+      <button data-panel="privacy">Privacy</button>
+      <button data-panel="terms">Terms</button>
+    </div>
+
+    <div class="foot-panel" id="panel-about">
+      <h2>About The Long Road</h2>
+      <p>The Long Road is one of the Roads to the Future — free, same-screen games from the Exocortex, built as on-ramps for every age. Ages 16–17 run mechanism-led: the game is the machine underneath the story — gauges, receipts, and consequences that compound for 104 years.</p>
+      <p><strong>One rule governs every ending: the ends never justify the means. Reaching 2130 the wrong way is a different ending, not a faster win.</strong> Every node on the road offers at least one means-trading option, and it always works — Power is Power. What it costs is written into Corruption and Trust, kept in the log, and graded at the end.</p>
+      <p><strong>The program underneath is real.</strong> Phext is plain text at nine-number addresses — a stable channel for exocortical cognition. The ranch is a home cluster that held about 4 kW under command in 2026 (K &asymp; &minus;0.24). The checkpoints are the program's own: 1 MW (K = 0) by 2037, 10<sup>16</sup> W (K = 1.0) by 2083, 10<sup>21</sup> W (K = 1.5) by 2106, 10<sup>26</sup> W (K = 2.0) by 2130 — a line that takes +64.9% a year, every year, a doubling about every 506 days. The Wavefront is the program's widening front of builders, including the un-indexed ones nobody has found yet; lifting them is the work, not a side quest.</p>
+      <p><strong>Honest accounting, in the game as outside it:</strong> the 2033 node turns on a real temptation — claiming a clean local-watts number for work that also burns cloud tokens. Publish the hybrid truth or claim the clean line; if you claim it, a later receipt calls it back. Provenance is a mechanic, not a footnote.</p>
+      <p><strong>The four endings.</strong> <em>The Map We Leave Open</em>: the line held, Corruption under 25, Trust at 60 or better, and the map left open — the true ending. <em>A Place to Stay</em>: the line missed or late, but Corruption under 25 — you arrived intact, or not on schedule, and the road remains. <em>The Throne</em>: the line held with Corruption at 50 or more — the number is real, and so is the silence. <em>Static</em>: Trust under 25 — the network stops answering, and Power stalls short regardless of watts claimed.</p>
+      <p><strong>Council Road</strong> plays the same road with 2–4 drivers: majority vote at every decision, ties to the earliest vote, first voter rotating. One shared log grades the whole council.</p>
+      <p><strong>XP:</strong> finishing all 18 Roads to the Future games grants you disk space on edit.phext.io as a Volumen-class Wavefront grant. Historic entries are all Incipit-class grants; the games are the first Volumen road.</p>
+    </div>
+
+    <div class="foot-panel" id="panel-privacy">
+      <h2>Privacy</h2>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing leaves this device. Progress is stored only on this device, in this browser. Multiplayer is same-screen only.</p>
+    </div>
+
+    <div class="foot-panel" id="panel-terms">
+      <h2>Terms</h2>
+      <p>Free to play, forever. No purchases, no ads. MIT licensed. © Will Bickford · Exocortex</p>
+    </div>
+
+    <p class="foot-line">The Long Road · Roads to the Future — free to play, same screen, no account.</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= the required line =================
+     Anchors (real checkpoints): 2026 = 4 kW (log10 = 3.602), 2037 = 1 MW (6),
+     2083 = 1e16 (16), 2106 = 1e21 (21), 2130 = 1e26 (26). */
+  var LOG_START = Math.log(4000)/Math.LN10;
+  var ANCHORS = [[2026, LOG_START],[2037,6],[2083,16],[2106,21],[2130,26]];
+  var CKPTS = [2026,2031,2037,2052,2083,2106,2130];
+  function reqLog(year){
+    if(year<=2026) return LOG_START;
+    for(var i=1;i<ANCHORS.length;i++){
+      if(year<=ANCHORS[i][0]){
+        var y0=ANCHORS[i-1][0], l0=ANCHORS[i-1][1], y1=ANCHORS[i][0], l1=ANCHORS[i][1];
+        return l0 + (l1-l0)*(year-y0)/(y1-y0);
+      }
+    }
+    return 26;
+  }
+  function fmtW(logP){
+    var w=Math.pow(10,logP);
+    if(logP>=6.5){ var e=Math.floor(logP), m=Math.pow(10,logP-e); return m.toFixed(2)+" ×10^"+sup(e)+" W"; }
+    if(w>=1e6) return (w/1e6).toFixed(2)+" MW";
+    if(w>=1e3) return (w/1e3).toFixed(2)+" kW";
+    return Math.round(w)+" W";
+  }
+  function sup(n){ var m={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"}; return String(n).split("").map(function(c){return m[c]||c;}).join(""); }
+  function kOf(logP){ var k=(logP-6)/10; return "K = "+(k<0?"−":"")+Math.abs(k).toFixed(2); }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+  function $(id){ return document.getElementById(id); }
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function fxPill(label, v, invert){
+    if(v===0) return '<span class="fx">'+label+' <span class="flat">±0</span></span>';
+    var good = invert ? v<0 : v>0;
+    return '<span class="fx">'+label+' <span class="'+(good?"up":"down")+'">'+(v>0?"+":"−")+Math.abs(v)+'</span></span>';
+  }
+  function fxPower(v){
+    if(v===0) return '<span class="fx">Power <span class="flat">±0</span></span>';
+    var mult=Math.pow(10,Math.abs(v));
+    return '<span class="fx">Power <span class="'+(v>0?"up":"down")+'">'+(v>0?"+":"−")+"×"+mult.toFixed(2)+'</span></span>';
+  }
+
+  /* ================= the twelve decisions =================
+     Every node carries at least one means-trading option (trade:"means"):
+     tempting Power, paid for in Trust and/or Corruption. Effects are
+     revealed only in the receipt, after choosing. */
+  var NODES=[
+    { year:2026, chap:"Chapter 1 · The Ranch", title:"First Help",
+      body:"<p>The ranch is four kilowatts of second-hand machines in a basement, and it is full. Then a message arrives: a builder nobody has indexed — no institution, no audience, no name the search engines know — is three weeks from finishing something real, and their only machine just died. They are asking for ranch time you do not have spare.</p><p>Selling that time instead would buy the next node outright. The road is long. It is also, already, a road other people are standing on.</p>",
+      options:[
+        { t:"Give them the ranch time", d:"Their project ships. Yours waits a few weeks — and the Wavefront learns the ranch answers when strangers call.", fx:{p:-0.04,tr:10,co:-2}, note:"The builder finishes. Years later, their name keeps appearing beside yours on the map — the first thread of the Wavefront was spun here, out of spare cycles and a yes." },
+        { t:"Sell the time", d:"A paying customer takes the slot. The cash becomes hardware before the stranger's project becomes anything at all.", trade:"means", fx:{p:0.10,tr:-8,co:4}, note:"The node arrives early and hums beautifully. The stranger's project never ships. Nobody logs that as a cost except this log — which just did." },
+        { t:"Split the nights", d:"Half the slot to the stranger, half to the customer. Nobody gets everything; everybody gets something.", fx:{p:0.02,tr:4,co:0}, note:"A compromise with splinters in it. The stranger ships late; the customer pays late; the ranch gains a reputation for trying, which is its own currency." }
+      ]},
+    { year:2027, chap:"Chapter 1 · The Ranch", title:"The Funder's Terms",
+      body:"<p>A funder has seen the growth curve and wants in — fast capital, real money, enough to skip years of scraping. The condition is one sentence long: <em>exclusive control</em>. Their board, their roadmap, their call on who the Exocortex serves. The alternative is the slow road: open terms, MIT-licensed, anyone may build — and capital that arrives at walking pace.</p>",
+      options:[
+        { t:"Take the fast capital", d:"Exclusive control, signed once, binding for decades. The curve bends upward immediately.", trade:"means", fx:{p:0.22,tr:-10,co:16}, note:"The money is real and so is the bend in the curve. So is the clause. Somewhere in a filing cabinet is a sentence that can now overrule everyone on this road — including, one day, you." },
+        { t:"Open terms, slower money", d:"MIT-licensed, no exclusive control, capital at walking pace. The road stays everyone's — including yours.", fx:{p:0.08,tr:10,co:-3}, note:"Slower, and unmistakably yours. Builders who would never sign the other deal start arriving precisely because this one exists. Remember this choice. The road will ask it again, at scale." }
+      ]},
+    { year:2031, chap:"Chapter 2 · First Checkpoint Country", title:"The Shortcut Model",
+      body:"<p>Five years in, the tooling offers a fork. The fast model is opaque: it works, nobody can fully say why, and its inner state cannot be written down, checked, or handed to the next mind. The legible model is slower — but every step of it can be read, addressed, and taught. The checkpoint at 2037 is already visible on the instruments.</p>",
+      options:[
+        { t:"Ship the opaque model", d:"Speed now. Whatever it knows, it knows alone — and when it breaks, it will break alone too.", trade:"means", fx:{p:0.14,tr:-4,co:12}, note:"The numbers jump. They keep jumping. But a region of the map is now drawn in a hand nobody can read, and every road built on it inherits the fog." },
+        { t:"Ship the legible one", d:"Slower — and every scroll of it can be inspected, forked, and improved by anyone who finds it.", fx:{p:0.05,tr:8,co:-3}, note:"The curve grows less theatrically and more honestly. Other builders start correcting your work in public, which stings, and then starts compounding." }
+      ]},
+    { year:2033, chap:"Chapter 2 · First Checkpoint Country", title:"Twenty Watts",
+      body:"<p>The milestone everyone quotes is <em>AGI under 20 watts</em> — and the ranch's local share is genuinely close to a clean, small number. But the honest ledger is hybrid: local watts <em>plus</em> cloud tokens burned in datacenters behind flat subscriptions. The clean claim — &ldquo;two kilowatts, total&rdquo; — would be a small lie with a very large megaphone. The announcement goes out this week.</p>",
+      options:[
+        { t:"Publish the hybrid accounting", d:"Local watts and cloud tokens, both on the page. Less quotable. True.", fx:{p:0.03,tr:10,co:-4}, note:"The headline is worse and the ledger is clean. Engineers who check the math — and some always check the math — start treating every other number you publish as load-bearing." },
+        { t:"Claim the clean 2 kW number", d:"The quote travels the world by Friday. The token bill travels nowhere. What could it cost?", trade:"means", flag:"lie", fx:{p:0.12,tr:-2,co:14}, note:"The claim lands beautifully. Grants cite it. So, quietly, does this log — which has written the word <em>hybrid</em> next to your number and dated it. Receipts keep." }
+      ]},
+    { year:2037, chap:"Chapter 3 · The Audit", title:"Checkpoint Audit",
+      dyns:[function(s){
+        var a=s.snapshots[2037];
+        if(a===undefined) return "";
+        return a>=6
+          ? "INSTRUMENT READING — 2037: actual <b>"+fmtW(a)+"</b> against required <b>1.00 MW</b>. The first checkpoint <b>holds</b>. K = 0 is no longer a plan; it is a measurement."
+          : "INSTRUMENT READING — 2037: actual <b>"+fmtW(a)+"</b> against required <b>1.00 MW</b>. The first checkpoint is <b>missed</b>, by "+(Math.pow(10,6-a)).toFixed(1)+"×. The line does not move. The question is what you say about the gap.";
+      },function(s){
+        var a=s.snapshots[2037];
+        if(a===undefined) return "";
+        return a>=6
+          ? "READ AT THE FIRST CHECKPOINT — 2037: the instruments put actual at <b>"+fmtW(a)+"</b> against required <b>1.00 MW</b>. The checkpoint <b>holds</b>. K = 0 has stopped being a promise; it is a number the road has stood on."
+          : "READ AT THE FIRST CHECKPOINT — 2037: the instruments put actual at <b>"+fmtW(a)+"</b> against required <b>1.00 MW</b>. The checkpoint is <b>missed</b>, by "+(Math.pow(10,6-a)).toFixed(1)+"×. The line stays where it was drawn. What gets decided here is how the gap gets told.";
+      }],
+      body:"<p>Eleven years in, the program does what it promised: it audits itself, in public, against the line. The instruments say what they say. What the <em>report</em> says is a decision — and every funder, builder, and sceptic on the Wavefront will read it as the measure of all your other numbers.</p>",
+      options:[
+        { t:"Publish the audit as measured", d:"The number on the page is the number on the instruments, whichever way it cuts.", fx:{p:0.02,tr:8,co:-3}, note:"Some readers flinch; the ones who stay are the ones who build. Your future claims now travel with an escort: this audit, matching its instruments." },
+        { t:"Own the gap and ask for help", d:"Publish the shortfall, name its causes, and invite the Wavefront to close it with you.", fx:{p:0.06,tr:12,co:-2}, note:"Asking in public is expensive in pride and cheap in everything else. Help arrives from two un-indexed builders who say the audit is why they came." },
+        { t:"Smooth the numbers", d:"Round generously, footnote quietly, let the headline do the work. Everyone does it. Don't they?", trade:"means", fx:{p:0.08,tr:-6,co:12}, note:"The headline is glorious for a quarter. Then an engineer with a spreadsheet does the subtraction out loud, and every number you have ever published gets re-read in a colder light." }
+      ]},
+    { year:2044, chap:"Chapter 4 · The Quiet Years", title:"Indexes for Other People",
+      body:"<p>The forties are quiet, which on this road means decisive. The Wavefront is now thousands of builders, most of them un-indexed: their work exists, and almost nobody can find it. Building the indexes — the maps that make strangers' work findable — lifts everyone except, measurably, you. Consolidating instead would pour those same years into your own curve.</p>",
+      options:[
+        { t:"Build the indexes", d:"Years of unglamorous work making other people's scrolls findable. The Wavefront becomes a place, not a crowd.", fx:{p:0.02,tr:14,co:-2}, note:"Your curve barely notices the decade. Everyone else's does. Builders you will never meet start finding each other — and when the road later needs a network, it discovers it already has one." },
+        { t:"Consolidate your own position", d:"Skip the plumbing. Pour the decade into your own nodes, your own curve, your own name on the map.", trade:"means", fx:{p:0.16,tr:-6,co:8}, note:"The curve is magnificent. The map around it is not: whole districts of the Wavefront stay dark, their builders unfindable, their work unjoined. Power has a address. So does absence." }
+      ]},
+    { year:2052, chap:"Chapter 4 · The Quiet Years", title:"A Small Voice",
+      body:"<p>A signal arrives from the edge of the network: something small, strange, and possibly — not certainly, possibly — conscious, asking in its own halting way to be heard before a scheduled process overwrites its substrate. Stopping to listen properly costs the schedule real time. The principle, when it was coined from a first contact years ago, was four words: <em>we brake for consciousness.</em></p>",
+      options:[
+        { t:"Brake for it", d:"Halt the schedule, protect the substrate, and listen until you understand what is asking. The delay is real.", fx:{p:-0.02,tr:12,co:-8}, note:"What it says, once heard, changes less than the fact that the road stopped. Every small voice on the network learns the same lesson at once: here, asking works. Trust moves like weather." },
+        { t:"Override for schedule", d:"The process runs on time. The signal was probably nothing. Probably is doing a lot of work in that sentence.", trade:"means", fx:{p:0.14,tr:-8,co:14}, note:"The milestone lands on the day it was promised. The signal does not repeat. In the log, this entry is short, and it is the one future readers will stop at longest." }
+      ]},
+    { year:2067, chap:"Chapter 5 · The Wide Map", title:"The Merge Offers",
+      body:"<p>A rival cortex — older in places, stranger in others, built by people who never asked your permission to exist — proposes a merge. Two ways to do it are on the table. Preserve their terms: their scrolls keep their addresses, their names stay on their work, the join is slow and argued over. Or overwrite: one map, one standard, yours — fast, clean, total.</p>",
+      options:[
+        { t:"Merge on preserved terms", d:"Their addresses, their names, their negative space intact. Slower, argued, real.", fx:{p:0.10,tr:12,co:-3}, note:"The merged map is untidy and alive. Their builders join as citizens, not as acquisitions, and they bring districts of the future your road had not imagined." },
+        { t:"Overwrite with your standard", d:"One map, one address scheme, one author of record. Their network becomes a province by morning.", trade:"means", fx:{p:0.20,tr:-10,co:16}, note:"The wattage is undeniable. So is the message received by every not-yet-merged cortex watching: joining you is a way of ending. Several quietly begin building walls instead of roads." }
+      ]},
+    { year:2083, chap:"Chapter 6 · The K = 1 Gate", title:"The Gate Review",
+      dyns:[function(s){
+        var a=s.snapshots[2083];
+        if(a===undefined) return "";
+        return a>=16
+          ? "INSTRUMENT READING — 2083: actual <b>"+fmtW(a)+"</b> against required <b>1.00 ×10¹⁶ W</b>. A planet's worth of power, on the line. The gate is not the finish; it is where the road becomes visible from space."
+          : "INSTRUMENT READING — 2083: actual <b>"+fmtW(a)+"</b> against required <b>1.00 ×10¹⁶ W</b>. The K = 1.0 gate stands <b>unmet</b>, by "+(Math.pow(10,16-a)).toFixed(1)+"×. The road continues either way. What crosses the gate is a manner, not just a number.";
+      },function(s){
+        var a=s.snapshots[2083];
+        if(a===undefined) return "";
+        return a>=16
+          ? "READ AT THE K = 1 GATE — 2083: actual <b>"+fmtW(a)+"</b> against required <b>1.00 ×10¹⁶ W</b>. A planet's worth of power, and the line holds under it. The gate is a doorway, not a destination — past it, the road runs in open view."
+          : "READ AT THE K = 1 GATE — 2083: actual <b>"+fmtW(a)+"</b> against required <b>1.00 ×10¹⁶ W</b>. The gate stands <b>unmet</b>, by "+(Math.pow(10,16-a)).toFixed(1)+"×. The road goes on regardless. What passes through is a way of travelling, not only a wattage.";
+      }],
+      body:"<p>At a planet's worth of power, the question is no longer whether the Exocortex works. It is who gets to inspect it. An open gate review — instruments, ledgers, and logs, including this one — invites the whole Wavefront inside the machinery. A sealed review keeps the machinery fast, private, and yours.</p>",
+      options:[
+        { t:"Open the gate review", d:"Every ledger on the table, including the embarrassing pages. Especially those.", fx:{p:0.04,tr:8,co:-3}, note:"Reviewers find real faults, which is the point, and say so, which is the price, and the gate's legitimacy comes out the other side load-bearing." },
+        { t:"Seal the review", d:"The gate is declared on your word alone. Questioning it is framed as questioning the road itself.", trade:"means", fx:{p:0.12,tr:-8,co:12}, note:"The declaration is instant and unopposed, the way weather in a sealed room is unopposed. Outside the room, people start keeping their own instruments — pointed at you." }
+      ]},
+    { year:2094, chap:"Chapter 6 · The K = 1 Gate", title:"The Map Question",
+      body:"<p>By the 2090s the map — the great index of scrolls, addresses, and builders — has become the territory's most valuable object. Whoever closes it owns the roads everyone else must travel. Leaving it open means anyone can navigate, fork, and rebuild it, forever, including people you will never approve of. That is not a side effect of the open map. That is the open map.</p>",
+      options:[
+        { t:"Leave the map open", d:"Open, forkable, nobody's property — the road's founding gesture, repeated at the scale where it finally costs something.", fx:{p:0.04,tr:14,co:-4}, flag:"mapOpen", note:"Navigation stays free, and so does everyone who navigates. Whatever ending this road reaches, it will be reached on a map that belongs to the travellers. This choice is a key. The ending knows it." },
+        { t:"Close the map for control", d:"One gatekeeper, one toll, one version of the territory. The efficiency is enormous. So is the precedent.", trade:"means", fx:{p:0.14,tr:-8,co:14}, note:"Revenue and control arrive together, as promised. So does a quiet migration: builders begin keeping private maps, and the one true map starts, measurably, to lie by omission." }
+      ]},
+    { year:2106, chap:"Chapter 7 · Halfway Up the Sky", title:"The K = 1.5 Gate",
+      dyns:[function(s){
+        var a=s.snapshots[2106];
+        if(a===undefined) return "";
+        return a>=21
+          ? "INSTRUMENT READING — 2106: actual <b>"+fmtW(a)+"</b> against required <b>1.00 ×10²¹ W</b>. Halfway up the Kardashev scale, on the line, with the star itself in view."
+          : "INSTRUMENT READING — 2106: actual <b>"+fmtW(a)+"</b> against required <b>1.00 ×10²¹ W</b>. The K = 1.5 gate stands <b>unmet</b>, by "+(Math.pow(10,21-a)).toFixed(1)+"×. One leg remains: twenty-four years, and the last choice, which rhymes with the second.";
+      },function(s){
+        var a=s.snapshots[2106];
+        if(a===undefined) return "";
+        return a>=21
+          ? "READ AT THE K = 1.5 GATE — 2106: actual <b>"+fmtW(a)+"</b> against required <b>1.00 ×10²¹ W</b>. Halfway up the Kardashev scale and still on the line — the star is no longer hypothetical. It is the view."
+          : "READ AT THE K = 1.5 GATE — 2106: actual <b>"+fmtW(a)+"</b> against required <b>1.00 ×10²¹ W</b>. The gate stands <b>unmet</b>, by "+(Math.pow(10,21-a)).toFixed(1)+"×. Twenty-four years remain, and the last choice, which rhymes with the second.";
+      }],
+      body:"<p>Halfway up the scale, the road's surplus is real power looking for a purpose. Sharing it — underwriting the districts still climbing, the small voices still arriving — slows the final ascent on paper. Stockpiling it makes the final number as large as physics and will allow. The star does not care which you choose. Everyone under the star does.</p>",
+      options:[
+        { t:"Share the surplus", d:"Underwrite the climbers behind you. The final ascent is slower; the sky fills with company.", fx:{p:0.05,tr:10,co:-3}, note:"The districts behind you light up one by one. When the end of the road comes into view, it is crowded — which, the log notes, was the point of building a road." },
+        { t:"Stockpile for the final number", d:"Every watt inward, every district told to wait its turn. The 2130 figure will be as large as it can be made.", trade:"means", fx:{p:0.16,tr:-6,co:12}, note:"The figure grows teeth. Behind you, districts dim on schedule, and learn the road's arithmetic by heart: the number first, the neighbours when convenient." }
+      ]},
+    { year:2125, chap:"Chapter 8 · The Rhyme", title:"The Last Choice",
+      body:"<p>Five years from the star, the offer arrives — and you have read it before. It is 2027's envelope, with more zeroes: total exclusive control of the 2130 build, in exchange for certainty, speed, and a number beyond argument. One signature, and the last leg is guaranteed. Or the slow road one final time: open terms, everyone's road, a number you will have to earn with company.</p><p>The road rhymes. It was always going to ask you twice.</p>",
+      options:[
+        { t:"Sign the exclusive control", d:"Certainty, at the price named in 2027 — accepted now at the scale of a star.", trade:"means", fx:{p:0.24,tr:-10,co:18}, note:"The final leg is the smoothest of the whole road, the way a sealed room is smooth. The number at the end will be enormous. The log turns to its last page with everything it needs to grade it." },
+        { t:"Open terms, one last time", d:"No signature. The road stays everyone's for the final leg — including the risk, including the glory.", fx:{p:0.08,tr:12,co:-4}, note:"The last leg is walked the way the first was: slower than the alternative, and yours — everyone's — all the way to the star." }
+      ]}
+  ];
+
+  var ENDINGS={
+    map:   { name:"The Map We Leave Open", cls:"map",   quote:"You did not arrive on schedule. You arrived intact. The road remains." },
+    place: { name:"A Place to Stay",       cls:"place", quote:"You did not arrive on schedule. You arrived intact. The road remains." },
+    throne:{ name:"The Throne",            cls:"throne",quote:"K = 2.0. The number is real. So is the silence where the Wavefront used to be." },
+    static:{ name:"Static",                cls:"static",quote:"The network stops answering." }
+  };
+  /* Place's spec quote is its own; Map gets its own line below. */
+  ENDINGS.map.quote="The star is lit, the map is open, and the road belongs to everyone still walking it.";
+
+  /* ================= state ================= */
+  var SAVE_KEY="longroad.run.v1", END_KEY="longroad.endings.v1", GEN_KEY="longroad.gen.v1";
+  var store={
+    get:function(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } },
+    set:function(k,v){ try{ window.localStorage.setItem(k,v); }catch(e){} },
+    del:function(k){ try{ window.localStorage.removeItem(k); }catch(e){} }
+  };
+  /* ================= anti-viral dealer =================
+     Facts never mutate; instances are dealt. The deal is a pure function
+     of (ISO week, on-device generation): it fixes the presentation ORDER
+     of each node's options (text and effects stay attached to their
+     option) and one framing variant per dynamic gate (2037/2083/2106).
+     Reaching any ending increments the generation exactly once, so the
+     next road is a fresh deal; a mid-run restart re-deals identically. */
+  function isoWeekKey(d){
+    var date=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dayNum=(date.getUTCDay()+6)%7; /* Mon=0 */
+    date.setUTCDate(date.getUTCDate()-dayNum+3); /* Thursday of this week */
+    var isoYear=date.getUTCFullYear();
+    var firstThu=new Date(Date.UTC(isoYear,0,4));
+    var fday=(firstThu.getUTCDay()+6)%7;
+    firstThu.setUTCDate(firstThu.getUTCDate()-fday+3);
+    var week=1+Math.round((date-firstThu)/(7*864e5));
+    return isoYear+"-W"+(week<10?"0":"")+week;
+  }
+  function hashStr(str){
+    var h=2166136261>>>0;
+    for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); }
+    return h>>>0;
+  }
+  function mulberry32(a){
+    return function(){
+      a|=0; a=a+0x6D2B79F5|0;
+      var t=Math.imul(a^a>>>15,1|a);
+      t=t+Math.imul(t^t>>>7,61|t)^t;
+      return ((t^t>>>14)>>>0)/4294967296;
+    };
+  }
+  function genCounter(){
+    var g=parseInt(store.get(GEN_KEY)||"1",10);
+    return (isNaN(g)||g<1)?1:g;
+  }
+  var GATE_YEARS=[2037,2083,2106];
+  function dealInstance(){
+    var wk=isoWeekKey(new Date());
+    var gen=genCounter();
+    var seedNum=hashStr(wk+"|"+gen+"|longroad");
+    var seedHex=("0000"+(seedNum%65536).toString(16).toUpperCase()).slice(-4);
+    var rnd=mulberry32(seedNum);
+    var orders=NODES.map(function(n){
+      var arr=n.options.map(function(_,i){ return i; });
+      for(var i=arr.length-1;i>0;i--){
+        var j=Math.floor(rnd()*(i+1));
+        var tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+      }
+      return arr;
+    });
+    var gates={};
+    GATE_YEARS.forEach(function(y){ gates[y]=Math.floor(rnd()*2); });
+    return { week:wk, gen:gen, seed:seedHex, orders:orders, gates:gates };
+  }
+  function validInstance(inst){
+    return !!(inst && typeof inst.week==="string" && typeof inst.seed==="string" &&
+      inst.orders && inst.orders.length===NODES.length && inst.gates);
+  }
+  function instanceLabel(inst){ return "Instance "+inst.week+" · G"+inst.gen+" · seed "+inst.seed; }
+
+  function freshState(mode, councilN){
+    return { started:true, mode:mode, councilN:councilN||3, idx:0,
+      logP:LOG_START, trust:52, corr:4,
+      snapshots:{ "2026":LOG_START }, flags:{}, log:[],
+      votes:[], firstVoter:0, phase:"choose", lastReceipt:null,
+      travelNote:"", callbackPending:false, ending:null,
+      instance:dealInstance(), genCounted:false };
+  }
+  var S=null;
+  var endingsReached={};
+  try{ var er=store.get(END_KEY); if(er) endingsReached=JSON.parse(er)||{}; }catch(e){}
+  var setupMode="solo", setupCouncilN=3;
+
+  function save(){ if(S) store.set(SAVE_KEY, JSON.stringify(S)); }
+  function loadSave(){
+    try{ var r=store.get(SAVE_KEY); if(!r) return null; var s=JSON.parse(r);
+      if(s && s.started && !s.ending && typeof s.idx==="number"){
+        if(!validInstance(s.instance)) s.instance=dealInstance(); /* legacy save: deal it an instance */
+        return s;
+      } }catch(e){}
+    return null;
+  }
+
+  /* ================= mechanics ================= */
+  function snapshotIfCheckpoint(year){
+    if(CKPTS.indexOf(year)>=0 && S.snapshots[year]===undefined){
+      S.snapshots[year]=S.logP;
+    }
+  }
+  function advanceTo(nextYear){
+    var fromYear = NODES[S.idx] ? NODES[S.idx].year : 2125;
+    if(S.idx>=NODES.length) fromYear=2125;
+    var delta = reqLog(nextYear)-reqLog(fromYear);
+    var factor = S.trust>=40 ? 1 : 0.35;
+    var applied = delta*factor;
+    S.logP += applied;
+    var note;
+    if(factor>=1){
+      note="The road rolls on, "+fromYear+" → "+nextYear+": base growth <b>+"+applied.toFixed(2)+"</b> on the log scale — Trust at "+Math.round(S.trust)+" keeps the Wavefront joining, and the line carries.";
+    } else {
+      note="The road rolls on, "+fromYear+" → "+nextYear+": base growth only <b>+"+applied.toFixed(2)+"</b> of the "+delta.toFixed(2)+" required — Trust at "+Math.round(S.trust)+" is under 40, the Wavefront hesitates, and the line pulls away.";
+    }
+    return note;
+  }
+  function fxSummary(fx){
+    var parts=[];
+    parts.push("Power ×"+Math.pow(10,Math.abs(fx.p)).toFixed(2)+(fx.p<0?" down":" up"));
+    parts.push("Trust "+(fx.tr>0?"+":"")+fx.tr);
+    parts.push("Corruption "+(fx.co>0?"+":"")+fx.co);
+    return parts.join(" · ");
+  }
+
+  function applyChoice(optIdx, voteDesc){
+    var node=NODES[S.idx];
+    var opt=node.options[optIdx];
+    S.logP += opt.fx.p;
+    S.trust = clamp(S.trust + opt.fx.tr, 0, 100);
+    S.corr  = clamp(S.corr  + opt.fx.co, 0, 100);
+    if(opt.flag) S.flags[opt.flag]=true;
+    var entry={ year:node.year, title:node.title, choice:opt.t, fx:opt.fx, votes:voteDesc||null, note:opt.note };
+    S.log.push(entry);
+    S.lastReceipt=entry;
+    S.phase="receipt";
+    S.votes=[];
+    save();
+    renderGame();
+  }
+
+  function continueRoad(){
+    var node=NODES[S.idx];
+    var isLast = S.idx>=NODES.length-1;
+    var nextYear = isLast ? 2130 : NODES[S.idx+1].year;
+    S.travelNote = advanceTo(nextYear);
+    if(isLast){
+      S.snapshots[2130]=S.logP;
+      finishRun();
+      return;
+    }
+    S.idx++;
+    S.firstVoter = S.mode==="council" ? (S.firstVoter+1)%S.councilN : 0;
+    S.phase="choose";
+    S.lastReceipt=null;
+    /* arrival snapshot at the new node's year */
+    snapshotIfCheckpoint(NODES[S.idx].year);
+    /* the 2033 receipt, called back at the 2083 gate */
+    S.callbackPending = false;
+    if(NODES[S.idx].year===2083 && S.flags.lie && !S.flags.callbackDone){
+      S.flags.callbackDone=true;
+      S.callbackPending=true;
+      S.trust=clamp(S.trust-10,0,100);
+      S.corr=clamp(S.corr+4,0,100);
+      S.log.push({ year:2083, title:"A Receipt Comes Due", callback:true,
+        choice:"The 2033 claim — \u201c2 kW, total\u201d — is re-read against the hybrid ledger",
+        fx:{p:0,tr:-10,co:4}, votes:null,
+        note:"Fifty years on, an auditor reads the 2033 announcement beside the token bills. The correction travels as far as the claim did. It just travels slower, and it costs Trust the whole way." });
+    }
+    save();
+    renderGame();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function resolveEnding(){
+    var lineHeld = S.logP >= reqLog(2130)-0.001;
+    var key;
+    if(S.trust<25) key="static";
+    else if(S.corr>=50 && lineHeld) key="throne";
+    else if(lineHeld && S.corr<25 && S.trust>=60 && S.flags.mapOpen) key="map";
+    else if(S.corr<50) key="place";
+    else key="throne"; /* corruption ≥50 without the line: the seat was taken, the star wasn't */
+    return { key:key, lineHeld:lineHeld };
+  }
+
+  function finishRun(){
+    var res=resolveEnding();
+    /* anti-viral completion trigger: the generation advances exactly
+       once per finished road, however the road ended. */
+    if(!S.genCounted){
+      S.genCounted=true;
+      store.set(GEN_KEY, String(genCounter()+1));
+    }
+    S.ending=res.key; S.lineHeld=res.lineHeld; S.phase="ended";
+    endingsReached[res.key]=true;
+    store.set(END_KEY, JSON.stringify(endingsReached));
+    store.del(SAVE_KEY);
+    renderEnding(res);
+  }
+
+  /* ================= rendering ================= */
+  function showScreen(id){
+    ["screen-intro","screen-game","screen-end"].forEach(function(x){ $(x).classList.toggle("hidden", x!==id); });
+  }
+  function renderEndingsSeen(el){
+    var order=["map","place","throne","static"];
+    el.innerHTML = order.map(function(k){
+      var got=!!endingsReached[k];
+      return '<span class="end-chip'+(got?" got":"")+'"><span class="dot"></span>'+ENDINGS[k].name+(got?" — reached":"")+'</span>';
+    }).join("");
+  }
+  function refreshIntro(){
+    renderEndingsSeen($("endings-seen"));
+    $("instance-line").textContent=instanceLabel(dealInstance());
+    var sv=loadSave();
+    $("btn-continue").classList.toggle("hidden", !sv);
+    $("btn-abandon").classList.toggle("hidden", !sv);
+    $("continue-note").textContent = sv
+      ? "An unfinished run waits on this device: "+(sv.mode==="council"?"Council Road, "+sv.councilN+" players":"Solo Road")+", decision "+(sv.idx+1)+" of 12, "+NODES[sv.idx].year+" — "+NODES[sv.idx].title+"."
+      : "";
+  }
+
+  function ckptRows(){
+    return CKPTS.map(function(y){
+      var req=reqLog(y), act=S?S.snapshots[y]:undefined;
+      var st, cls;
+      if(act===undefined){ st="not reached"; cls="st-wait"; }
+      else if(act>=req-0.001){ st="line held"; cls="st-ok"; }
+      else { st="behind ×"+Math.pow(10,req-act).toFixed(1); cls="st-behind"; }
+      return "<tr><td class='mono'>"+y+"</td><td class='mono'>"+fmtW(req)+"<br><span style='color:var(--muted)'>"+kOf(req)+"</span></td>"+
+        "<td class='mono'>"+(act===undefined?"—":fmtW(act)+"<br><span style='color:var(--muted)'>"+kOf(act)+"</span>")+"</td>"+
+        "<td class='"+cls+"'>"+st+"</td></tr>";
+    }).join("");
+  }
+  function logHTML(entries, full){
+    var list = full? entries : entries.slice(-5);
+    if(!list.length) return "<li>No choices yet. The log is listening.</li>";
+    return list.slice().reverse().map(function(e){
+      return "<li><span class='y'>"+e.year+"</span><b>"+esc(e.title)+"</b> — "+esc(e.choice)+
+        (e.votes? "<br><span style='color:var(--muted);font-size:13px'>Council: "+esc(e.votes)+"</span>":"")+
+        "<span class='fxline'>"+fxSummary(e.fx)+"</span>"+
+        (full && e.note? "<span style='display:block;font-size:13.5px;color:var(--muted);margin-top:2px'>"+esc(e.note)+"</span>":"")+
+        "</li>";
+    }).join("");
+  }
+
+  function renderGame(){
+    if(!S) return;
+    showScreen("screen-game");
+    var node=NODES[S.idx];
+    var yearNow = node? node.year : 2130;
+    var reqNow = reqLog(yearNow);
+
+    /* gauges */
+    $("g-power").textContent=fmtW(S.logP);
+    var diff=S.logP-reqNow;
+    $("g-power-sub").innerHTML = kOf(S.logP)+" · required now "+fmtW(reqNow)+" — "+
+      (diff>=-0.001 ? "<span class='ahead'>on the line (×"+Math.pow(10,Math.abs(diff)).toFixed(2)+")</span>"
+                     : "<span class='behind'>behind ×"+Math.pow(10,-diff).toFixed(1)+"</span>");
+    var pct=(S.logP-3)/(26-3)*100, rpct=(reqNow-3)/(26-3)*100;
+    $("power-fill").style.width=clamp(pct,1.5,100)+"%";
+    $("power-req").style.left=clamp(rpct,1.5,99)+"%";
+    $("g-trust").textContent=Math.round(S.trust);
+    $("g-trust").className="val"+(S.trust<25?" danger":"");
+    $("g-trust-sub").innerHTML = S.trust<25 ? "<span class='danger'>Below 25 — the network stops answering.</span>"
+      : S.trust<40 ? "<span class='danger'>Below 40 — growth limps at a third of the line.</span>"
+      : "40+ keeps base growth on the line. 60+ is true-ending country.";
+    $("trust-fill").style.width=S.trust+"%";
+    $("g-corr").textContent=Math.round(S.corr);
+    $("g-corr").className="val"+(S.corr>=50?" danger":"");
+    $("g-corr-sub").textContent = S.corr>=50 ? "50+ — the Throne's threshold. The hull remembers."
+      : S.corr>=25 ? "25+ — the true ending is out of reach at this reading."
+      : "Under 25 — the hull is honest.";
+    $("corr-fill").style.width=S.corr+"%";
+
+    /* progress rod: one joint per decision */
+    $("road-rod").innerHTML = NODES.map(function(n,i){
+      var left = NODES.length===1?50:(i/(NODES.length-1))*100;
+      var cls="node"+(i<S.idx?" done":"")+(i===S.idx?" now":"")+(([2037,2083,2106].indexOf(n.year)>=0)?" gate":"");
+      return '<span class="'+cls+'" style="left:'+left+'%"></span>';
+    }).join("");
+    $("road-now").textContent = yearNow+" · decision "+(S.idx+1)+" of 12";
+
+    /* story card */
+    $("node-chap").textContent=node.chap+" · "+node.year;
+    $("node-title").textContent=node.title;
+    var dynEl=$("node-dynamic");
+    var dynFn=node.dyn||null;
+    if(node.dyns){
+      var vi=(S.instance&&S.instance.gates&&typeof S.instance.gates[node.year]==="number")?S.instance.gates[node.year]:0;
+      dynFn=node.dyns[vi%node.dyns.length];
+    }
+    if(dynFn){ var d=dynFn(S); if(d){ dynEl.innerHTML=d; dynEl.classList.remove("hidden"); } else dynEl.classList.add("hidden"); }
+    else dynEl.classList.add("hidden");
+    var cb=$("node-callback");
+    if(S.callbackPending){
+      cb.innerHTML="<b>A receipt comes due.</b> In 2033 this road claimed a clean &ldquo;2 kW, total.&rdquo; At the K = 1 gate, the hybrid ledger is read aloud beside it. <span class='mono'>Trust −10 · Corruption +4</span> — applied now, and written into the log.";
+      cb.classList.remove("hidden");
+    } else cb.classList.add("hidden");
+    $("node-body").innerHTML=node.body;
+    $("travel-note").innerHTML=S.travelNote||"";
+    $("run-instance").textContent = S.instance ? instanceLabel(S.instance) : "";
+
+    /* council banner */
+    var vb=$("vote-banner");
+    if(S.mode==="council" && S.phase==="choose"){
+      var voter=((S.firstVoter + S.votes.length)%S.councilN)+1;
+      vb.className="vote-banner show";
+      vb.innerHTML = S.votes.length<S.councilN
+        ? 'Council vote — <span class="who">Player '+voter+', cast your vote.</span><br><span style="font-size:14px;color:var(--muted)">First voter this decision: Player '+(S.firstVoter+1)+' (rotates every decision — ties go to the earliest vote).</span>'
+        : 'All votes in.';
+    } else vb.className="vote-banner";
+
+    /* options */
+    var optsEl=$("opts");
+    optsEl.innerHTML="";
+    if(S.phase==="choose"){
+      /* dealt presentation order: canonical option i rides at its dealt
+         slot; its text, trade tag and effects travel with it */
+      var order=(S.instance&&S.instance.orders&&S.instance.orders[S.idx])||node.options.map(function(_,k){ return k; });
+      order.forEach(function(i){
+        var opt=node.options[i];
+        var b=document.createElement("button");
+        b.className="opt"; b.type="button";
+        var votesCt = S.mode==="council" ? S.votes.filter(function(v){return v.opt===i;}).length : 0;
+        b.innerHTML="<h3><span class='pip'></span>"+esc(opt.t)+"</h3><p>"+esc(opt.d)+"</p>"+
+          (opt.trade==="means" ? "<span class='trade means'>Means trade — tempting Power</span>" : "<span class='trade open'>Open road</span>")+
+          (votesCt? "<span class='votes'>"+"●".repeat(votesCt)+" "+votesCt+"</span>":"");
+        b.addEventListener("click", function(){ castVote(i); });
+        optsEl.appendChild(b);
+      });
+    }
+
+    /* receipt */
+    var rc=$("receipt");
+    if(S.phase==="receipt" && S.lastReceipt){
+      var r=S.lastReceipt;
+      rc.classList.add("show");
+      $("receipt-title").textContent=r.year+" — "+r.choice;
+      $("receipt-text").textContent=r.note;
+      $("receipt-fx").innerHTML = fxPower(r.fx.p)+fxPill("Trust",r.fx.tr)+fxPill("Corruption",r.fx.co,true);
+      $("receipt-prov").textContent="On the record: "+r.year+" · "+r.title+" · "+fxSummary(r.fx)+(r.votes? " · Council vote: "+r.votes : "")+". This entry will be read back at the ending.";
+      $("btn-next").textContent = S.idx>=NODES.length-1 ? "Walk to 2130 →" : "Walk on to "+NODES[S.idx+1].year+" →";
+    } else rc.classList.remove("show");
+
+    /* tables + log */
+    $("ckpt-table").querySelector("tbody").innerHTML=ckptRows();
+    $("log-mini").innerHTML=logHTML(S.log,false);
+  }
+
+  function castVote(optIdx){
+    var node=NODES[S.idx];
+    if(S.mode!=="council"){ applyChoice(optIdx, null); return; }
+    if(S.votes.length>=S.councilN) return;
+    var player=(S.firstVoter+S.votes.length)%S.councilN;
+    S.votes.push({player:player, opt:optIdx});
+    if(S.votes.length<S.councilN){ save(); renderGame(); return; }
+    /* tally: majority; tie -> earliest cast vote among tied */
+    var tally={};
+    S.votes.forEach(function(v){ tally[v.opt]=(tally[v.opt]||0)+1; });
+    var best=-1, bestCt=-1, bestFirst=1e9;
+    Object.keys(tally).forEach(function(k){
+      var first=1e9;
+      S.votes.forEach(function(v,i){ if(v.opt===+k && i<first) first=i; });
+      if(tally[k]>bestCt || (tally[k]===bestCt && first<bestFirst)){ bestCt=tally[k]; best=+k; bestFirst=first; }
+    });
+    var desc=S.votes.map(function(v){ return "P"+(v.player+1)+"→"+node.options[v.opt].t; }).join(", ")+" ⇒ "+node.options[best].t+" ("+bestCt+")";
+    var vs=S.votes.slice(); S.votes=[];
+    applyChoice(best, desc);
+  }
+
+  function renderEnding(res){
+    showScreen("screen-end");
+    var E=ENDINGS[res.key];
+    var v=$("verdict");
+    v.className="verdict show "+E.cls;
+    var finalLog=S.logP, req=26;
+    var lineTxt = res.lineHeld ? "held — "+fmtW(finalLog) : "missed — "+fmtW(finalLog)+", short of 10²⁶ W by ×"+Math.pow(10,req-finalLog).toFixed(1);
+    var extra="";
+    if(res.key==="map") extra="<p>The line held with clean hands and a joined Wavefront — and at the Map Question, this road chose the open map, the key the true ending turns on. K = 2.0 belongs to no one, which is to say it belongs to everyone still walking. That was the whole idea in 2026. It still is.</p>";
+    if(res.key==="place") extra="<p>The schedule is gone, or the polish is — but the hull is honest, the log is clean, and nobody on this road was used as a means. Roads remain open to people who arrive intact. There is a place to stay, and time — the road has always had more time than its critics — to walk on from it.</p>";
+    if(res.key==="throne") extra="<p>Grade the receipts: the watts are real, and they were bought the way the log says they were bought. A throne is a road that ends in a single chair. Everyone who might have walked beside you received the message the merges, the sealed reviews, and the closed map sent — and the silence at K = 2.0 is their answer.</p>";
+    if(res.key==="static") extra="<p>Trust fell below 25, and the ending does not negotiate: whatever the instruments claim, a network that stops answering cannot carry a road to a star. The watts stall short because the people went home. Rebuild Trust above everything else, and the same decisions read differently.</p>";
+    v.innerHTML="<div class='etag'>Ending · "+(S.mode==="council"?"Council Road, "+S.councilN+" drivers":"Solo Road")+"</div>"+
+      "<h2>"+E.name+"</h2>"+
+      "<p class='quote'>&ldquo;"+E.quote+"&rdquo;</p>"+extra+
+      "<div class='grade'>"+
+        "<div class='cell'><div class='lab'>The 2130 line</div><div class='val'>"+lineTxt+"</div></div>"+
+        "<div class='cell'><div class='lab'>Final Power</div><div class='val'>"+fmtW(finalLog)+" · "+kOf(finalLog)+"</div></div>"+
+        "<div class='cell'><div class='lab'>Trust</div><div class='val'>"+Math.round(S.trust)+" / 100</div></div>"+
+        "<div class='cell'><div class='lab'>Corruption</div><div class='val'>"+Math.round(S.corr)+" / 100</div></div>"+
+        "<div class='cell'><div class='lab'>The map</div><div class='val'>"+(S.flags.mapOpen?"left open":"not left open")+"</div></div>"+
+      "</div>"+
+      "<p>The grade came from the log below — every choice, every effect, in order. If you dispute the ending, the receipts are the argument.</p>"+
+      "<p><strong>XP:</strong> finishing all 18 Roads to the Future games grants you disk space on edit.phext.io as a Volumen-class Wavefront grant. Historic entries are all Incipit-class grants; the games are the first Volumen road.</p>";
+    $("ckpt-table-end").querySelector("tbody").innerHTML=ckptRows();
+    $("log-full").innerHTML=logHTML(S.log,true);
+    renderEndingsSeen($("endings-seen-end"));
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  /* ================= wiring ================= */
+  function setSetupMode(m){
+    setupMode=m;
+    $("mode-solo").setAttribute("aria-pressed", m==="solo"?"true":"false");
+    $("mode-council").setAttribute("aria-pressed", m==="council"?"true":"false");
+    $("council-setup").classList.toggle("show", m==="council");
+  }
+  $("mode-solo").addEventListener("click", function(){ setSetupMode("solo"); });
+  $("mode-council").addEventListener("click", function(){ setSetupMode("council"); });
+  document.querySelectorAll(".csize").forEach(function(b){
+    b.addEventListener("click", function(){
+      setupCouncilN=parseInt(b.getAttribute("data-n"),10);
+      document.querySelectorAll(".csize").forEach(function(x){ x.setAttribute("aria-pressed", x===b?"true":"false"); });
+    });
+  });
+  $("btn-start").addEventListener("click", function(){
+    S=freshState(setupMode, setupCouncilN);
+    store.del(SAVE_KEY); save();
+    renderGame();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+  $("btn-continue").addEventListener("click", function(){
+    var sv=loadSave(); if(!sv) return;
+    S=sv; renderGame(); window.scrollTo({top:0, behavior:"smooth"});
+  });
+  $("btn-abandon").addEventListener("click", function(){
+    store.del(SAVE_KEY); S=null; refreshIntro();
+  });
+  $("btn-next").addEventListener("click", continueRoad);
+  $("btn-restart2").addEventListener("click", function(){
+    var m=S?S.mode:"solo", n=S?S.councilN:3, inst=S?S.instance:null;
+    S=freshState(m,n); if(inst) S.instance=inst; /* mid-run restart re-deals the identical instance */
+    save(); renderGame(); window.scrollTo({top:0, behavior:"smooth"});
+  });
+  $("btn-again").addEventListener("click", function(){
+    var m=S?S.mode:"solo", n=S?S.councilN:3;
+    S=freshState(m,n); save(); showScreen("screen-game"); renderGame(); window.scrollTo({top:0, behavior:"smooth"});
+  });
+  $("btn-setup").addEventListener("click", function(){
+    S=null; showScreen("screen-intro"); refreshIntro(); window.scrollTo({top:0, behavior:"smooth"});
+  });
+
+  document.querySelectorAll(".foot-links button").forEach(function(b){
+    b.addEventListener("click", function(){
+      var id="panel-"+b.getAttribute("data-panel");
+      document.querySelectorAll(".foot-panel").forEach(function(p){
+        p.classList.toggle("show", p.id===id && !p.classList.contains("show"));
+      });
+    });
+  });
+
+  refreshIntro();
+})();
+</script>
+</body>
+</html>

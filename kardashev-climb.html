@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Kardashev Climb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --page:#e8e4da; --ink:#1c1a15; --muted:#5c564a;
+    --plate:#171a20; --plate2:#20242d; --plate3:#262b36;
+    --rod:#3d4454; --joint:#8b93a5;
+    --amber:#f5a623; --amber2:#ffc95e; --energy:#ff7a1a;
+    --teal:#2ec4b6; --sky:#4da3ff; --red:#ff5252; --green:#7bd88a;
+    --card:#f4f1e8; --card-line:#d8d2c2;
+    --onplate:#eef0f4; --onplate-dim:#a7adbb;
+    --btn:#262b36;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --page:#0e0f12; --ink:#ece9e0; --muted:#9a9587;
+      --card:#1d2026; --card-line:#33363f;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--page); color:var(--ink);
+    font-family:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size:17px; line-height:1.45;
+    -webkit-text-size-adjust:100%;
+  }
+  .mono{font-family:"IBM Plex Mono", ui-monospace, monospace}
+  main{max-width:1180px;margin:0 auto;padding:18px 16px 40px}
+
+  /* ---------- brick-ratio dial ---------- */
+  .dial{display:flex;height:26px;border-radius:6px;overflow:hidden;border:2px solid var(--ink)}
+  .dial .d-duplo{flex:20;background:#e4572e;display:flex;align-items:center;justify-content:center}
+  .dial .d-lego{flex:30;background:#f5a623;display:flex;align-items:center;justify-content:center}
+  .dial .d-knex{flex:50;background:#2ec4b6;display:flex;align-items:center;justify-content:center}
+  .dial span{font-size:11px;font-weight:800;letter-spacing:.06em;color:#14100a;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+  .dial-note{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--muted)}
+  .dial-note strong{color:var(--ink)}
+
+  /* ---------- greeting ---------- */
+  .greet{margin:22px 0 6px}
+  .greet h1{font-size:clamp(30px,6vw,52px);line-height:1.02;margin:0 0 10px;font-weight:800;letter-spacing:-.01em}
+  .greet .will{font-size:clamp(18px,3.4vw,24px);font-weight:600;margin:0}
+  .greet .help{font-size:clamp(16px,3vw,20px);color:var(--muted);margin:4px 0 0}
+  .greet .help strong{color:var(--energy)}
+  .mission{margin:14px 0 0;font-size:16px;max-width:68ch}
+  .mission strong{background:var(--amber);color:#14100a;padding:0 5px;border-radius:3px}
+  .instance-line{margin:12px 0 0;font-size:14px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+  .instance-line strong{color:var(--ink)}
+
+  /* ---------- mode tabs ---------- */
+  .modes{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 14px}
+  .modes button{
+    min-height:56px;padding:10px 18px;border-radius:10px;border:2px solid var(--ink);
+    background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer;font-size:16px;
+  }
+  .modes button[aria-pressed="true"]{background:var(--ink);color:var(--page)}
+  .modes button small{display:block;font-weight:500;font-size:12.5px;opacity:.75}
+  .modes button:focus-visible, button:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+
+  /* ---------- baseplate board ---------- */
+  .plate{
+    background:var(--plate);color:var(--onplate);border-radius:16px;
+    padding:18px;position:relative;
+    background-image:radial-gradient(circle, #2a2f3a 2.2px, transparent 2.6px);
+    background-size:34px 34px;
+    box-shadow:0 10px 30px rgba(10,10,20,.35);
+  }
+  .plate-inner{background:linear-gradient(180deg, rgba(23,26,32,.82), rgba(23,26,32,.94));border-radius:10px;padding:4px}
+  .race-banner{display:none;border-radius:10px;padding:10px 14px;font-weight:800;font-size:18px;margin-bottom:12px;text-align:center}
+  .race-banner.red{display:block;background:#5b2320;border:2px solid var(--red)}
+  .race-banner.blue{display:block;background:#1d3350;border:2px solid var(--sky)}
+  .council-banner{display:none;border-radius:10px;padding:10px 14px;font-weight:700;margin-bottom:12px;background:var(--plate3);border:2px solid var(--joint);text-align:center}
+  .council-banner.show{display:block}
+  .council-banner .who{color:var(--amber2);font-size:19px}
+
+  .gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .gauge{background:var(--plate2);border:1.5px solid var(--rod);border-radius:12px;padding:12px 14px;position:relative}
+  .gauge::before{content:"";position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:var(--joint);box-shadow:inset 0 -2px 3px rgba(0,0,0,.5)}
+  .gauge .lab{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--onplate-dim);font-weight:700}
+  .gauge .val{font-family:"IBM Plex Mono",monospace;font-size:clamp(20px,3.4vw,27px);font-weight:600;margin-top:2px;word-break:break-word}
+  .gauge .sub{font-size:13px;color:var(--onplate-dim);margin-top:2px}
+  .gauge.big{grid-column:span 2}
+  @media (max-width:560px){.gauge.big{grid-column:span 1}}
+  .heatbar{height:14px;border-radius:7px;background:#101216;border:1px solid var(--rod);margin-top:8px;overflow:hidden}
+  .heatbar i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--energy),var(--red));transition:width .5s ease}
+  .heat-hot{color:var(--red)!important;font-weight:700}
+
+  /* event card */
+  .event{margin-top:14px;background:#2b2417;border:2px solid var(--amber);border-radius:12px;padding:14px 16px;color:#ffe9bb}
+  .event .etag{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--amber2)}
+  .event .etitle{font-size:19px;font-weight:700;margin-top:2px;color:#fff3d6}
+  .event p{margin:4px 0 0;font-size:15px}
+  .event .echoices{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .event .echoices button{min-height:56px;padding:8px 16px;border-radius:9px;border:2px solid var(--amber2);background:#171307;color:#ffe9bb;font:inherit;font-weight:700;cursor:pointer}
+  .event .echoices button:disabled{opacity:.4;cursor:not-allowed}
+  .event .echoices button.picked{background:var(--amber);color:#171307}
+
+  /* actions */
+  .pick-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin:18px 0 8px}
+  .pick-head h2{font-size:20px;margin:0;color:var(--onplate)}
+  .pick-head .need{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--amber2)}
+  .actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+  .action{
+    text-align:left;min-height:104px;padding:14px;border-radius:12px;cursor:pointer;
+    background:var(--plate2);border:2px solid var(--rod);color:var(--onplate);font:inherit;position:relative;
+  }
+  .action h3{margin:0 0 4px;font-size:18px;display:flex;align-items:center;gap:9px}
+  .action .pip{width:16px;height:16px;border-radius:50%;flex:none;border:3px solid var(--joint);background:#101216}
+  .action p{margin:0;font-size:14.5px;color:var(--onplate-dim)}
+  .action .cost{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--amber2);margin-top:6px;display:block}
+  .action.sel{border-color:var(--amber);background:#2e2a1e}
+  .action.sel .pip{background:var(--amber);border-color:var(--amber2)}
+  .action:disabled{opacity:.45;cursor:not-allowed}
+  .action .votes{position:absolute;top:10px;right:12px;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--amber2)}
+  .run-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .run{
+    flex:1;min-width:220px;min-height:60px;border-radius:12px;border:none;cursor:pointer;
+    background:var(--energy);color:#fff;font:inherit;font-weight:800;font-size:19px;
+    box-shadow:0 4px 0 #a34a08;
+  }
+  .run:active{transform:translateY(2px);box-shadow:0 2px 0 #a34a08}
+  .run:disabled{background:var(--rod);box-shadow:none;cursor:not-allowed}
+  .restart{min-height:60px;padding:0 20px;border-radius:12px;border:2px solid var(--joint);background:transparent;color:var(--onplate);font:inherit;font-weight:700;cursor:pointer}
+
+  /* ---------- lower grid ---------- */
+  .lower{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px;align-items:start}
+  @media (max-width:900px){.lower{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1.5px solid var(--card-line);border-radius:14px;padding:16px 18px}
+  .panel h2{margin:0 0 6px;font-size:19px}
+  .panel h3{margin:16px 0 6px;font-size:16px}
+  .panel p{margin:6px 0}
+  .small{font-size:14px;color:var(--muted)}
+  .chart-wrap{width:100%}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:4px}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .road{list-style:none;margin:8px 0 0;padding:0}
+  .road li{display:flex;gap:12px;padding:10px 0;border-top:1px dashed var(--card-line);align-items:flex-start}
+  .road li:first-child{border-top:none}
+  .road .joint{flex:none;width:22px;height:22px;border-radius:50%;border:3px solid var(--muted);margin-top:2px;background:transparent}
+  .road li.done .joint{background:var(--green);border-color:var(--green)}
+  .road li.next .joint{border-color:var(--energy);background:var(--amber)}
+  .road .when{font-family:"IBM Plex Mono",monospace;font-weight:600;white-space:nowrap}
+  .road .what{font-size:15px}
+  .road .what span{display:block;font-size:13.5px;color:var(--muted)}
+  .log{list-style:none;margin:6px 0 0;padding:0;font-size:14.5px}
+  .log li{padding:7px 0;border-top:1px dashed var(--card-line)}
+  .log li:first-child{border-top:none}
+  .log .y{font-family:"IBM Plex Mono",monospace;font-weight:600;margin-right:6px}
+  .records{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .record{flex:1;min-width:140px;background:var(--plate);color:var(--onplate);border-radius:10px;padding:10px 12px}
+  .record .lab{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--onplate-dim);font-weight:700}
+  .record .val{font-family:"IBM Plex Mono",monospace;font-size:18px;margin-top:2px}
+
+  /* end panels */
+  .verdict{display:none;margin-top:14px;border-radius:14px;padding:18px;border:2.5px solid}
+  .verdict.show{display:block}
+  .verdict.win{background:#12281a;border-color:var(--green);color:#dff5e2}
+  .verdict.lose{background:var(--card);border-color:var(--energy);color:var(--ink)}
+  .verdict h2{margin:0 0 6px;font-size:24px}
+  .verdict .big{font-family:"IBM Plex Mono",monospace;font-size:17px}
+  .proj{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
+  .proj .cell{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:10px 12px}
+  .verdict.lose .proj .cell{background:var(--page);border-color:var(--card-line)}
+  .proj .lab{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;opacity:.75}
+  .proj .val{font-family:"IBM Plex Mono",monospace;font-size:19px;margin-top:2px}
+
+  /* footer / compliance */
+  footer{margin-top:26px;border-top:2px solid var(--ink);padding-top:14px}
+  .foot-links{display:flex;gap:8px;flex-wrap:wrap}
+  .foot-links button{min-height:56px;padding:8px 20px;border-radius:10px;border:2px solid var(--ink);background:transparent;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+  .foot-panel{display:none;margin-top:12px;background:var(--card);border:1.5px solid var(--card-line);border-radius:12px;padding:16px 18px;max-width:78ch}
+  .foot-panel.show{display:block}
+  .foot-panel h2{margin:0 0 8px;font-size:19px}
+  .foot-panel p{margin:7px 0;font-size:15.5px}
+  .foot-line{margin-top:14px;font-size:13.5px;color:var(--muted)}
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+<main>
+  <!-- Brick-ratio age dial: 13–15 runs K'Nex-led -->
+  <div class="dial" role="img" aria-label="Build mix for ages 13 to 15, K'Nex-led: 20 percent Duplo, 30 percent Lego, 50 percent K'Nex rods and joints">
+    <div class="d-duplo"><span>Duplo 20</span></div>
+    <div class="d-lego"><span>Lego 30</span></div>
+    <div class="d-knex"><span>K'Nex-led 50</span></div>
+  </div>
+  <div class="dial-note">
+    <span><strong>Ages 13–15</strong> · K'Nex-led: rods, joints &amp; gauges</span>
+    <span>Roads to the Future · Aperture Shift</span>
+  </div>
+
+  <section class="greet">
+    <h1>Kardashev Climb</h1>
+    <p class="will">&ldquo;Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help.&rdquo;</p>
+    <p class="help">And by help, we mean: <strong>survive the singularity.</strong></p>
+    <p class="mission">One road on that future is power. In 2026 the Exocortex runs on a home ranch cluster holding <strong>4 kW</strong> under command — Kardashev <strong>K &asymp; &minus;0.24</strong>. The first checkpoint is <strong>1 megawatt (K = 0) by the end of 2037</strong>. You have 12 years, two moves a year, a heat limit, and a cash box. Compounding does the rest — if you feed it.</p>
+    <p class="instance-line mono" id="instance-line">Instance —</p>
+  </section>
+
+  <div class="modes" role="group" aria-label="Game mode">
+    <button id="mode-solo" aria-pressed="true">Solo<small>One builder, one ranch</small></button>
+    <button id="mode-council" aria-pressed="false">Council<small>2–4 players vote each year</small></button>
+    <button id="mode-race" aria-pressed="false">Two Ranches<small>Race a friend to 1 MW</small></button>
+  </div>
+
+  <div id="council-setup" class="panel" style="display:none;margin-bottom:14px">
+    <h2>Council size</h2>
+    <p class="small">Every councillor taps <strong>one</strong> vote per year. The two actions with the most votes happen. Ties go to whoever voted earliest — and the first voter rotates every year, so nobody owns the tiebreak.</p>
+    <div class="modes" style="margin:8px 0 0">
+      <button class="csize" data-n="2" aria-pressed="false">2 players</button>
+      <button class="csize" data-n="3" aria-pressed="true">3 players</button>
+      <button class="csize" data-n="4" aria-pressed="false">4 players</button>
+    </div>
+  </div>
+
+  <!-- ================= GAME BOARD ================= -->
+  <section class="plate" aria-label="Game board">
+    <div class="plate-inner">
+      <div id="race-banner" class="race-banner"></div>
+      <div id="council-banner" class="council-banner"></div>
+
+      <div class="gauges">
+        <div class="gauge big">
+          <div class="lab">Power under command</div>
+          <div class="val" id="g-watts">4,000 W</div>
+          <div class="sub" id="g-k">K = &minus;0.24 · <span id="g-dist">996,000 W to 1 MW</span></div>
+        </div>
+        <div class="gauge">
+          <div class="lab">Year</div>
+          <div class="val" id="g-year">2026</div>
+          <div class="sub" id="g-turn">Turn 1 of 12</div>
+        </div>
+        <div class="gauge">
+          <div class="lab">Growth</div>
+          <div class="val" id="g-growth">+20%/yr</div>
+          <div class="sub" id="g-double">doubles every 3.8 years</div>
+        </div>
+        <div class="gauge">
+          <div class="lab">Cash</div>
+          <div class="val" id="g-cash">$6,000</div>
+          <div class="sub">contracts in, nodes out</div>
+        </div>
+        <div class="gauge">
+          <div class="lab">Ranch heat</div>
+          <div class="val" id="g-heat">40%</div>
+          <div class="heatbar"><i id="heat-fill" style="width:40%"></i></div>
+          <div class="sub" id="heat-note">nodes must stay &le;75&deg;C — 100% burns one out</div>
+        </div>
+      </div>
+
+      <div class="event" id="event-card">
+        <div class="etag">This year's card</div>
+        <div class="etitle" id="event-title">—</div>
+        <p id="event-text">Draw a card to start the year.</p>
+        <div class="echoices" id="event-choices" style="display:none">
+          <button id="ev-pay">Pay $1,500</button>
+          <button id="ev-slow">Take growth &minus;3 instead</button>
+        </div>
+      </div>
+
+      <div class="pick-head">
+        <h2 id="pick-title">Pick two actions</h2>
+        <span class="need" id="pick-need">0 / 2 picked</span>
+      </div>
+      <div class="actions" id="actions">
+        <button class="action" data-act="build">
+          <h3><span class="pip"></span>Build Nodes</h3>
+          <p>More machines on the ranch. Watts jump right now — this grows the <em>base</em>, not the rate.</p>
+          <span class="cost" id="cost-build">Costs $2,000 · +25% watts · heat +12</span>
+          <span class="votes" data-votes="build"></span>
+        </button>
+        <button class="action" data-act="eff">
+          <h3><span class="pip"></span>Improve Efficiency</h3>
+          <p>Squeeze more work from every watt. The rate itself rises — and a rate compounds forever.</p>
+          <span class="cost">Free · growth +8 points, permanent</span>
+          <span class="votes" data-votes="eff"></span>
+        </button>
+        <button class="action" data-act="contract">
+          <h3><span class="pip"></span>Take Contracts</h3>
+          <p>Sell spare cycles to pay the bills. Cash now — but attention is finite, so this year's growth dips.</p>
+          <span class="cost">+$5,000 cash · this year's growth &minus;4</span>
+          <span class="votes" data-votes="contract"></span>
+        </button>
+        <button class="action" data-act="cool">
+          <h3><span class="pip"></span>Cool the Ranch</h3>
+          <p>Airflow, shade, downtime. No new power — but nothing melts. The thermal rule is real.</p>
+          <span class="cost">Free · heat &minus;30</span>
+          <span class="votes" data-votes="cool"></span>
+        </button>
+      </div>
+
+      <div class="run-row">
+        <button class="run" id="run-btn" disabled>Pick 2 actions to run the year</button>
+        <button class="restart" id="restart-btn">Restart</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- win / lose -->
+  <section class="verdict" id="verdict" aria-live="polite"></section>
+
+  <div class="lower">
+    <section class="panel">
+      <h2>The climb — watts per year</h2>
+      <p class="small">Log scale: each gridline is 10&times; the one below. On a normal chart the early years would be invisible — that invisibility is exactly how compounding fools people.</p>
+      <div class="chart-wrap" id="chart-wrap"></div>
+      <div class="legend">
+        <span><b style="background:var(--energy)"></b><span id="legend-a">Your ranch</span></span>
+        <span id="legend-b-wrap" style="display:none"><b style="background:var(--sky)"></b>Ranch Two</span>
+        <span><b style="background:var(--muted)"></b>dashed line = 1 MW, K = 0</span>
+      </div>
+      <h3>Field log</h3>
+      <ul class="log" id="log"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>The road to 2130</h2>
+      <p class="small">The real checkpoints of the Exocortex program. This game plays the first leg; the rest is the same line, held longer.</p>
+      <ul class="road" id="road">
+        <li data-year="2026"><span class="joint"></span><span class="when">2026</span><span class="what">4 kW — the ranch baseline<span>K &asymp; &minus;0.24 · where you start</span></span></li>
+        <li data-year="2037"><span class="joint"></span><span class="when">2037</span><span class="what">1 MW — K = 0<span>this game's finish line</span></span></li>
+        <li data-year="2083"><span class="joint"></span><span class="when">2083</span><span class="what">10<sup>16</sup> W — K = 1.0<span>a planet's worth of power</span></span></li>
+        <li data-year="2106"><span class="joint"></span><span class="when">2106</span><span class="what">10<sup>21</sup> W — K = 1.5<span>halfway up the scale</span></span></li>
+        <li data-year="2130"><span class="joint"></span><span class="when">2130</span><span class="what">10<sup>26</sup> W — K = 2.0<span>a star's worth — the Exocortex of 2130</span></span></li>
+      </ul>
+      <p class="small" style="margin-top:12px">Holding the 2130 line from 4 kW takes <strong>+0.137% per day &asymp; +64.9% per year</strong> — a doubling about every <strong>506 days</strong>. Small rate, never broken. That is the whole secret, and it is not a secret.</p>
+      <h3>On this device</h3>
+      <div class="records">
+        <div class="record"><div class="lab">Best outcome</div><div class="val" id="rec-best">—</div></div>
+        <div class="record"><div class="lab">Fastest win</div><div class="val" id="rec-fast">—</div></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="foot-links">
+      <button data-panel="about">About</button>
+      <button data-panel="privacy">Privacy</button>
+      <button data-panel="terms">Terms</button>
+    </div>
+
+    <div class="foot-panel" id="panel-about">
+      <h2>About Kardashev Climb</h2>
+      <p>The Kardashev scale measures a civilisation by the power it can use. The formula is <span class="mono">K = (log<sub>10</sub> P &minus; 6) / 10</span>, with P in watts. A home ranch cluster at 4 kW sits at K &asymp; &minus;0.24 — below zero, off the bottom of the famous scale. The Exocortex program's checkpoints are 1 MW (K = 0) by 2037, 10<sup>16</sup> W (K = 1.0) by 2083, 10<sup>21</sup> W (K = 1.5) by 2106, and 10<sup>26</sup> W (K = 2.0) by 2130.</p>
+      <p>This game teaches the one skill the climb runs on: telling a <em>rate</em> from a <em>base</em>. Building nodes raises the base once. Efficiency raises the rate forever. Contracts buy time with attention. Cooling keeps the hardware alive — the ranch rule is a sustained &le;75&deg;C, and this game's Heat gauge is that rule with the numbers filed off.</p>
+      <p><strong>Honest accounting:</strong> &ldquo;AGI on 2 kilowatts&rdquo; is a small lie — the real system also burns cloud tokens. Local watts are the ranch's share; most inference brains draw unmetered datacenter power behind flat subscriptions. This game counts local watts only, and says so.</p>
+      <p>Kardashev Climb is one of the Roads to the Future — free, same-screen games from Aperture Shift / the Exocortex, built as on-ramps for every age. Ages 13–15 run K'Nex-led: mechanism first.</p>
+    </div>
+
+    <div class="foot-panel" id="panel-privacy">
+      <h2>Privacy</h2>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing leaves this device. Progress and scores are stored only on this device, in this browser. Multiplayer is same-screen only.</p>
+    </div>
+
+    <div class="foot-panel" id="panel-terms">
+      <h2>Terms</h2>
+      <p>Free to play, forever. No purchases, no ads. MIT licensed. &copy; Will Bickford &middot; Exocortex</p>
+    </div>
+
+    <p class="foot-line">Kardashev Climb · Roads to the Future · Aperture Shift — free to play, same screen, no account.</p>
+  </footer>
+</main>
+<script>
+(function(){
+  "use strict";
+  var START_YEAR=2026, END_YEAR=2037, TURNS=12, TARGET=1000000;
+
+  /* ---------- helpers ---------- */
+  function $(id){return document.getElementById(id);}
+  function fmtW(w){
+    if(w>=1e21) return (w/1e21).toFixed(2)+" ×10²¹ W";
+    if(w>=1e18) return (w/1e18).toFixed(2)+" ×10¹⁸ W";
+    if(w>=1e15) return (w/1e15).toFixed(2)+" ×10¹⁵ W";
+    if(w>=1e12) return (w/1e12).toFixed(2)+" T W".replace(" T"," ×10¹²");
+    if(w>=1e9)  return (w/1e9).toFixed(2)+" GW";
+    if(w>=1e6)  return (w/1e6).toFixed(2)+" MW";
+    if(w>=1e3)  return (w/1e3).toFixed(2)+" kW";
+    return Math.round(w)+" W";
+  }
+  function fmtWfull(w){ return Math.round(w).toLocaleString("en-US")+" W"; }
+  function fmt$(n){ return (n<0?"−$":"$")+Math.abs(Math.round(n)).toLocaleString("en-US"); }
+  function kval(w){ return (Math.log(w)/Math.LN10 - 6)/10; }
+  function kfmt(w){ var k=kval(w); return "K = "+(k<0?"−":"")+Math.abs(k).toFixed(2); }
+  function doublingYears(g){ if(g<=0) return Infinity; return Math.LN2/Math.log(1+g/100); }
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+  /* ---------- events deck ---------- */
+  var EVENTS=[
+    {id:"auction", title:"Surplus auction", text:"A lab upstate is clearing racks. Build Nodes costs half this year.", apply:function(s,log){ s.buildCost=1000; log("Surplus auction: nodes are half price this year."); }},
+    {id:"heatwave", title:"Heat wave", text:"A hot week settles over the ranch. Heat +20 — the basement does not care that you have plans.", apply:function(s,log){ s.heat+=20; log("Heat wave: heat +20 (now "+Math.round(s.heat)+"%)."); }},
+    {id:"paper", title:"A paper lands", text:"Un-indexed work, lifted: someone publishes the trick your nodes needed. Efficiency +4, free.", apply:function(s,log){ s.growth+=4; log("A paper lands: growth +4 for free (now +"+s.growth+"%/yr)."); }},
+    {id:"cloudbill", title:"Cloud bill", text:"Tokens aren't free. Pay $1,500, or lose 3 growth points while you route around the bill.", choice:true},
+    {id:"neighbor", title:"A neighbor joins", text:"The Wavefront lifts builders: a neighbor wheels their cluster into the shared pool. +10% watts.", apply:function(s,log){ s.watts*=1.10; log("A neighbor joins: +10% watts ("+fmtW(s.watts)+")."); }}
+  ];
+
+  /* ---------- state ---------- */
+  function freshState(name){
+    return { name:name, watts:4000, growth:20, cash:6000, heat:40, year:START_YEAR,
+             turn:1, buildCost:2000, growthPenalty:0, over:false, won:false,
+             stats:{build:0,eff:0,contract:0,cool:0,burnouts:0},
+             history:[{year:START_YEAR,watts:4000}] };
+  }
+  var mode="solo";               // solo | council | race
+  var councilN=3;
+  var solo=freshState("Your ranch");
+  var race=[freshState("Ranch One"), freshState("Ranch Two")];
+  var raceActive=0, raceDone=false;
+  var council=freshState("The Council's ranch");
+  var votes=[];                  // council: [{player, act}] in cast order
+  var firstVoter=0;              // rotates yearly
+  var picked=[];                 // solo/race selected actions
+  var cloudPending=false;
+  var endlessShown=false;
+
+  /* ---------- anti-viral instance: dealt, never fixed ----------
+     The instance is dealt by a generator seeded with (ISO week +
+     on-device generation counter). The FACTS never move — the five
+     event cards, their effects, the checkpoints, the rates. What is
+     dealt is only the event sequence: which event lands in which
+     year. Reaching any ending (win, lose, or the endless projection
+     on the win panel) increments the generation exactly once, so the
+     next climb faces a different decade. A mid-run restart re-deals
+     the identical instance. Council and Two Ranches read the same
+     dealt sequence, indexed by year, within a session. */
+  var GEN_KEY="kc-generation";
+  var schedule=[];               // event dealt for each year, index = year - START_YEAR
+  var dealWeek="", dealGen=1, dealSeedHex="0000";
+  var instanceCounted=false;     // guard: one generation increment per instance
+  function isoWeekLabel(d){
+    var date=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dayNum=(date.getUTCDay()+6)%7;              // Mon=0..Sun=6
+    date.setUTCDate(date.getUTCDate()-dayNum+3);    // Thursday of this week
+    var isoYear=date.getUTCFullYear();
+    var firstThu=new Date(Date.UTC(isoYear,0,4));
+    var fday=(firstThu.getUTCDay()+6)%7;
+    firstThu.setUTCDate(firstThu.getUTCDate()-fday+3);
+    var week=1+Math.round((date-firstThu)/(7*24*3600*1000));
+    return isoYear+"-W"+(week<10?"0":"")+week;
+  }
+  function hashSeed(str){
+    var h=0x811c9dc5;
+    for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,0x01000193); }
+    h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+    return h>>>0;
+  }
+  function splitmix32(a){
+    return function(){
+      a=a+0x9e3779b9|0;
+      var t=a^a>>>16; t=Math.imul(t,0x21f0aaad); t=t^t>>>15; t=Math.imul(t,0x735a2d97);
+      return ((t^t>>>15)>>>0)/4294967296;
+    };
+  }
+  function dealInstance(){
+    dealWeek=isoWeekLabel(new Date());
+    var g=parseInt(store.get(GEN_KEY)||"1",10);
+    dealGen=(isFinite(g)&&g>=1)?g:1;
+    var seed=hashSeed(dealWeek+"|G"+dealGen+"|kardashev-climb");
+    dealSeedHex=("0000"+((seed>>>16)&0xFFFF).toString(16).toUpperCase()).slice(-4);
+    var rng=splitmix32(seed);
+    schedule=[];
+    while(schedule.length<TURNS){
+      var block=EVENTS.slice();
+      for(var i=block.length-1;i>0;i--){ var j=Math.floor(rng()*(i+1)); var t=block[i]; block[i]=block[j]; block[j]=t; }
+      schedule=schedule.concat(block);
+    }
+    schedule.length=TURNS;
+    instanceCounted=false;
+    var el=$("instance-line");
+    if(el) el.innerHTML="Instance <strong>"+dealWeek+" · G"+dealGen+" · seed "+dealSeedHex+"</strong> — the event cards are dealt for this instance; finish a climb and the next one is dealt fresh.";
+  }
+  function completeInstance(){
+    if(instanceCounted) return;
+    instanceCounted=true;
+    store.set(GEN_KEY, String(dealGen+1));
+  }
+
+  function active(){
+    if(mode==="race") return race[raceActive];
+    if(mode==="council") return council;
+    return solo;
+  }
+  function otherRanch(){ return race[1-raceActive]; }
+
+  /* ---------- persistence (best + fastest, on-device only) ---------- */
+  var store={ get:function(k){ try{return window.localStorage.getItem(k);}catch(e){return null;} },
+              set:function(k,v){ try{window.localStorage.setItem(k,v);}catch(e){} } };
+  function loadRecords(){
+    var b=store.get("kc-best"), f=store.get("kc-fastest");
+    $("rec-best").textContent = b ? fmtWfull(parseFloat(b)) : "—";
+    $("rec-fast").textContent = f ? (f+" years") : "—";
+  }
+  function saveRecords(s){
+    var b=parseFloat(store.get("kc-best")||"0");
+    if(s.watts>b) store.set("kc-best", String(Math.round(s.watts)));
+    if(s.won){
+      var yrs=s.turn; // turns taken to win
+      var f=parseInt(store.get("kc-fastest")||"999",10);
+      if(yrs<f) store.set("kc-fastest", String(yrs));
+    }
+    loadRecords();
+  }
+
+  /* ---------- log ---------- */
+  var logEl=$("log");
+  function addLog(year,msg){
+    var li=document.createElement("li");
+    li.innerHTML='<span class="y">'+year+'</span>'+esc(msg);
+    if(logEl.firstChild) logEl.insertBefore(li,logEl.firstChild); else logEl.appendChild(li);
+  }
+  function clearLog(){ logEl.innerHTML=""; }
+
+  /* ---------- chart (hand-authored SVG, log scale) ---------- */
+  function drawChart(){
+    var wrap=$("chart-wrap");
+    var W=720,H=250,padL=64,padR=14,padT=16,padB=30;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var logMin=3, logMax=6.3; // 1 kW .. ~2 MW
+    function y(w){ var l=Math.log(w)/Math.LN10; var t=(l-logMin)/(logMax-logMin); if(t<0)t=0; if(t>1)t=1; return padT+plotH-(t*plotH); }
+    function baseY(){ return padT+plotH; }
+    var series=[{s: active(), color:"#ff7a1a"}];
+    if(mode==="race") series=[{s:race[0],color:"#ff7a1a"},{s:race[1],color:"#4da3ff"}];
+    var years=[]; for(var yr=START_YEAR; yr<=END_YEAR; yr++) years.push(yr);
+    var slot=plotW/years.length, bw=Math.min(34, slot*0.58);
+    var out='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Bar chart of watts per year, log scale">';
+    // gridlines at 1k,10k,100k,1M
+    var grid=[[1000,"1 kW"],[10000,"10 kW"],[100000,"100 kW"],[1000000,"1 MW"]];
+    for(var g=0;g<grid.length;g++){
+      var gy=y(grid[g][0]);
+      out+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(padL+plotW)+'" y2="'+gy+'" stroke="#9a9587" stroke-width="'+(grid[g][0]===TARGET?0:1)+'" opacity="0.35"/>';
+      out+='<text x="'+(padL-8)+'" y="'+(gy+4)+'" text-anchor="end" font-size="12" fill="currentColor" opacity="0.7" font-family="IBM Plex Mono, monospace">'+grid[g][1]+'</text>';
+    }
+    // target line
+    var ty=y(TARGET);
+    out+='<line x1="'+padL+'" y1="'+ty+'" x2="'+(padL+plotW)+'" y2="'+ty+'" stroke="#8a8578" stroke-width="2" stroke-dasharray="7 5"/>';
+    // bars
+    series.forEach(function(ser,si){
+      ser.s.history.forEach(function(h,i){
+        var cx=padL+slot*i+slot/2 + (series.length===2 ? (si===0?-bw/2-1:bw/2+1) : 0);
+        var top=y(h.watts);
+        out+='<rect x="'+(cx-bw/2)+'" y="'+top+'" width="'+bw+'" height="'+(baseY()-top)+'" rx="3" fill="'+ser.color+'"/>';
+      });
+    });
+    // x labels
+    years.forEach(function(yr,i){
+      if(i%2===0 || years.length<=12){
+        var cx=padL+slot*i+slot/2;
+        out+='<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle" font-size="11.5" fill="currentColor" opacity="0.7" font-family="IBM Plex Mono, monospace">'+("'"+String(yr).slice(2))+'</text>';
+      }
+    });
+    out+='</svg>';
+    wrap.innerHTML=out;
+  }
+
+  /* ---------- road ---------- */
+  function drawRoad(){
+    var s=active(); var curY = s.over ? END_YEAR : s.year;
+    var items=$("road").querySelectorAll("li");
+    items.forEach(function(li){
+      var y=parseInt(li.getAttribute("data-year"),10);
+      li.classList.remove("done","next");
+      if(y===2037 && s.won) li.classList.add("done");
+      else if(y<curY || (y===2026)) li.classList.add("done");
+      else if(y===2037) li.classList.add("next");
+    });
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var s=active();
+    // race banner
+    var rb=$("race-banner");
+    if(mode==="race" && !raceDone){
+      rb.className="race-banner "+(raceActive===0?"red":"blue");
+      rb.textContent=(raceActive===0?"🔴 Ranch One":"🔵 Ranch Two")+" — your year "+s.year+". Pass the screen when your year is done.";
+    } else if(mode==="race" && raceDone){
+      rb.className="race-banner"; rb.style.display="none";
+    } else { rb.className="race-banner"; }
+    // council banner
+    var cb=$("council-banner");
+    if(mode==="council" && !s.over){
+      cb.className="council-banner show";
+      var voter = votes.length < councilN ? ((firstVoter+votes.length)%councilN)+1 : null;
+      cb.innerHTML = voter
+        ? 'Council vote — <span class="who">Player '+voter+', tap your pick.</span><br><span style="font-size:14px;color:var(--onplate-dim)">First voter this year: Player '+(firstVoter+1)+' (rotates yearly — ties go to the earliest vote).</span>'
+        : 'All votes in — the top two actions run the year.';
+    } else cb.className="council-banner";
+
+    $("legend-a").textContent = mode==="race" ? "Ranch One" : (mode==="council" ? "The Council's ranch" : "Your ranch");
+    $("legend-b-wrap").style.display = mode==="race" ? "" : "none";
+
+    $("g-watts").textContent=fmtWfull(s.watts);
+    var dist=Math.max(0,TARGET-s.watts);
+    $("g-k").innerHTML=kfmt(s.watts).replace("-","−")+" · "+(dist>0 ? fmtWfull(dist).replace(" W"," W")+" to 1 MW (×"+(TARGET/s.watts).toFixed(1)+" more)" : "1 MW reached ✓");
+    var yrLabel = s.over ? (s.won? s.year : END_YEAR) : s.year;
+    $("g-year").textContent = s.over && !s.won ? END_YEAR : Math.min(s.year,END_YEAR);
+    $("g-turn").textContent = s.over ? (s.won? "Won on turn "+s.turn : "All 12 turns played") : ("Turn "+s.turn+" of "+TURNS);
+    $("g-growth").textContent="+"+s.growth+"%/yr"+(s.growthPenalty? " (−"+s.growthPenalty+" this yr)":"");
+    var dbl=doublingYears(s.growth);
+    $("g-double").textContent = isFinite(dbl) ? ("doubles every "+dbl.toFixed(1)+" years") : "not doubling — growth is 0";
+    $("g-cash").textContent=fmt$(s.cash);
+    $("g-heat").textContent=Math.round(s.heat)+"%";
+    $("g-heat").className="val"+(s.heat>=75?" heat-hot":"");
+    $("heat-fill").style.width=Math.min(100,Math.max(0,s.heat))+"%";
+    $("heat-note").innerHTML = s.heat>=75 ? '<span class="heat-hot">Danger zone — cool it or risk a burnout.</span>' : "nodes must stay ≤75°C — 100% burns one out";
+    $("cost-build").textContent="Costs "+fmt$(s.buildCost)+" · +25% watts · heat +12";
+
+    // action buttons state
+    var btns=document.querySelectorAll(".action");
+    btns.forEach(function(b){
+      var act=b.getAttribute("data-act");
+      var sel = mode==="council" ? false : picked.indexOf(act)>=0;
+      b.classList.toggle("sel", sel);
+      var dis=false;
+      if(s.over || cloudPending) dis=true;
+      if(act==="build" && s.cash < s.buildCost) dis=true;
+      if(mode==="council" && votes.length>=councilN) dis=true;
+      b.disabled=dis;
+      var vEl=b.querySelector("[data-votes]");
+      if(mode==="council"){
+        var c=0; votes.forEach(function(v){ if(v.act===act)c++; });
+        vEl.textContent = c? ("●".repeat(c)+" "+c+" vote"+(c>1?"s":"")) : "";
+      } else vEl.textContent="";
+    });
+
+    // pick header + run button
+    var need=$("pick-need"), run=$("run-btn"), title=$("pick-title");
+    if(mode==="council"){
+      title.textContent="Council: each player taps one pick";
+      need.textContent=votes.length+" / "+councilN+" votes in";
+      var tally={}; votes.forEach(function(v){ tally[v.act]=(tally[v.act]||0)+1; });
+      var distinct=Object.keys(tally).length;
+      run.disabled = !(votes.length===councilN && !cloudPending && !s.over);
+      run.textContent = run.disabled ? "Waiting for votes…" : "Run the year with the top two →";
+    } else {
+      title.textContent = mode==="race" ? (s.name+": pick two actions") : "Pick two actions";
+      need.textContent=picked.length+" / 2 picked";
+      run.disabled = !(picked.length===2 && !cloudPending && !s.over);
+      run.textContent = s.over ? "Game over — restart to climb again" :
+        (cloudPending ? "Settle the cloud bill first" :
+        (picked.length===2 ? "Run "+s.year+" →" : "Pick 2 actions to run the year"));
+    }
+    drawChart(); drawRoad();
+  }
+
+  /* ---------- event flow ---------- */
+  function drawEvent(s){
+    s.buildCost=2000; s.growthPenalty=0; cloudPending=false;
+    $("event-choices").style.display="none";
+    // The event for a year is the one the generator dealt for that year —
+    // the same card faces every ranch and the Council in that year.
+    var idx=s.year-START_YEAR;
+    if(idx<0) idx=0; if(idx>=schedule.length) idx=schedule.length-1;
+    var ev=schedule[idx]; s.currentEvent=ev;
+    $("event-title").textContent=ev.title;
+    $("event-text").textContent=ev.text;
+    if(ev.choice){
+      cloudPending=true;
+      $("event-choices").style.display="flex";
+      $("ev-pay").disabled = s.cash<1500;
+      $("ev-pay").classList.remove("picked"); $("ev-slow").classList.remove("picked");
+      addLog(s.year,"Cloud bill arrives: pay $1,500 or take growth −3.");
+    } else {
+      ev.apply(s,function(m){ addLog(s.year,m); });
+    }
+  }
+  $("ev-pay").addEventListener("click",function(){
+    var s=active(); if(!cloudPending||s.cash<1500) return;
+    s.cash-=1500; cloudPending=false;
+    $("event-choices").style.display="none";
+    addLog(s.year,"Cloud bill paid: −$1,500 (cash "+fmt$(s.cash)+"). Tokens aren't free.");
+    render();
+  });
+  $("ev-slow").addEventListener("click",function(){
+    var s=active(); if(!cloudPending) return;
+    s.growthPenalty+=3; cloudPending=false;
+    $("event-choices").style.display="none";
+    addLog(s.year,"Cloud bill dodged: growth −3 this year. The datacenter sends its regards.");
+    render();
+  });
+
+  /* ---------- year resolution ---------- */
+  function councilTopTwo(){
+    // tally with tie-break: earliest vote in rotating order wins
+    var order={}; votes.forEach(function(v,i){ if(!(v.act in order)) order[v.act]=i; });
+    var tally={}; votes.forEach(function(v){ tally[v.act]=(tally[v.act]||0)+1; });
+    var acts=Object.keys(tally);
+    acts.sort(function(a,b){ if(tally[b]!==tally[a]) return tally[b]-tally[a]; return order[a]-order[b]; });
+    var top=acts.slice(0,2);
+    // if only one distinct act voted, second slot goes to that same act? No — a single act can't run twice except eff/build stacking is odd; pad with the runner-up order: use 'cool' as no-op-ish? Instead: if only 1 distinct, run it plus the earliest non-voted? Keep honest: run it once and waste slot, noted in log.
+    return top;
+  }
+
+  function resolveYear(s, acts){
+    var notes=[];
+    var has=function(a){ return acts.indexOf(a)>=0; };
+    // contracts penalty applies to THIS year's compounding
+    var effGrowth=s.growth - s.growthPenalty - (has("contract")?4:0);
+    if(effGrowth<0) effGrowth=0;
+    var before=s.watts;
+    s.watts*= (1+effGrowth/100);
+    notes.push("grew +"+effGrowth+"% → "+fmtW(s.watts));
+    if(has("contract")){ s.cash+=5000; s.stats.contract++; notes.push("contracts +$5,000"); }
+    if(has("build")){
+      s.cash-=s.buildCost; s.watts*=1.25; s.stats.build++;
+      notes.push("built nodes (−"+fmt$(s.buildCost)+" spent) → "+fmtW(s.watts));
+    }
+    if(has("eff")){ s.growth+=8; s.stats.eff++; notes.push("efficiency: growth now +"+s.growth+"%/yr"); }
+    // heat
+    s.heat += has("build") ? 12 : 6;
+    if(has("cool")){ s.heat-=30; s.stats.cool++; notes.push("cooled the ranch"); }
+    if(s.heat<0)s.heat=0;
+    var burned=false;
+    if(s.heat>=100){
+      s.watts*=0.8; s.heat=55; s.stats.burnouts++; burned=true;
+      notes.push("🔥 HEAT 100% — a node burned out: −20% watts → "+fmtW(s.watts)+". Heat dumped to 55%.");
+    }
+    addLog(s.year, s.name+": "+notes.join(" · ")+". Cash "+fmt$(s.cash)+", heat "+Math.round(s.heat)+"%.");
+    s.history.push({year:Math.min(s.year+1,END_YEAR), watts:s.watts});
+    return burned;
+  }
+
+  function checkEnd(s){
+    if(s.watts>=TARGET){
+      s.won=true; s.over=true;
+      completeInstance();   // win (and its endless projection): the run is solved — deal moves on
+      saveRecords(s);
+      showWin(s);
+      return true;
+    }
+    if(s.year>=END_YEAR){
+      s.over=true;
+      completeInstance();   // lose: the run is solved too — exactly one increment, guarded
+      saveRecords(s);
+      if(mode==="race"){ finishRace(); }
+      else showLose(s);
+      return true;
+    }
+    s.year++; s.turn++;
+    return false;
+  }
+
+  function runYear(){
+    var s=active();
+    if(s.over||cloudPending) return;
+    var acts;
+    if(mode==="council"){
+      if(votes.length<councilN) return;
+      acts=councilTopTwo();
+      var tally={}; votes.forEach(function(v){ tally[v.act]=(tally[v.act]||0)+1; });
+      var desc=acts.map(function(a){ return a+" ("+(tally[a]||0)+")"; }).join(" + ");
+      addLog(s.year,"Council vote: "+votes.map(function(v){return "P"+(v.player+1)+"→"+v.act;}).join(", ")+" ⇒ runs "+desc+(acts.length<2?". Only one distinct pick — the second slot idles.":""));
+      if(acts.indexOf("build")>=0 && s.cash<s.buildCost){ acts=acts.filter(function(a){return a!=="build";}); addLog(s.year,"Build Nodes dropped: the Council can't spend cash it doesn't have ("+fmt$(s.cash)+")."); }
+      votes=[];
+      firstVoter=(firstVoter+1)%councilN;
+    } else {
+      if(picked.length!==2) return;
+      acts=picked.slice(); picked=[];
+    }
+    resolveYear(s,acts);
+    var ended=checkEnd(s);
+    if(mode==="race" && !ended && !raceDone){
+      raceActive=1-raceActive;
+      var ns=active();
+      if(!ns.over) drawEvent(ns);
+    } else if(!ended){
+      drawEvent(s);
+    }
+    if(mode==="race") renderRaceCheck();
+    render();
+  }
+  function renderRaceCheck(){
+    if(raceDone) return;
+    var a=race[0], b=race[1];
+    if(a.won||b.won){ raceDone=true; return; }
+    if(a.over&&b.over){ raceDone=true; finishRace(); }
+  }
+  function finishRace(){
+    completeInstance();   // a finished race is an ending — guarded, counts once
+    raceDone=true;
+    var a=race[0], b=race[1];
+    var winner = a.watts===b.watts ? null : (a.watts>b.watts?a:b);
+    var v=$("verdict");
+    v.className="verdict show "+((winner&&winner.won)?"win":"lose");
+    v.innerHTML="<h2>"+(winner? (winner.won? "🏁 "+winner.name+" takes it!" : "🏁 "+winner.name+" finishes higher") : "Dead heat")+"</h2>"+
+      '<p class="big">Ranch One: '+fmtWfull(a.watts)+' ('+kfmt(a.watts)+') · Ranch Two: '+fmtWfull(b.watts)+' ('+kfmt(b.watts)+')</p>'+
+      "<p>First to 1 MW wins — if neither ranch gets there by the end of 2037, the bigger ranch takes the road. Same hill, two crews: notice how different the two lines look by the end. The base is what you built; the slope is what you learned.</p>"+
+      '<div class="run-row"><button class="run" onclick="document.getElementById(\'restart-btn\').click()">Race again</button></div>';
+    v.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+
+  /* ---------- win / lose panels ---------- */
+  function requiredRate(fromW, toW, years){ return (Math.pow(toW/fromW,1/years)-1)*100; }
+  function arrivalYear(fromW, fromYear, g, target){
+    if(g<=0) return Infinity;
+    return fromYear + (Math.log(target/fromW)/Math.log(1+g/100));
+  }
+  function showWin(s){
+    if(mode==="race"){ raceDone=true; finishRace(); return; }
+    var v=$("verdict");
+    var g=s.growth;
+    var y1=arrivalYear(s.watts, END_YEAR, g, 1e16);
+    var y2=arrivalYear(s.watts, END_YEAR, g, 1e26);
+    var need=requiredRate(s.watts, 1e26, 2130-END_YEAR);
+    var holds = isFinite(y2) && y2<=2130;
+    v.className="verdict show win";
+    v.innerHTML=
+      "<h2>K = 0. The first checkpoint holds.</h2>"+
+      '<p class="big">'+s.name+' reached '+fmtWfull(s.watts)+' in '+s.year+' — turn '+s.turn+' of 12, with growth at +'+g+'%/yr and '+fmt$(s.cash)+' in the box.</p>'+
+      "<p><strong>Keep climbing (endless):</strong> hold this exact rate and the same line keeps going. Here is where it lands — the gap between your rate and the required rate is the rest of the game.</p>"+
+      '<div class="proj">'+
+        '<div class="cell"><div class="lab">Your rate reaches K = 1.0 (10¹⁶ W)</div><div class="val">'+(isFinite(y1)? Math.ceil(y1):"never")+'</div></div>'+
+        '<div class="cell"><div class="lab">Your rate reaches K = 2.0 (10²⁶ W)</div><div class="val">'+(isFinite(y2)? Math.ceil(y2):"never")+'</div></div>'+
+        '<div class="cell"><div class="lab">Rate needed from here for 2130</div><div class="val">+'+need.toFixed(1)+'%/yr</div></div>'+
+        '<div class="cell"><div class="lab">Verdict</div><div class="val">'+(holds? "Line holds ✓":"Falls short — gap is the game")+'</div></div>'+
+      "</div>"+
+      "<p>"+(holds
+        ? "Holding +"+g+"%/yr from here reaches K 2.0 by "+Math.ceil(y2)+" — ahead of the 2130 line. That is what a rate, kept, does."
+        : "At +"+g+"%/yr you reach K 2.0 in "+(isFinite(y2)?Math.ceil(y2):"never")+", but the road needs 2130 — you'd need +"+need.toFixed(1)+"%/yr from here. Every efficiency point you banked early was worth more than one banked late. Run it again and feel where the slope is bought.")+"</p>"+
+      '<div class="run-row"><button class="run" onclick="document.getElementById(\'restart-btn\').click()">Climb again</button></div>';
+    saveRecords(s);
+    v.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+  function showLose(s){
+    var v=$("verdict");
+    var need12=requiredRate(4000,TARGET,TURNS);
+    // diagnosis: which lever was starved
+    var diag;
+    if(s.stats.burnouts>0 && s.stats.cool<=2) diag="Cooling was starved: "+s.stats.burnouts+" burnout(s) ate a fifth of your ranch each time. A Cool the Ranch year feels wasted — until the year it saves everything.";
+    else if(s.stats.eff<=3) diag="Efficiency was starved: you improved the rate only "+s.stats.eff+" time(s) in 12 years. Builds raise the base once; the rate compounds every single year after. The slope was the game.";
+    else if(s.stats.build<=3) diag="Building was starved: only "+s.stats.build+" node builds. A great rate on a tiny base is still tiny for a long time — compounding needs something to compound.";
+    else if(s.stats.contract<=1) diag="Contracts were starved: cash ran dry, so builds stalled. Attention spent earning is growth borrowed — but a ranch that can't pay can't grow either.";
+    else diag="No single lever starved — the mix was close. The line needed a slightly earlier rate: efficiency bought in 2027 compounds eleven times; bought in 2036, once.";
+    v.className="verdict show lose";
+    v.innerHTML=
+      "<h2>2037: "+fmtWfull(s.watts)+" — short of 1 MW.</h2>"+
+      '<p class="big">'+kfmt(s.watts)+' · you covered '+(100*s.watts/TARGET).toFixed(1)+'% of the road. No shame in it — here is exactly what the line needed:</p>'+
+      '<div class="proj">'+
+        '<div class="cell"><div class="lab">Effective rate needed, 2026→2037</div><div class="val">≈ +'+need12.toFixed(0)+'%/yr every year</div></div>'+
+        '<div class="cell"><div class="lab">Your finish</div><div class="val">'+fmtW(s.watts)+'</div></div>'+
+        '<div class="cell"><div class="lab">Short by</div><div class="val">×'+(TARGET/s.watts).toFixed(1)+'</div></div>'+
+      "</div>"+
+      "<p><strong>What was starved:</strong> "+diag+"</p>"+
+      "<p>Builds ×"+s.stats.build+" · Efficiency ×"+s.stats.eff+" · Contracts ×"+s.stats.contract+" · Cooling ×"+s.stats.cool+" · Burnouts ×"+s.stats.burnouts+". Retry with one lever fed earlier — and watch the log chart bend.</p>"+
+      '<div class="run-row"><button class="run" onclick="document.getElementById(\'restart-btn\').click()">Retry the climb</button></div>';
+    v.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+
+  /* ---------- input wiring ---------- */
+  document.querySelectorAll(".action").forEach(function(b){
+    b.addEventListener("click",function(){
+      var s=active(); if(s.over||cloudPending) return;
+      var act=b.getAttribute("data-act");
+      if(mode==="council"){
+        if(votes.length>=councilN) return;
+        var player=(firstVoter+votes.length)%councilN;
+        votes.push({player:player, act:act});
+        addLog(s.year,"Player "+(player+1)+" votes: "+b.querySelector("h3").textContent.trim()+".");
+        render();
+      } else {
+        if(act==="build" && s.cash<s.buildCost) return;
+        var i=picked.indexOf(act);
+        if(i>=0) picked.splice(i,1);
+        else { if(picked.length>=2) picked.shift(); picked.push(act); }
+        render();
+      }
+    });
+  });
+  $("run-btn").addEventListener("click",runYear);
+  $("restart-btn").addEventListener("click",function(){ resetGame(); });
+
+  function setMode(m){
+    mode=m;
+    ["solo","council","race"].forEach(function(k){ $("mode-"+k).setAttribute("aria-pressed", k===m?"true":"false"); });
+    $("council-setup").style.display = m==="council" ? "block" : "none";
+    resetGame();
+  }
+  $("mode-solo").addEventListener("click",function(){ setMode("solo"); });
+  $("mode-council").addEventListener("click",function(){ setMode("council"); });
+  $("mode-race").addEventListener("click",function(){ setMode("race"); });
+  document.querySelectorAll(".csize").forEach(function(b){
+    b.addEventListener("click",function(){
+      councilN=parseInt(b.getAttribute("data-n"),10);
+      document.querySelectorAll(".csize").forEach(function(x){ x.setAttribute("aria-pressed", x===b?"true":"false"); });
+      if(mode==="council") resetGame();
+    });
+  });
+
+  function resetGame(){
+    solo=freshState("Your ranch");
+    council=freshState("The Council's ranch");
+    race=[freshState("Ranch One"), freshState("Ranch Two")];
+    raceActive=0; raceDone=false; votes=[]; picked=[]; firstVoter=0; cloudPending=false;
+    dealInstance();   // same week + generation = the identical deal (mid-run restart changes nothing)
+    clearLog();
+    var v=$("verdict"); v.className="verdict"; v.innerHTML="";
+    if(mode==="race"){
+      drawEvent(race[0]);
+      addLog(START_YEAR,"Two Ranches: Ranch One and Ranch Two alternate years on this screen. First to 1 MW wins.");
+    } else if(mode==="council"){
+      drawEvent(council);
+      addLog(START_YEAR,"Council opens: "+councilN+" players, one vote each, two actions run. Majority rules; ties go to the earliest vote, and the first voter rotates.");
+    } else {
+      drawEvent(solo);
+    }
+    addLog(START_YEAR,"2026: the ranch holds 4,000 W (K = −0.24). Target: 1,000,000 W by the end of 2037.");
+    render();
+  }
+
+  /* footer panels */
+  document.querySelectorAll(".foot-links button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var id="panel-"+b.getAttribute("data-panel");
+      document.querySelectorAll(".foot-panel").forEach(function(p){
+        p.classList.toggle("show", p.id===id && !p.classList.contains("show"));
+      });
+    });
+  });
+
+  loadRecords();
+  resetGame();
+})();
+</script>
+</body>
+</html>

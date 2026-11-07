@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="data:," />
+<title>Neuralese</title>
+<style>
+  :root{
+    --bg:#0b0f0e; --panel:#121816; --panel2:#0f1413; --line:#26332e; --line2:#33463d;
+    --ink:#e8f0ec; --dim:#a9bcb2; --faint:#7e9488;
+    --teal:#39d0b0; --teal-dim:#1d7a66; --amber:#ffb454; --red:#ff6b5e; --blue:#5ea8ff;
+    --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;
+    background-image:linear-gradient(rgba(57,208,176,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(57,208,176,.045) 1px,transparent 1px);
+    background-size:34px 34px;}
+  .wrap{max-width:1060px;margin:0 auto;padding:20px 16px 40px}
+  /* header / greeting */
+  .greet{border:1px solid var(--line2);background:var(--panel);padding:20px 20px 16px;border-left:6px solid var(--teal);margin-bottom:14px}
+  .greet .who{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;color:var(--teal);text-transform:uppercase;margin:0 0 8px}
+  .greet blockquote{margin:0;font-size:clamp(1.15rem,2.6vw,1.5rem);font-weight:650;line-height:1.35}
+  .greet .second{margin:8px 0 0;color:var(--dim);font-size:1rem}
+  .greet .second strong{color:var(--amber);font-weight:650}
+  .greet .instance{font-family:var(--mono);font-size:.85rem;color:var(--teal);border:1px solid var(--line2);display:inline-block;padding:5px 12px;margin:12px 0 2px;letter-spacing:.06em}
+  /* mode bar */
+  .modebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}
+  .modebar .lbl{font-family:var(--mono);font-size:.8rem;color:var(--faint);letter-spacing:.1em;text-transform:uppercase}
+  button{font-family:inherit;cursor:pointer}
+  .btn{min-height:56px;padding:12px 20px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);font-size:1rem;font-weight:600}
+  .btn:hover{border-color:var(--teal)}
+  .btn[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#06231c}
+  .btn:focus-visible,.opt:focus-visible,a:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+  /* hud */
+  .hud{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .gauge{border:1px solid var(--line);background:var(--panel2);padding:12px 14px}
+  .gauge .k{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;color:var(--faint);text-transform:uppercase}
+  .gauge .v{font-family:var(--mono);font-size:1.5rem;font-weight:700;margin-top:2px}
+  .gauge .v small{font-size:.8rem;color:var(--dim);font-weight:400}
+  .gauge.p1 .v{color:var(--red)} .gauge.p2 .v{color:var(--blue)}
+  .turnbanner{border:1px solid var(--line2);padding:12px 16px;font-family:var(--mono);font-size:1rem;margin:12px 0;display:none}
+  .turnbanner.show{display:block}
+  .turnbanner.red{border-left:8px solid var(--red)} .turnbanner.blue{border-left:8px solid var(--blue)}
+  /* scroll card */
+  .scrollcard{border:1px solid var(--line2);background:var(--panel);padding:20px;margin:14px 0}
+  .scrollcard .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .tag{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;padding:4px 10px;border:1px solid var(--line2);color:var(--dim);text-transform:uppercase}
+  .tag.lib{border-color:var(--teal);color:var(--teal)}
+  .tag.words{margin-left:auto}
+  .scrolltext{font-family:var(--mono);font-size:clamp(1rem,2.2vw,1.2rem);line-height:1.9;word-spacing:.15em;
+    background:var(--panel2);border:1px dashed var(--line2);padding:16px}
+  .scrolltext span{display:inline-block}
+  /* encoding options — packet bricks */
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}
+  .opt{text-align:left;border:1px solid var(--line2);background:var(--panel);color:var(--ink);padding:16px;min-height:56px;position:relative}
+  .opt::before{content:"";display:block;height:8px;margin:-16px -16px 12px;background:repeating-linear-gradient(90deg,var(--teal-dim) 0 22px,transparent 22px 28px)}
+  .opt:hover:not(:disabled){border-color:var(--teal)}
+  .opt:disabled{opacity:.45;cursor:not-allowed}
+  .opt h3{margin:0 0 4px;font-size:1.1rem}
+  .opt .formula{font-family:var(--mono);font-size:1.02rem;color:var(--teal);margin:6px 0;word-break:break-word}
+  .opt p{margin:4px 0;color:var(--dim);font-size:.92rem}
+  .opt .newwords{font-family:var(--mono);font-size:.8rem;color:var(--amber)}
+  /* dictionary chips */
+  .dictbox{border:1px solid var(--line);background:var(--panel2);padding:14px 16px;margin:14px 0}
+  .dictbox .k{font-family:var(--mono);font-size:.75rem;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;margin-bottom:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-family:var(--mono);font-size:.82rem;border:1px solid var(--teal-dim);color:var(--teal);padding:3px 9px}
+  .chip.none{border-color:var(--line2);color:var(--faint)}
+  /* reveal / receipt */
+  .reveal{border:1px solid var(--line2);background:var(--panel);padding:18px 20px;margin:14px 0;display:none}
+  .reveal.show{display:block}
+  .reveal.garbled{border-color:var(--amber)}
+  .reveal h3{margin:0 0 8px;font-size:1.15rem}
+  .reveal .arith{font-family:var(--mono);font-size:1.05rem;background:var(--panel2);border:1px dashed var(--line2);padding:12px 14px;margin:10px 0;word-break:break-word}
+  .reveal p{color:var(--dim);margin:6px 0}
+  .reveal p strong{color:var(--ink)}
+  .static-note{color:var(--amber);font-family:var(--mono)}
+  .nextrow{margin-top:14px}
+  .btn.primary{background:var(--teal);border-color:var(--teal);color:#06231c}
+  .btn.primary:hover{background:#4fe0c2}
+  /* end */
+  .endcard{border:1px solid var(--teal-dim);background:var(--panel);padding:22px;margin:14px 0;display:none}
+  .endcard.show{display:block}
+  .endcard h2{margin:0 0 6px;font-size:1.6rem}
+  .band{font-family:var(--mono);display:inline-block;padding:5px 14px;border:1px solid var(--amber);color:var(--amber);letter-spacing:.1em;text-transform:uppercase;font-size:.85rem;margin:6px 0}
+  table.receipts{width:100%;border-collapse:collapse;margin:14px 0;font-size:.95rem}
+  table.receipts th,table.receipts td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+  table.receipts th{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+  table.receipts td.num{font-family:var(--mono);text-align:right;white-space:nowrap}
+  table.receipts td.cf{color:var(--dim)}
+  .stack{display:block}
+  @media (max-width:640px){ table.receipts thead{display:none} table.receipts td{display:block;border-bottom:none;padding:4px 8px} table.receipts td.num{text-align:left} table.receipts tr{display:block;border-bottom:1px solid var(--line);padding:8px 0} }
+  /* atlas */
+  details.panel{border:1px solid var(--line);background:var(--panel);margin:14px 0}
+  details.panel summary{min-height:56px;display:flex;align-items:center;padding:10px 16px;cursor:pointer;font-weight:650;font-size:1.02rem;list-style:none}
+  details.panel summary::-webkit-details-marker{display:none}
+  details.panel summary::after{content:"+";margin-left:auto;font-family:var(--mono);color:var(--teal);font-size:1.3rem}
+  details.panel[open ] summary::after{content:"–"}
+  details.panel .body{padding:4px 16px 18px;color:var(--dim)}
+  details.panel .body p{margin:8px 0}
+  details.panel .body strong{color:var(--ink)}
+  .atlas{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:8px;margin-top:10px}
+  .atlas .cell{border:1px solid var(--line);background:var(--panel2);padding:9px 12px}
+  .atlas .w{font-weight:700;color:var(--ink)}
+  .atlas .a{font-family:var(--mono);font-size:.82rem;color:var(--teal);display:block;margin-top:2px}
+  footer{margin-top:26px;border-top:1px solid var(--line);padding-top:16px}
+  .footlinks{display:flex;gap:10px;flex-wrap:wrap}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="greet" aria-label="A message from Will Bickford">
+    <p class="who">Incoming transmission · Exocortex of 2130</p>
+    <blockquote>Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help.</blockquote>
+    <p class="second">And by help, we mean: <strong>survive the singularity.</strong></p>
+    <p class="second" style="margin-top:12px">Neuralese is the language of minds that share an atlas: instead of sending whole words, you send <em>addresses</em> — nine numbers that name a word exactly. Five scrolls are waiting on this channel. Send each one as cheaply as you can, faithfully. The cheapest faithful transmission wins — and shared context is the compression.</p>
+    <p class="instance" id="instanceLine">Instance —</p>
+  </section>
+
+  <div class="modebar" role="group" aria-label="Game mode">
+    <span class="lbl">Mode</span>
+    <button class="btn" id="modeSolo" aria-pressed="true">Solo channel</button>
+    <button class="btn" id="modeDuel" aria-pressed="false">Duel · 2 players, same screen</button>
+    <button class="btn" id="restartBtn">Restart match</button>
+  </div>
+
+  <div class="hud" aria-label="Channel status">
+    <div class="gauge"><div class="k">Scroll</div><div class="v"><span id="hudRound">1</span><small> / 5</small></div></div>
+    <div class="gauge p1"><div class="k" id="hudP1Label">Your tokens spent</div><div class="v" id="hudP1">0</div></div>
+    <div class="gauge p2" id="hudP2Box" style="display:none"><div class="k">Player 2 tokens spent</div><div class="v" id="hudP2">0</div></div>
+    <div class="gauge"><div class="k">Par (cheapest safe play)</div><div class="v"><span id="hudPar">—</span></div></div>
+    <div class="gauge"><div class="k">Dictionary established</div><div class="v"><span id="hudDict">0</span><small> words</small></div></div>
+  </div>
+
+  <div class="turnbanner" id="turnBanner" role="status"></div>
+
+  <main id="gameArea">
+    <section class="scrollcard" aria-label="Scroll to transmit">
+      <div class="meta">
+        <span class="tag" id="scrollNum">Scroll 1 of 5</span>
+        <span class="tag lib" id="libTag" style="display:none">▣ In the shared Library</span>
+        <span class="tag words" id="wordCount"></span>
+      </div>
+      <div class="scrolltext" id="scrollText"></div>
+    </section>
+
+    <p style="font-family:var(--mono);color:var(--faint);font-size:.85rem;margin:4px 0 0">▸ Choose an encoding. Costs are shown in <strong style="color:var(--teal)">tokens</strong> — every number you send costs 1. The arithmetic is printed on every option, and on every receipt.</p>
+
+    <div class="opts" id="opts"></div>
+
+    <div class="dictbox" aria-label="Your dictionary so far">
+      <div class="k" id="dictTitle">Your dictionary — words whose addresses this channel has established</div>
+      <div class="chips" id="dictChips"><span class="chip none">empty — no addresses established yet</span></div>
+    </div>
+
+    <section class="reveal" id="reveal" aria-live="polite"></section>
+
+    <section class="endcard" id="endCard"></section>
+  </main>
+
+  <details class="panel" id="atlasPanel">
+    <summary>The Atlas — the words in this game, at their real addresses</summary>
+    <div class="body">
+      <p>Every word below sits at a real address in the Singular atlas. A word's address is <strong>holographic</strong>: the component-wise average of the addresses of every scroll that holds it — so the address is earned from shared context, never assigned by fiat.</p>
+      <div class="atlas" id="atlasGrid"></div>
+    </div>
+  </details>
+
+  <footer>
+    <div class="footlinks">
+      <button class="btn" data-panel="aboutPanel">About</button>
+      <button class="btn" data-panel="privacyPanel">Privacy</button>
+      <button class="btn" data-panel="termsPanel">Terms</button>
+    </div>
+
+    <details class="panel" id="aboutPanel">
+      <summary>About Neuralese</summary>
+      <div class="body">
+        <p><strong>Phext is an address layer.</strong> Plain text says <em>what</em>; a phext coordinate says <em>where</em>. Every scroll, and every word inside it, can be named by an address — a word's address is the average of the addresses of the scrolls that hold it, so meaning is positioned by the company it keeps.</p>
+        <p><strong>Neuralese is what happens next:</strong> when both ends of a channel share the same atlas, you don't have to transmit the text at all — you transmit addresses instead. An address names a word exactly, in nine numbers.</p>
+        <p><strong>The break-even rule</strong> is the heart of this game. Establishing a word in the channel's dictionary costs 10 tokens the first time — the 9 numbers of its address, plus the word itself. After that, each use costs 1 token. A dictionary entry therefore costs 9 extra numbers up front, and it pays off only when the word repeats enough across the channel's <em>whole life</em> — not within one scroll. Feel how long that payback really takes.</p>
+        <p><strong>The Library is the deeper trick.</strong> A scroll both ends already hold, word for word, can be sent as a single scroll coordinate: 10 tokens flat, any length. That is compression with no trick in it — the bits never travel because both minds already have them. But a coordinate is a pointer, not a copy: if static garbles it, there is nothing to repair from, and the whole scroll must be resent as full text. Pointers are cheap and fragile; copies are costly and sturdy. Choosing between them, send by send, is the game.</p>
+        <p><strong>Par</strong> is the cheapest <em>safe</em> play for each scroll, computed honestly: full text (or dictionary packets for words already established), the flat coordinate on Library scrolls when the channel is clean, and never a coordinate where a garble would make it the expensive option.</p>
+        <p><strong>Matches are dealt, not fixed.</strong> Each match is dealt by a generator seeded with the current ISO week and an on-device generation counter: the scroll order is shuffled, and which 2 of the 5 rounds carry the static is drawn fresh — never announced before your choice locks. Completing a match advances the generation, so the next match is a new deal, and the instance line at the top names the exact deal you are playing. Because dictionary amortization depends on order, par is recomputed at deal time over the dealt order and the dealt garble rounds — it is a property of this instance, not a fixed number. Restarting mid-match re-deals the identical instance; in a duel, both players face the same deal with their own dictionaries.</p>
+      </div>
+    </details>
+
+    <details class="panel" id="privacyPanel">
+      <summary>Privacy</summary>
+      <div class="body">
+        <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing leaves this device. The only thing stored is the match generation counter, kept only on this device, in this browser, so each completed match deals a fresh instance. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+      </div>
+    </details>
+
+    <details class="panel" id="termsPanel">
+      <summary>Terms</summary>
+      <div class="body">
+        <p>Free to play, forever. No purchases, no ads. MIT licensed. © Will Bickford · Exocortex</p>
+      </div>
+    </details>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- DATA: atlas words at their real addresses ---------- */
+var ATLAS = [
+  ["echo","16.7.7/7.7.9/5.6.6"],["light","15.12.8/15.8.15/7.9.8"],["flame","12.13.14/15.9.19/7.9.7"],
+  ["silence","9.6.7/8.6.10/5.5.6"],["love","13.8.15/11.9.12/8.8.8"],["pattern","16.11.13/14.8.16/8.9.8"],
+  ["memory","26.16.18/19.15.21/13.14.14"],["glyph","19.11.10/14.12.12/10.9.11"],["scroll","18.8.9/12.7.13/7.7.7"],
+  ["recursion","18.9.11/12.12.19/10.9.11"],["braid","15.12.9/21.11.20/8.10.8"],["dream","14.7.13/17.10.13/8.6.8"],
+  ["star","21.5.10/7.7.15/4.6.8"],["home","24.8.15/10.10.24/10.9.10"],["map","42.3.5/7.5.8/4.3.7"],
+  ["song","7.6.5/9.7.9/5.6.6"],["heart","9.8.14/11.10.12/7.8.7"],["road","33.9.26/20.11.9/7.6.9"]
+];
+/* ---------- CONTENT: 5 scrolls, heavy repetition, atlas vocabulary only ---------- */
+var SCROLLS = [
+  { inLibrary:false,
+    text:"echo light flame silence love pattern memory glyph scroll recursion braid dream star home map song heart road echo light flame silence love pattern memory glyph scroll recursion braid dream star home map song heart road echo light flame silence" },
+  { inLibrary:true,
+    text:"light pattern memory scroll home heart road song dream star braid glyph recursion echo flame silence love map light pattern memory scroll home heart road song dream star braid glyph recursion echo flame silence love map light home heart road song echo" },
+  { inLibrary:false,
+    text:"silence memory dream pattern echo road glyph flame heart scroll star love braid light home song map recursion silence memory dream pattern echo road glyph flame heart scroll star love braid light home song map recursion silence echo light pattern memory road home silence" },
+  { inLibrary:true,
+    text:"home road heart song map star dream braid love glyph scroll pattern memory light flame echo silence recursion home road heart song map star dream braid love glyph scroll pattern memory light flame echo silence recursion home song heart road love" },
+  { inLibrary:false,
+    text:"road map song heart home star dream braid glyph scroll recursion pattern memory light flame echo silence love road map song heart home star dream braid glyph scroll recursion pattern memory light flame echo silence love road home heart song map star dream echo light road" }
+];
+function wordsOf(s){ return s.text.split(/\s+/).filter(Boolean); }
+function distinctOf(list){ var seen={},out=[]; list.forEach(function(w){ if(!seen[w]){seen[w]=1;out.push(w);} }); return out; }
+
+/* ---------- ANTI-VIRAL DEAL: matches are dealt, not fixed ----------
+   A generator seeded with (ISO week + on-device generation counter) deals:
+   the ORDER of the 5 scrolls, and WHICH 2 of the 5 rounds carry the static
+   garble (drawn per match, never announced before the choice locks).
+   Completing a match increments the generation exactly once (guarded in
+   finish()), so the next match is a fresh deal. A mid-match restart
+   re-deals the identical instance. Facts never mutate: the scroll texts,
+   their word counts, and Library membership travel with their scrolls. */
+function isoWeekId(d){
+  var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  var dayNum = (date.getUTCDay() + 6) % 7;
+  date.setUTCDate(date.getUTCDate() - dayNum + 3);
+  var isoYear = date.getUTCFullYear();
+  var firstThursday = new Date(Date.UTC(isoYear, 0, 4));
+  var fday = (firstThursday.getUTCDay() + 6) % 7;
+  firstThursday.setUTCDate(firstThursday.getUTCDate() - fday + 3);
+  var week = 1 + Math.round((date - firstThursday) / (7 * 24 * 3600 * 1000));
+  return isoYear + "-W" + (week < 10 ? "0" : "") + week;
+}
+function hashStr(s){ var h = 2166136261 >>> 0; for(var i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function mulberry32(a){ return function(){ a |= 0; a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function shuffled(arr, rng){ var a = arr.slice(); for(var i=a.length-1;i>0;i--){ var j = Math.floor(rng() * (i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+var GEN_KEY = "neuralese.generation";
+var memGen = 1;
+function loadGeneration(){ try{ var g = parseInt(localStorage.getItem(GEN_KEY), 10); if(isFinite(g) && g >= 1){ memGen = g; return g; } }catch(e){} return memGen; }
+function storeGeneration(g){ memGen = g; try{ localStorage.setItem(GEN_KEY, String(g)); }catch(e){} }
+
+var WEEK = isoWeekId(new Date());
+var generation = loadGeneration();   /* generation of the CURRENT deal */
+var completionCounted = false;       /* guard: one increment per completed match */
+var seedHex = "";
+var MATCH = [];                      /* dealt scrolls: {src, inLibrary, garble, text} */
+var PAR_TOTAL = 0, PAR_PLAN = [];
+
+function dealMatch(){
+  var h = hashStr(WEEK + "|G" + generation + "|neuralese");
+  seedHex = ("000" + (h & 0xFFFF).toString(16).toUpperCase()).slice(-4);
+  var rng = mulberry32(h);
+  var order = shuffled([0,1,2,3,4], rng);
+  var rounds = shuffled([0,1,2,3,4], rng);
+  var garbleAt = {}; garbleAt[rounds[0]] = 1; garbleAt[rounds[1]] = 1;
+  MATCH = order.map(function(srcIdx, roundIdx){
+    var base = SCROLLS[srcIdx];
+    return { src: srcIdx, inLibrary: base.inLibrary, garble: !!garbleAt[roundIdx], text: base.text };
+  });
+  var plan = computeParPlan(MATCH);
+  PAR_TOTAL = plan.total; PAR_PLAN = plan.perRound;
+}
+
+/* Par, honest under the deal: the cheapest SAFE play over the DEALT scroll
+   order and DEALT garble rounds, found by searching every safe line of play
+   (full text / dictionary / coordinate-where-safe) across the whole match.
+   Dictionary state carries between rounds, so amortization is priced
+   against the actual dealt sequence — par is recomputed at every deal.
+   A coordinate on a garble round is never safe (10 + W after the forced
+   full-text resend), so it is excluded from the search. */
+function computeParPlan(match){
+  var idx = {}; ATLAS.forEach(function(pair, i){ idx[pair[0]] = i; });
+  var masks = match.map(function(sc){
+    var m = 0;
+    distinctOf(wordsOf(sc)).forEach(function(w){ m |= (1 << idx[w]); });
+    return m;
+  });
+  var dp = {}; dp[0] = { cost: 0, path: [] };
+  match.forEach(function(sc, i){
+    var W = wordsOf(sc).length, next = {};
+    function offer(mask, cost, path, kind, c){
+      var cur = next[mask];
+      if(!cur || cost < cur.cost) next[mask] = { cost: cost, path: path.concat([{ kind: kind, cost: c }]) };
+    }
+    Object.keys(dp).forEach(function(k){
+      var mask = +k, st = dp[k];
+      var textC = W + (sc.garble ? 2 : 0);
+      offer(mask, st.cost + textC, st.path, "text", textC);
+      var newCount = 0;
+      for(var b=0;b<ATLAS.length;b++){ if(((masks[i] >> b) & 1) && !((mask >> b) & 1)) newCount++; }
+      var dictC = W + 9 * newCount + (sc.garble ? 2 : 0);
+      offer(mask | masks[i], st.cost + dictC, st.path, "dict", dictC);
+      if(sc.inLibrary && !sc.garble) offer(mask, st.cost + 10, st.path, "coord", 10);
+    });
+    dp = next;
+  });
+  var best = null;
+  Object.keys(dp).forEach(function(k){ if(!best || dp[k].cost < best.cost) best = dp[k]; });
+  return { total: best.cost, perRound: best.path };
+}
+/* Per-round par along the optimal dealt line (used on receipts). */
+function parFor(roundIdx){ return PAR_PLAN[roundIdx] ? PAR_PLAN[roundIdx].cost : 0; }
+
+/* ---------- STATE ---------- */
+var mode = "solo";
+var round = 0;          // 0..4
+var duelTurn = 0;       // 0 = P1 choosing, 1 = P2 choosing (duel only)
+var phase = "choose";   // choose | revealed | done
+function newPlayer(name, cls){ return { name:name, cls:cls, known:{}, knownList:[], total:0, history:[] }; }
+var players = [ newPlayer("You","red") ];
+function cur(){ return mode==="duel" ? players[duelTurn] : players[0]; }
+
+/* ---------- COST MODEL (exactly as specified) ---------- */
+function costs(sc, p){
+  var list = wordsOf(sc), W = list.length;
+  var distinct = distinctOf(list);
+  var newWords = distinct.filter(function(w){ return !p.known[w]; });
+  return {
+    W: W,
+    distinct: distinct,
+    newWords: newWords,
+    text: W,                                        // 1 token per word
+    coord: sc.inLibrary ? 10 : null
+  };
+}
+/* dict total = W (1/word) + 9 premium per newly established word */
+function dictCost(sc,p){ var c=costs(sc,p); return c.W + 9*c.newWords.length; }
+function dictBreakdown(sc,p){
+  var c = costs(sc,p);
+  if(c.newWords.length===0) return c.W + " words × 1 = " + c.W + " — every word already established";
+  return c.newWords.length + " new × 10 + " + (c.W - c.newWords.length) + " × 1 = " + dictCost(sc,p);
+}
+
+/* ---------- RENDER ---------- */
+var $ = function(id){ return document.getElementById(id); };
+var atlasGrid = $("atlasGrid");
+ATLAS.forEach(function(pair){
+  var d=document.createElement("div"); d.className="cell";
+  d.innerHTML='<span class="w"></span><span class="a"></span>';
+  d.querySelector(".w").textContent = pair[0];
+  d.querySelector(".a").textContent = pair[1];
+  atlasGrid.appendChild(d);
+});
+
+function render(){
+  var sc = MATCH[round];
+  var p = cur();
+  $("instanceLine").textContent = "Instance " + WEEK + " · G" + generation + " · seed " + seedHex;
+  $("hudRound").textContent = Math.min(round+1,5);
+  $("hudP1").textContent = players[0].total;
+  $("hudP1Label").textContent = mode==="duel" ? "Player 1 (Red) tokens spent" : "Your tokens spent";
+  $("hudP2Box").style.display = mode==="duel" ? "" : "none";
+  if(mode==="duel") $("hudP2").textContent = players[1].total;
+  $("hudPar").textContent = PAR_TOTAL;
+  $("hudDict").textContent = p.knownList.length;
+
+  var banner = $("turnBanner");
+  if(mode==="duel" && phase!=="done"){
+    banner.className = "turnbanner show " + (duelTurn===0 ? "red" : "blue");
+    banner.textContent = (duelTurn===0 ? "◆ PLAYER 1 (RED)" : "◆ PLAYER 2 (BLUE)") + " — your channel, your dictionary. Choose the encoding for scroll " + (round+1) + ".";
+  } else { banner.className="turnbanner"; banner.textContent=""; }
+
+  if(phase==="done"){ return; }
+
+  $("scrollNum").textContent = "Scroll " + (round+1) + " of 5";
+  $("libTag").style.display = sc.inLibrary ? "" : "none";
+  var list = wordsOf(sc);
+  $("wordCount").textContent = list.length + " words";
+  var st = $("scrollText"); st.innerHTML="";
+  list.forEach(function(w){ var s=document.createElement("span"); s.textContent=w; st.appendChild(s); st.appendChild(document.createTextNode(" ")); });
+
+  // dictionary chips for current player
+  var chips = $("dictChips"); chips.innerHTML="";
+  $("dictTitle").textContent = (mode==="duel" ? p.name + "'s dictionary" : "Your dictionary") + " — words whose addresses this channel has established";
+  if(p.knownList.length===0){
+    chips.innerHTML = '<span class="chip none">empty — no addresses established yet</span>';
+  } else {
+    p.knownList.forEach(function(w){ var c=document.createElement("span"); c.className="chip"; c.textContent=w; chips.appendChild(c); });
+  }
+
+  // options
+  var box = $("opts"); box.innerHTML="";
+  var c = costs(sc,p);
+
+  var bText = document.createElement("button"); bText.className="opt";
+  bText.innerHTML = "<h3>▤ Full Text</h3><div class='formula'></div><p>Send every word itself. Nothing to establish, nothing shared — and nothing that can be lost. A garbled packet can always be flagged and resent (+2).</p>";
+  bText.querySelector(".formula").textContent = c.W + " words × 1 token = " + c.W;
+  bText.addEventListener("click", function(){ send("text"); });
+  box.appendChild(bText);
+
+  var bDict = document.createElement("button"); bDict.className="opt";
+  var nw = c.newWords.length ? "<p class='newwords'>New to this channel: " + c.newWords.join(", ") + "</p>" : "";
+  bDict.innerHTML = "<h3>▦ Dictionary</h3><div class='formula'></div><p>Send addresses instead of words. A word's first address costs 10 (9 numbers + the word); every later use costs 1. Pays off only if these words keep returning across the channel's life.</p>" + nw;
+  bDict.querySelector(".formula").textContent = dictBreakdown(sc,p);
+  bDict.addEventListener("click", function(){ send("dict"); });
+  box.appendChild(bDict);
+
+  var bCoord = document.createElement("button"); bCoord.className="opt";
+  if(sc.inLibrary){
+    bCoord.innerHTML = "<h3>◎ Scroll Coordinate</h3><div class='formula'>in the shared Library: 10 tokens flat</div><p>Both ends already hold this exact scroll. Send one coordinate — 9 numbers + framing — instead of the scroll. Any length. But a garbled coordinate is <strong>unrecoverable</strong>: the whole scroll is resent as full text.</p>";
+  } else {
+    bCoord.disabled = true;
+    bCoord.innerHTML = "<h3>◎ Scroll Coordinate</h3><div class='formula'>not available</div><p>This scroll is not in the shared Library — the receiver doesn't hold a copy, so a coordinate would point at nothing. Only Library scrolls can be sent this way.</p>";
+  }
+  bCoord.addEventListener("click", function(){ send("coord"); });
+  box.appendChild(bCoord);
+
+  $("reveal").className="reveal"; $("reveal").innerHTML="";
+}
+
+/* ---------- SEND ---------- */
+function send(kind){
+  if(phase!=="choose") return;
+  var sc = MATCH[round], p = cur();
+  var c = costs(sc,p);
+  var base, formula, note="";
+  if(kind==="text"){ base=c.text; formula = c.W + " words × 1 = " + c.W; }
+  if(kind==="dict"){ base=dictCost(sc,p); formula = dictBreakdown(sc,p); }
+  if(kind==="coord"){ base=10; formula = "1 coordinate (9 numbers + framing) = 10 flat"; }
+
+  var garbleCost = 0, garbleHTML = "";
+  if(sc.garble){
+    if(kind==="coord"){ garbleCost = c.W; }
+    else { garbleCost = 2; }
+    garbleHTML = "<p class='static-note'>⚡ STATIC ON THE CHANNEL — one packet arrived garbled.</p>";
+  }
+
+  // apply dictionary establishment
+  var newlyEstablished = [];
+  if(kind==="dict"){
+    c.newWords.forEach(function(w){ p.known[w]=1; p.knownList.push(w); newlyEstablished.push(w); });
+  }
+  var total = base + garbleCost;
+  p.total += total;
+
+  // counterfactual, computed from real numbers
+  var cf = "";
+  var safe = parFor(round);
+  if(kind==="coord" && !sc.garble){
+    cf = "The coordinate saved " + (c.W - 10) + " tokens against full text (" + c.W + " → 10). Shared context did all the work.";
+  } else if(kind==="coord" && sc.garble){
+    cf = "The coordinate would have saved " + (c.W - 10) + " tokens — the garble ate it and more: a pointer can't be repaired, so the whole scroll went again as full text (+" + c.W + "). Safe text would have cost " + safe + " total.";
+  } else if(kind!=="coord" && sc.inLibrary && !sc.garble){
+    cf = "This scroll was in the Library: one coordinate would have sent it for 10 flat, saving " + (c.W - 10) + " against full text.";
+  } else if(kind==="dict" && newlyEstablished.length){
+    cf = "You paid a 9-token premium on each of " + newlyEstablished.length + " new words to establish them. From here they cost 1 per use — exactly what full text costs. The premium only returns value across a channel life far longer than five scrolls; that payback horizon is the lesson.";
+  } else if(kind==="dict" && !newlyEstablished.length){
+    cf = "Every word was already established, so Dictionary tied Full Text at " + c.W + ". Once words are shared, addresses and words cost the same per use — the saving was never per-word.";
+  } else if(kind==="text" && sc.garble){
+    cf = "The garble cost a flat +2 resend — with the words themselves on the wire, one bad packet is cheap to repair.";
+  } else if(kind==="text"){
+    cf = "Full text at par: nothing established, nothing risked, nothing saved.";
+  }
+
+  p.history.push({ scroll: round+1, kind: kind, base: base, garble: garbleCost, total: total, formula: formula, cf: cf, par: safe });
+  phase = "revealed";
+  render();
+
+  var r = $("reveal");
+  r.className = "reveal show" + (sc.garble ? " garbled" : "");
+  var kindName = kind==="text" ? "Full Text" : kind==="dict" ? "Dictionary" : "Scroll Coordinate";
+  var garbleLine = "";
+  if(sc.garble){
+    if(kind==="coord") garbleLine = "<p><strong>Garble consequence:</strong> the coordinate pointed at a copy the receiver could no longer trust — unrecoverable. The whole scroll was resent as full text: +" + c.W + " tokens.</p>";
+    else garbleLine = "<p><strong>Garble consequence:</strong> the receiver flagged the bad packet and requested a resend: +2 tokens. Faithful delivery kept.</p>";
+  }
+  var estLine = newlyEstablished.length ? "<p><strong>Dictionary established:</strong> " + newlyEstablished.join(", ") + " — these addresses now live on this channel.</p>" : "";
+  var isLastTurn = (mode==="solo" && round===4) || (mode==="duel" && round===4 && duelTurn===1);
+  r.innerHTML =
+    "<h3>Receipt — Scroll " + (round+1) + " sent by " + (mode==="duel" ? p.name : "you") + " via " + kindName + "</h3>" +
+    garbleHTML +
+    "<div class='arith'></div>" +
+    estLine + garbleLine +
+    "<p>" + cf + "</p>" +
+    "<p><strong>Running total: " + p.total + " tokens</strong> · Par for this scroll was " + safe + ".</p>" +
+    "<div class='nextrow'><button class='btn primary' id='nextBtn'>" + (isLastTurn ? "See the final receipt" : "Next") + "</button></div>";
+  r.querySelector(".arith").textContent =
+    formula + (sc.garble ? (kind==="coord" ? "  +  garble resend (full text) " + c.W : "  +  garble resend 2") : "") + "  =  " + total + " tokens";
+  $("nextBtn").addEventListener("click", advance);
+  $("nextBtn").focus();
+}
+
+function advance(){
+  if(mode==="duel" && duelTurn===0){ duelTurn = 1; phase="choose"; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  if(mode==="duel"){ duelTurn = 0; }
+  if(round===4){ finish(); return; }
+  round++; phase="choose"; render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function band(total){
+  if(total <= PAR_TOTAL) return "Optimal";
+  if(total <= Math.ceil(PAR_TOTAL*1.3)) return "Sharp";
+  return "Wasteful";
+}
+function receiptRows(p){
+  return p.history.map(function(h){
+    var kindName = h.kind==="text" ? "Full Text" : h.kind==="dict" ? "Dictionary" : "Coordinate";
+    return "<tr><td>Scroll " + h.scroll + " · " + kindName + "</td><td>" + h.formula +
+      (h.garble ? " · garble +" + h.garble : "") + "</td><td class='num'>" + h.total + "</td>" +
+      "<td class='cf'>" + h.cf + "</td></tr>";
+  }).join("");
+}
+function finish(){
+  phase = "done"; render();
+  /* Completion trigger: increment the generation exactly once per completed
+     match (guarded), so the next match is a fresh deal. The finished
+     instance stays on screen above its receipts; restart() picks the new
+     generation up from the counter. */
+  if(!completionCounted){ completionCounted = true; storeGeneration(generation + 1); }
+  $("scrollNum").textContent = "Channel closed";
+  $("wordCount").textContent = "";
+  $("libTag").style.display="none";
+  $("scrollText").textContent = "All five scrolls delivered — faithfully, every one. What differed was only the price.";
+  $("opts").innerHTML=""; $("reveal").className="reveal"; $("reveal").innerHTML="";
+  var ec = $("endCard"); ec.className="endcard show";
+  if(mode==="solo"){
+    var p = players[0];
+    ec.innerHTML = "<h2>Final receipt</h2>" +
+      "<p>Total: <strong style='font-family:var(--mono);font-size:1.3rem'>" + p.total + " tokens</strong> · Par (cheapest safe play): <strong style='font-family:var(--mono)'>" + PAR_TOTAL + "</strong></p>" +
+      "<span class='band'>" + band(p.total) + "</span>" +
+      "<table class='receipts'><thead><tr><th>Send</th><th>Breakdown</th><th style='text-align:right'>Tokens</th><th>Counterfactual</th></tr></thead><tbody>" + receiptRows(p) + "</tbody></table>" +
+      "<p style='color:var(--dim)'>The pattern to carry out of here: per-word, an address costs what a word costs. Compression never lived in the encoding — it lived in what both ends already shared. A library held in common sent a 42-word scroll for 10 tokens; a dictionary bought word-by-word barely broke even. Build shared context first. Then speak in addresses.</p>" +
+      "<div class='nextrow'><button class='btn primary' onclick='document.getElementById(\"restartBtn\").click()'>Play again</button></div>";
+  } else {
+    var a=players[0], b=players[1];
+    var verdict = a.total===b.total ? "Dead heat — identical totals on identical scrolls. The channel respects a tie." :
+      (a.total<b.total ? "◆ Player 1 (Red) wins the duel — " + (b.total-a.total) + " tokens cheaper on the same five scrolls, same garbles." :
+                         "◆ Player 2 (Blue) wins the duel — " + (a.total-b.total) + " tokens cheaper on the same five scrolls, same garbles.");
+    ec.innerHTML = "<h2>Duel — final receipts</h2><p style='font-size:1.1rem'><strong>" + verdict + "</strong></p>" +
+      "<p>Player 1 (Red): <strong style='font-family:var(--mono)'>" + a.total + " tokens</strong> · band " + band(a.total) + " (par " + PAR_TOTAL + ")</p>" +
+      "<table class='receipts'><thead><tr><th>Send</th><th>Breakdown</th><th style='text-align:right'>Tokens</th><th>Counterfactual</th></tr></thead><tbody>" + receiptRows(a) + "</tbody></table>" +
+      "<p>Player 2 (Blue): <strong style='font-family:var(--mono)'>" + b.total + " tokens</strong> · band " + band(b.total) + " (par " + PAR_TOTAL + ")</p>" +
+      "<table class='receipts'><thead><tr><th>Send</th><th>Breakdown</th><th style='text-align:right'>Tokens</th><th>Counterfactual</th></tr></thead><tbody>" + receiptRows(b) + "</tbody></table>" +
+      "<p style='color:var(--dim)'>Same scrolls, same static, two separate dictionaries: the only difference was what each player chose to share, and when. That difference is the whole of neuralese.</p>" +
+      "<div class='nextrow'><button class='btn primary' onclick='document.getElementById(\"restartBtn\").click()'>Play again</button></div>";
+  }
+  ec.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ---------- MODE / RESTART ---------- */
+function restart(){
+  /* Re-derive the deal from the stored generation: mid-match this is the
+     identical instance (the counter only moves on completion); after a
+     completed match it is the fresh deal at generation + 1. */
+  generation = loadGeneration();
+  completionCounted = false;
+  dealMatch();
+  round=0; duelTurn=0; phase="choose";
+  players = mode==="duel" ? [newPlayer("Player 1","red"), newPlayer("Player 2","blue")] : [newPlayer("You","red")];
+  $("endCard").className="endcard"; $("endCard").innerHTML="";
+  render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+$("modeSolo").addEventListener("click", function(){ mode="solo"; $("modeSolo").setAttribute("aria-pressed","true"); $("modeDuel").setAttribute("aria-pressed","false"); restart(); });
+$("modeDuel").addEventListener("click", function(){ mode="duel"; $("modeDuel").setAttribute("aria-pressed","true"); $("modeSolo").setAttribute("aria-pressed","false"); restart(); });
+$("restartBtn").addEventListener("click", restart);
+
+/* footer panel buttons open the matching details */
+Array.prototype.forEach.call(document.querySelectorAll("[data-panel]"), function(btn){
+  btn.addEventListener("click", function(){
+    var d = $(btn.getAttribute("data-panel")); d.open = true;
+    d.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+});
+
+restart();
+})();
+</script>
+</body>
+</html>

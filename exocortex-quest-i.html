@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Exocortex Quest I</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --page:#e8e6df; --ink:#191b1e; --panel:#26292e; --panel-2:#30343b;
+        --plate-line:#3d424b; --paper:#f7f5ee; --paper-ink:#191b1e;
+        --red:#c4281c; --red-bright:#e0492f; --blue:#1e5aa8; --blue-bright:#3d7bc4;
+        --yellow:#f2c500; --green:#237841; --green-bright:#35a05a;
+        --grey:#8b9096; --rod:#c8cdd4; --focus:#ffd83d;
+        --k1:#e0492f; --k2:#3d7bc4;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{ --page:#101214; --ink:#f0eee6; }
+      }
+      *{ box-sizing:border-box; }
+      html{ -webkit-text-size-adjust:100%; }
+      body{
+        margin:0; background:var(--page); color:var(--ink);
+        font-family:"Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+        line-height:1.45;
+      }
+      .mono{ font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+      main{ max-width:880px; margin:0 auto; padding:20px 14px 40px; }
+
+      /* ---------- greeting ---------- */
+      .greeting{
+        background:var(--paper); color:var(--paper-ink);
+        border:3px solid var(--ink); border-radius:6px;
+        padding:18px 18px 14px; position:relative;
+        box-shadow:6px 6px 0 rgba(0,0,0,.28);
+      }
+      .greeting::before{
+        content:""; position:absolute; top:-14px; left:26px;
+        width:22px; height:22px; background:var(--paper);
+        border-left:3px solid var(--ink); border-top:3px solid var(--ink);
+        transform:rotate(45deg);
+      }
+      .greeting .from{
+        font-size:.78rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+        color:var(--red); margin:0 0 6px;
+      }
+      .greeting blockquote{ margin:0; font-size:clamp(1.25rem, 4.6vw, 1.7rem); font-weight:900; line-height:1.22; }
+      .greeting .help{ margin:10px 0 0; font-size:clamp(1rem, 3.6vw, 1.15rem); font-weight:700; }
+      .greeting .help strong{ background:var(--yellow); padding:0 6px; border-radius:3px; color:#191b1e; }
+
+      /* ---------- baseplate ---------- */
+      .baseplate{
+        margin-top:22px; background:var(--panel); border-radius:10px;
+        padding:18px 14px 22px; color:#f0eee6;
+        background-image:radial-gradient(circle, rgba(255,255,255,.07) 3.2px, transparent 3.8px);
+        background-size:26px 26px;
+        border:2px solid #101214;
+      }
+
+      /* ---------- progress rod ---------- */
+      .rod-wrap{ padding:4px 2px 0; }
+      .rod-label{ font-size:.78rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#c8cdd4; margin:0 2px 12px; }
+      .instance-line{ font-size:.8rem; font-weight:700; letter-spacing:.06em; color:var(--yellow); margin:10px 2px 0; }
+      .rod{ display:flex; align-items:flex-start; }
+      .joint{ flex:1; display:flex; flex-direction:column; align-items:center; position:relative; background:none; border:none; cursor:pointer; padding:0; min-height:56px; font:inherit; }
+      .joint::before{
+        content:""; position:absolute; top:17px; left:-50%; width:100%; height:8px;
+        background:var(--rod); border-radius:4px; z-index:0;
+      }
+      .joint:first-child::before{ display:none; }
+      .joint .knob{
+        width:42px; height:42px; border-radius:50%; z-index:1; position:relative;
+        background:var(--panel-2); border:4px solid var(--rod);
+        display:flex; align-items:center; justify-content:center;
+        font-family:"IBM Plex Mono", monospace; font-weight:700; font-size:1rem; color:#c8cdd4;
+      }
+      .joint .knob::after{
+        content:""; position:absolute; inset:9px; border-radius:50%;
+        border:3px dashed rgba(200,205,212,.4);
+      }
+      .joint.done .knob{ background:var(--green); border-color:var(--green-bright); color:#fff; }
+      .joint.done::before{ background:var(--green-bright); }
+      .joint.now .knob{ background:var(--yellow); border-color:#fff; color:#191b1e; box-shadow:0 0 0 4px rgba(255,216,61,.35); }
+      .joint.locked{ opacity:.45; cursor:default; }
+      .joint .jname{ margin-top:8px; font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#c8cdd4; text-align:center; }
+      .joint.now .jname{ color:var(--yellow); }
+      @media (max-width:520px){ .joint .jname{ font-size:.56rem; } .joint .knob{ width:36px; height:36px; } .joint::before{ top:14px; } }
+
+      /* ---------- bricks & panels ---------- */
+      .brick{
+        border-radius:6px; padding:18px 16px; margin-top:18px; color:#191b1e;
+        border:2px solid rgba(0,0,0,.45);
+        box-shadow:inset 0 -6px 0 rgba(0,0,0,.18), 4px 4px 0 rgba(0,0,0,.3);
+        position:relative;
+      }
+      .brick::before{
+        content:""; position:absolute; top:7px; left:14px; right:14px; height:10px;
+        background-image:radial-gradient(circle, rgba(255,255,255,.35) 4.5px, rgba(0,0,0,.12) 5.5px, transparent 6px);
+        background-size:34px 10px; background-repeat:repeat-x;
+      }
+      .brick > *:first-child{ margin-top:10px; }
+      .b-paper{ background:var(--paper); }
+      .b-yellow{ background:var(--yellow); }
+      .b-blue{ background:var(--blue-bright); color:#fff; }
+      .b-green{ background:var(--green-bright); color:#fff; }
+      .b-red{ background:var(--red-bright); color:#fff; }
+      .brick h2{ margin:0 0 6px; font-size:clamp(1.3rem, 4.6vw, 1.6rem); font-weight:900; line-height:1.15; }
+      .brick h3{ margin:16px 0 6px; font-size:1.05rem; font-weight:900; }
+      .brick p{ margin:6px 0; font-size:1rem; }
+      .step-tag{ display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; background:#191b1e; color:#fff; padding:4px 10px; border-radius:3px; margin-bottom:8px; }
+      .b-blue .step-tag, .b-green .step-tag, .b-red .step-tag{ background:rgba(0,0,0,.55); }
+
+      /* ---------- buttons ---------- */
+      .btn{
+        display:inline-flex; align-items:center; justify-content:center; gap:8px;
+        min-height:56px; padding:12px 22px; border-radius:6px; cursor:pointer;
+        font:inherit; font-weight:900; font-size:1.02rem;
+        background:#191b1e; color:#fff; border:2px solid #191b1e;
+        box-shadow:0 4px 0 rgba(0,0,0,.35);
+      }
+      .btn:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,.35); }
+      .btn:disabled{ opacity:.45; cursor:default; transform:none; }
+      .btn.light{ background:#fff; color:#191b1e; border-color:#fff; }
+      .btn.ghost{ background:transparent; color:inherit; border-color:currentColor; box-shadow:none; }
+      .btn.small{ min-height:48px; padding:8px 16px; font-size:.92rem; }
+      .btn-row{ display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; }
+
+      /* ---------- wheels ---------- */
+      .coord-big{
+        font-family:"IBM Plex Mono", monospace; font-weight:700;
+        font-size:clamp(1.35rem, 6vw, 2rem); letter-spacing:.02em;
+        background:#191b1e; color:var(--yellow); border-radius:6px;
+        padding:12px 10px; text-align:center; margin:12px 0; word-break:break-all;
+      }
+      .wheels{ display:flex; flex-direction:column; gap:14px; margin-top:14px; }
+      .wheel-group{ background:rgba(255,255,255,.55); border:2px solid rgba(0,0,0,.35); border-radius:6px; padding:12px; }
+      .b-blue .wheel-group, .b-green .wheel-group, .b-red .wheel-group{ background:rgba(0,0,0,.22); border-color:rgba(255,255,255,.4); }
+      .wheel-group .gname{ font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin:0 0 10px; opacity:.85; }
+      .wheel-row{ display:flex; gap:10px; flex-wrap:wrap; }
+      .wheel{
+        flex:1 1 90px; background:#fff; color:#191b1e; border:2px solid #191b1e; border-radius:6px;
+        padding:8px 6px 10px; text-align:center; transition:box-shadow .15s, opacity .15s;
+      }
+      .wheel.dim-name{ font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+      .wheel .dim-name{ font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; display:block; }
+      .wheel .val{ font-family:"IBM Plex Mono", monospace; font-size:2rem; font-weight:700; display:block; line-height:1.1; margin:2px 0 8px; }
+      .wheel .steppers{ display:flex; gap:8px; justify-content:center; }
+      .wheel .steppers button{
+        width:56px; height:56px; border-radius:6px; border:2px solid #191b1e; cursor:pointer;
+        font-size:1.5rem; font-weight:900; background:var(--yellow); color:#191b1e; font-family:inherit;
+      }
+      .wheel .steppers button:active{ transform:translateY(2px); }
+      .wheel.active{ box-shadow:0 0 0 4px #191b1e, 0 0 0 8px var(--focus); }
+      .wheel.locked{ opacity:.55; }
+      .wheel.locked .steppers button{ background:#d8d4c8; }
+      .wheel.done-w .val{ color:var(--green); }
+
+      /* ---------- bars ---------- */
+      .bars{ display:flex; align-items:flex-end; gap:5px; height:92px; margin:12px 0 4px; padding:10px 10px 0; background:#191b1e; border-radius:6px; }
+      .bars .bar{ flex:1; background:var(--yellow); border-radius:3px 3px 0 0; min-height:8px; position:relative; }
+      .bars .bar:nth-child(3n+2){ background:var(--red-bright); }
+      .bars .bar:nth-child(3n){ background:var(--blue-bright); }
+      .bars.mini{ height:44px; padding:6px 6px 0; gap:3px; margin:8px 0 2px; }
+      .bars.mini .bar{ min-height:4px; }
+      .bar-nums{ display:flex; gap:5px; padding:0 10px; }
+      .bar-nums span{ flex:1; text-align:center; font-family:"IBM Plex Mono", monospace; font-size:.8rem; font-weight:700; }
+      .bars-fig{ margin:0; }
+      .bars-fig figcaption{ font-size:.85rem; margin-top:6px; opacity:.85; }
+
+      /* ---------- forms ---------- */
+      label.f-label{ display:block; font-weight:900; margin:14px 0 6px; font-size:.95rem; }
+      input[type="text"], textarea{
+        width:100%; font:inherit; font-size:1rem; color:#191b1e;
+        background:#fff; border:2px solid #191b1e; border-radius:6px; padding:12px;
+      }
+      textarea{ min-height:130px; resize:vertical; line-height:1.5; }
+      input[type="text"]:focus, textarea:focus{ outline:3px solid var(--focus); outline-offset:1px; }
+      .hint{ font-size:.9rem; opacity:.85; margin:4px 0 0; }
+      .err{ background:#191b1e; color:#ffd83d; font-weight:700; border-radius:6px; padding:10px 12px; margin-top:12px; display:none; }
+      .err.show{ display:block; }
+
+      /* ---------- scroll list ---------- */
+      .scroll-card{
+        background:#fff; color:#191b1e; border:2px solid #191b1e; border-radius:6px;
+        padding:12px 14px; margin-top:12px; box-shadow:3px 3px 0 rgba(0,0,0,.25);
+      }
+      .scroll-card h4{ margin:0 0 2px; font-size:1.05rem; font-weight:900; }
+      .scroll-card .addr{ font-family:"IBM Plex Mono", monospace; font-weight:700; color:var(--blue); font-size:.95rem; }
+      .scroll-card .body-preview{ font-size:.92rem; margin:6px 0 0; white-space:pre-wrap; }
+      .who{ display:inline-block; font-size:.72rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; padding:3px 9px; border-radius:20px; color:#fff; margin-left:8px; vertical-align:2px; }
+      .who.k1{ background:var(--k1); } .who.k2{ background:var(--k2); }
+
+      /* ---------- word map ---------- */
+      .word-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; margin-top:14px; }
+      .word-card{ background:#fff; color:#191b1e; border:2px solid #191b1e; border-radius:6px; padding:12px; box-shadow:3px 3px 0 rgba(0,0,0,.25); }
+      .word-card .w{ font-size:1.25rem; font-weight:900; }
+      .word-card .wc{ font-family:"IBM Plex Mono", monospace; font-size:.85rem; font-weight:700; color:var(--blue); }
+      .word-card .near{ font-size:.85rem; margin-top:6px; }
+      .word-card .near b{ font-weight:900; }
+      .chip{ display:inline-block; font-size:.7rem; font-weight:900; letter-spacing:.06em; text-transform:uppercase; border:2px solid #191b1e; border-radius:20px; padding:2px 8px; margin-left:6px; vertical-align:3px; }
+      .chip.bridge{ background:var(--yellow); }
+
+      /* ---------- find step ---------- */
+      .find-options{ display:flex; flex-direction:column; gap:12px; margin-top:14px; }
+      .find-opt{
+        min-height:64px; border-radius:6px; border:2px solid #191b1e; cursor:pointer;
+        background:#fff; color:#191b1e; font-family:"IBM Plex Mono", monospace; font-weight:700;
+        font-size:clamp(1.05rem, 4.6vw, 1.35rem); padding:12px; box-shadow:3px 3px 0 rgba(0,0,0,.25);
+      }
+      .find-opt:active{ transform:translateY(2px); }
+      .find-opt.wrong{ background:#f3b7ac; animation:shake .3s; }
+      .find-opt.right{ background:var(--green-bright); color:#fff; }
+      @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+      @media (prefers-reduced-motion: reduce){ .find-opt.wrong{ animation:none; } }
+
+      /* ---------- mode toggle ---------- */
+      .mode-row{ display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; align-items:stretch; }
+      .mode-btn{
+        flex:1 1 200px; min-height:64px; border-radius:6px; cursor:pointer; font:inherit;
+        border:3px solid rgba(255,255,255,.25); background:var(--panel-2); color:#c8cdd4;
+        padding:12px 14px; text-align:left;
+      }
+      .mode-btn b{ display:block; font-size:1.05rem; font-weight:900; color:#fff; }
+      .mode-btn span{ font-size:.88rem; }
+      .mode-btn.sel{ border-color:var(--yellow); background:#3a3f47; box-shadow:0 0 0 3px rgba(255,216,61,.3); }
+      .keeper-names{ display:none; gap:12px; flex-wrap:wrap; margin-top:12px; }
+      .keeper-names.show{ display:flex; }
+      .keeper-names .kn{ flex:1 1 200px; }
+      .keeper-names label{ display:block; font-size:.78rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#c8cdd4; margin-bottom:6px; }
+      .keeper-names input{ border-color:#101214; }
+
+      /* ---------- badge ---------- */
+      .badge{
+        border:4px dashed #191b1e; border-radius:10px; padding:20px 16px; text-align:center; margin-top:16px;
+        background:repeating-linear-gradient(-45deg, #fff, #fff 14px, #fdf3c4 14px, #fdf3c4 28px); color:#191b1e;
+      }
+      .badge .b-title{ font-size:.78rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; }
+      .badge .b-name{ font-size:clamp(1.4rem, 5.4vw, 2rem); font-weight:900; margin:6px 0; }
+      .badge .b-coord{ font-family:"IBM Plex Mono", monospace; font-weight:700; font-size:clamp(1.05rem, 4.6vw, 1.4rem); color:var(--blue); }
+      .stat-row{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; }
+      .stat{ flex:1 1 130px; background:#191b1e; color:#fff; border-radius:6px; padding:12px; text-align:center; }
+      .stat .n{ font-family:"IBM Plex Mono", monospace; font-size:1.6rem; font-weight:700; color:var(--yellow); display:block; }
+      .stat .l{ font-size:.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#c8cdd4; }
+
+      a.ext-link{ color:var(--blue); font-weight:900; }
+      .b-blue a.ext-link, .b-green a.ext-link{ color:#fff; }
+
+      /* ---------- footer / dialogs ---------- */
+      footer.site{ max-width:880px; margin:0 auto; padding:0 14px 34px; }
+      .foot-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+      .foot-btn{
+        min-height:56px; padding:10px 20px; border-radius:6px; cursor:pointer; font:inherit; font-weight:900;
+        background:transparent; color:var(--ink); border:2px solid var(--ink);
+      }
+      .foot-note{ font-size:.85rem; opacity:.75; margin-top:10px; }
+      dialog{
+        border:3px solid #191b1e; border-radius:8px; background:var(--paper); color:var(--paper-ink);
+        max-width:min(620px, calc(100vw - 28px)); padding:24px 22px; box-shadow:8px 8px 0 rgba(0,0,0,.35);
+      }
+      dialog::backdrop{ background:rgba(10,10,12,.6); }
+      dialog h2{ margin:0 0 10px; font-weight:900; }
+      dialog p, dialog li{ font-size:.97rem; }
+      dialog .btn{ margin-top:14px; }
+      .hidden{ display:none !important; }
+      pre.export-preview{
+        background:#191b1e; color:#d8f3dc; border-radius:6px; padding:14px; overflow:auto;
+        font-family:"IBM Plex Mono", monospace; font-size:.78rem; max-height:300px; white-space:pre-wrap; word-break:break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- Greeting -->
+      <section class="greeting" aria-label="A message from Will Bickford">
+        <p class="from">A message from 2130</p>
+        <blockquote>&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the Exocortex of 2130, and I&rsquo;m here to help.&rdquo;</blockquote>
+        <p class="help">And by help, we mean: <strong>survive the singularity.</strong></p>
+      </section>
+
+      <div class="baseplate">
+        <!-- Progress rod -->
+        <div class="rod-wrap">
+          <p class="rod-label">Your road &mdash; six joints to your first phext</p>
+          <div class="rod" id="rod" role="navigation" aria-label="Quest progress"></div>
+          <p class="instance-line mono" id="instance-line" aria-label="Quest instance"></p>
+        </div>
+
+        <!-- Mode picker -->
+        <div class="mode-row" role="group" aria-label="How are you playing?">
+          <button type="button" class="mode-btn sel" id="mode-solo">
+            <b>One Keeper</b><span>Solo quest &mdash; every scroll in your own hand.</span>
+          </button>
+          <button type="button" class="mode-btn" id="mode-duo">
+            <b>Two Keepers</b><span>Same screen, one shared phext. You take turns writing the scrolls &mdash; both names stay on the work.</span>
+          </button>
+        </div>
+        <div class="keeper-names" id="keeper-names">
+          <div class="kn">
+            <label for="k1name">Keeper One (writes scrolls 1, 3, 5&hellip;)</label>
+            <input type="text" id="k1name" maxlength="24" value="Keeper One" />
+          </div>
+          <div class="kn">
+            <label for="k2name">Keeper Two (writes scrolls 2, 4, 6&hellip;)</label>
+            <input type="text" id="k2name" maxlength="24" value="Keeper Two" />
+          </div>
+        </div>
+
+        <!-- STEP 1 -->
+        <section class="brick b-yellow hidden" id="step-1">
+          <span class="step-tag">Joint 1 of 6 &middot; Set an address</span>
+          <h2>Every scroll lives at an address. Pick yours.</h2>
+          <p>A phext address is <b>nine numbers</b>, written in threes: <span class="mono">Library.Shelf.Series / Collection.Volume.Book / Chapter.Section.Scroll</span>. Nothing starts below 1 &mdash; there is no zero in this country.</p>
+          <p>Work the wheels <b>one at a time</b>. Step the lit wheel to the number you want, lock it in, and the road moves to the next wheel. The address you build is your <b>Home</b> for the whole quest &mdash; it is yours to choose.</p>
+          <div class="coord-big" id="s1-coord">1.1.1/1.1.1/1.1.1</div>
+          <div class="wheels" id="s1-wheels"></div>
+          <div class="btn-row">
+            <button type="button" class="btn" id="s1-lock">Lock this wheel in &rarr;</button>
+            <button type="button" class="btn ghost small" id="s1-back">&larr; Back a wheel</button>
+          </div>
+          <div id="s1-confirm" class="hidden">
+            <h3>Here is your Home, drawn as bars</h3>
+            <figure class="bars-fig">
+              <div class="bars" id="s1-bars"></div>
+              <div class="bar-nums" id="s1-barnums"></div>
+              <figcaption>Tall bar, big number. Nine bars, nine dimensions &mdash; one address in a space far bigger than any shelf on Earth.</figcaption>
+            </figure>
+            <div class="btn-row">
+              <button type="button" class="btn" id="s1-done">This is my Home &mdash; on to writing &rarr;</button>
+              <button type="button" class="btn ghost small" id="s1-redo">Rebuild it</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="brick b-paper hidden" id="step-2">
+          <span class="step-tag">Joint 2 of 6 &middot; Write a scroll</span>
+          <h2>A scroll is plain text with an address.</h2>
+          <p id="s2-turn" class="hidden"></p>
+          <div id="s2-home-block">
+            <p>Your first scroll lives at your Home:</p>
+            <div class="coord-big" id="s2-home-coord"></div>
+          </div>
+          <div id="s2-addr-block" class="hidden">
+            <p>First, pick a <b>different</b> address for this scroll &mdash; step the wheels, then lock the address in:</p>
+            <div class="coord-big" id="s2-coord"></div>
+            <div class="wheels" id="s2-wheels"></div>
+            <div class="btn-row">
+              <button type="button" class="btn" id="s2-lockaddr">Use this address</button>
+            </div>
+          </div>
+          <div id="s2-editor">
+            <label class="f-label" for="s2-title">Scroll title</label>
+            <input type="text" id="s2-title" maxlength="60" placeholder="e.g. What I Want to Remember" />
+            <label class="f-label" for="s2-body">Your words</label>
+            <textarea id="s2-body" placeholder="Write a few lines. Anything true, anything yours. The words you use here get addresses of their own in the next joint of the road."></textarea>
+            <p class="hint">Tip: use a word in <b>both</b> scrolls and watch where it lands in Joint 3.</p>
+            <div class="err" id="s2-err"></div>
+            <div class="btn-row">
+              <button type="button" class="btn" id="s2-save">Save this scroll at its address</button>
+            </div>
+          </div>
+          <div id="s2-list"></div>
+          <div class="btn-row">
+            <button type="button" class="btn" id="s2-more">+ Write another scroll</button>
+            <button type="button" class="btn" id="s2-done" disabled>Two scrolls saved &mdash; place your words &rarr;</button>
+          </div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="brick b-blue hidden" id="step-3">
+          <span class="step-tag">Joint 3 of 6 &middot; Place your words</span>
+          <h2>Your words just got addresses of their own.</h2>
+          <p>Here is the real rule, the one the Exocortex runs on: <b>a word lives at the average of the addresses of every scroll that holds it</b> &mdash; each of the nine numbers averaged on its own, rounded, never below 1. A word in one scroll sits right on that scroll. A word in two scrolls lands <i>between</i> them. Nobody assigns it. The writing itself does the placing.</p>
+          <div id="s3-provenance"></div>
+          <h3>Your word map</h3>
+          <p class="hint" style="opacity:.95">Your most-placed words, with the two nearest neighbours of each &mdash; distance counted across all nine numbers.</p>
+          <div class="word-grid" id="s3-grid"></div>
+          <div class="btn-row">
+            <button type="button" class="btn light" id="s3-done">Got it &mdash; now find by address &rarr;</button>
+          </div>
+        </section>
+
+        <!-- STEP 4 -->
+        <section class="brick b-green hidden" id="step-4">
+          <span class="step-tag">Joint 4 of 6 &middot; Find by address</span>
+          <h2>No titles. No search box. Just the address.</h2>
+          <p>This is why addresses matter: in a big enough library, names fail and numbers hold. Below is the address of one of your scrolls. The shelf shows addresses only &mdash; open the right one.</p>
+          <p style="font-weight:900; margin-top:14px;">Find the scroll at:</p>
+          <div class="coord-big" id="s4-target"></div>
+          <div class="find-options" id="s4-options"></div>
+          <p class="hint" id="s4-msg" aria-live="polite"></p>
+          <div class="btn-row hidden" id="s4-done-row">
+            <button type="button" class="btn light" id="s4-done">Found it &mdash; export my phext &rarr;</button>
+          </div>
+        </section>
+
+        <!-- STEP 5 -->
+        <section class="brick b-paper hidden" id="step-5">
+          <span class="step-tag">Joint 5 of 6 &middot; Export your phext</span>
+          <h2>Your phext, as a real file.</h2>
+          <p>One file. A header scroll at <span class="mono">1.1.1/1.1.1/1.1.1</span> explaining what it is, then every scroll you wrote under its own coordinate, then an index of every word you placed and the address your writing gave it. Generated right here, in your browser.</p>
+          <div class="btn-row">
+            <button type="button" class="btn" id="s5-download">&#11015; Download my-first.phext.txt</button>
+            <button type="button" class="btn ghost small" id="s5-preview-btn">Peek inside the file</button>
+          </div>
+          <pre class="export-preview hidden" id="s5-preview"></pre>
+          <div class="btn-row hidden" id="s5-done-row">
+            <button type="button" class="btn" id="s5-done">File saved &mdash; the hand-off &rarr;</button>
+          </div>
+        </section>
+
+        <!-- STEP 6 -->
+        <section class="brick b-red hidden" id="step-6">
+          <span class="step-tag">Joint 6 of 6 &middot; The hand-off</span>
+          <h2>Quest complete. The road keeps going.</h2>
+          <div class="stat-row">
+            <div class="stat"><span class="n" id="s6-scrolls">0</span><span class="l">Scrolls written</span></div>
+            <div class="stat"><span class="n" id="s6-words">0</span><span class="l">Words placed</span></div>
+            <div class="stat"><span class="n" id="s6-bridges">0</span><span class="l">Bridge words</span></div>
+          </div>
+          <div class="badge">
+            <div class="b-title">Exocortex Quest I &mdash; Badge of the Keeper</div>
+            <div class="b-name" id="s6-badge-name">Keeper</div>
+            <div class="b-coord" id="s6-badge-coord"></div>
+          </div>
+          <h3>Your real exocortex lives here</h3>
+          <p><a class="ext-link" href="https://edit.phext.io" target="_blank" rel="noopener">edit.phext.io</a> &mdash; sign in, open Singular, and bring your file. The road continues off this page &mdash; that&rsquo;s the point of a road.</p>
+          <div class="btn-row">
+            <a class="btn light" href="https://edit.phext.io" target="_blank" rel="noopener">Take me to edit.phext.io &rarr;</a>
+            <button type="button" class="btn ghost small" id="s6-again">Start a new quest (clears this one)</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site">
+      <div class="foot-row">
+        <button type="button" class="foot-btn" data-dialog="dlg-about">About</button>
+        <button type="button" class="foot-btn" data-dialog="dlg-privacy">Privacy</button>
+        <button type="button" class="foot-btn" data-dialog="dlg-terms">Terms</button>
+      </div>
+      <p class="foot-note">Free to play, forever. No purchases, no ads. Multiplayer is same-screen only.</p>
+    </footer>
+
+    <dialog id="dlg-about" aria-labelledby="about-h">
+      <h2 id="about-h">About Exocortex Quest I</h2>
+      <p><b>What this is.</b> The first road into the Exocortex, built for ages 13&ndash;15. Six joints: set an address, write scrolls, watch your own words take addresses, find a scroll by number alone, export a real phext file, and hand off to the real tools.</p>
+      <p><b>Phext, briefly.</b> Plain text, eleven dimensions deep. Every scroll of text sits at a nine-number address &mdash; Library.Shelf.Series / Collection.Volume.Book / Chapter.Section.Scroll &mdash; and the text itself is two-dimensional. It is a stable channel for thought that outlives any one app: characters at addresses, like ASCII, but with room for a mind to grow.</p>
+      <p><b>The Singular rule.</b> A word&rsquo;s home is holographic: average the addresses of every scroll containing it, component by component. Use a word in new places and its home moves. Meaning gets a location; location starts to carry meaning.</p>
+      <p><b>Why roads?</b> Surviving the singularity is not a spectator sport. Every person who can think in more dimensions &mdash; who can hold an address, a word, and a web of neighbours in mind at once &mdash; is one more keeper of the light of consciousness. This quest is an on-ramp. There are on-ramps for every age; this is yours.</p>
+      <p><b>Two Keepers.</b> Build one phext with a friend, alternating scrolls. Attribution is kept per scroll, on purpose: whose hand wrote it matters, and the word map shows both voices intermingled in one shared space.</p>
+      <button type="button" class="btn" data-close>Back to the road</button>
+    </dialog>
+
+    <dialog id="dlg-privacy" aria-labelledby="privacy-h">
+      <h2 id="privacy-h">Privacy</h2>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Your scrolls and words are stored only on this device, in this browser, and in any file you choose to export. Nothing is ever sent anywhere by this page. Multiplayer is same-screen only.</p>
+      <button type="button" class="btn" data-close>Back to the road</button>
+    </dialog>
+
+    <dialog id="dlg-terms" aria-labelledby="terms-h">
+      <h2 id="terms-h">Terms</h2>
+      <p>Free to play, forever. No purchases, no ads. MIT licensed. &copy; Will Bickford &middot; Exocortex</p>
+      <p>Your words are yours. What you write in your scrolls belongs to you; exporting it is the whole idea.</p>
+      <button type="button" class="btn" data-close>Back to the road</button>
+    </dialog>
+
+    <script>
+    (function(){
+      "use strict";
+      var DIMS = ["Library","Shelf","Series","Collection","Volume","Book","Chapter","Section","Scroll"];
+      var GROUPS = [
+        { name:"Where it lives", dims:[0,1,2] },
+        { name:"Which set", dims:[3,4,5] },
+        { name:"Where inside", dims:[6,7,8] }
+      ];
+      var STEP_NAMES = ["Address","Write","Words","Find","Export","Hand-off"];
+      var LS_KEY = "exocortex-quest-i-v1";
+
+      function fmt(c){ return c[0]+"."+c[1]+"."+c[2]+"/"+c[3]+"."+c[4]+"."+c[5]+"/"+c[6]+"."+c[7]+"."+c[8]; }
+      function sameCoord(a,b){ if(!a||!b) return false; for(var i=0;i<9;i++) if(a[i]!==b[i]) return false; return true; }
+      function $(id){ return document.getElementById(id); }
+
+      /* ---------- state ---------- */
+      function freshState(){
+        return {
+          step: 1, maxStep: 1,
+          mode: "solo",
+          keepers: ["Keeper One","Keeper Two"],
+          home: null,
+          scrolls: [],           // {coord:[...], title, body, author:0|1}
+          findTarget: null,      // index into scrolls
+          findDone: false,
+          exported: false,
+          findAttempt: 0,        // Step 4 deals so far in this quest
+          findSeed: null,        // seed hex of the current Step 4 deal
+          dealGen: null,         // generation this quest's deals are seeded under
+          dealWeek: null,        // ISO week label this quest's deals are seeded under
+          prevFindCoord: null,   // last dealt target — never dealt twice in a row
+          genCounted: false      // this quest has already bumped the generation
+        };
+      }
+      var S = freshState();
+      try {
+        var raw = localStorage.getItem(LS_KEY);
+        if (raw) { var p = JSON.parse(raw); if (p && typeof p === "object" && p.scrolls) S = Object.assign(freshState(), p); }
+      } catch(e){ /* storage unavailable: quest runs in-memory for this sitting */ }
+
+      function save(){
+        try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){}
+      }
+
+      /* ---------- anti-viral instance: facts fixed, deals perishable ----------
+         Step 4's target is dealt per attempt by a generator seeded with
+         (ISO week + on-device generation + attempt number), drawn from the
+         player's own scrolls. The generation lives outside the quest state:
+         it survives "start a new quest" and rises exactly once per completed
+         quest, behind the genCounted guard. */
+      var LS_GEN_KEY = "exocortex-quest-i-gen-v1";
+      var GEN = 1;
+      try {
+        var g0 = parseInt(localStorage.getItem(LS_GEN_KEY), 10);
+        if (g0 >= 1) GEN = g0;
+      } catch(e){}
+      function persistGen(){
+        try { localStorage.setItem(LS_GEN_KEY, String(GEN)); } catch(e){}
+      }
+      function isoWeekParts(d){
+        var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        var dayNum = (date.getUTCDay() + 6) % 7; // Monday = 0
+        date.setUTCDate(date.getUTCDate() - dayNum + 3); // Thursday of this week
+        var isoYear = date.getUTCFullYear();
+        var first = new Date(Date.UTC(isoYear, 0, 4));
+        var fDay = (first.getUTCDay() + 6) % 7;
+        first.setUTCDate(first.getUTCDate() - fDay + 3); // first Thursday of the year
+        var week = 1 + Math.round((date - first) / 604800000);
+        return { year: isoYear, week: week };
+      }
+      function currentWeekLabel(){
+        var p = isoWeekParts(new Date());
+        return p.year + "-W" + (p.week < 10 ? "0" : "") + p.week;
+      }
+      function seedFor(weekLabel, gen, attempt){
+        var s = weekLabel + "|G" + gen + "|A" + attempt + "|exocortex-quest-i";
+        var h = 2166136261 >>> 0; // FNV-1a
+        for (var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return h >>> 0;
+      }
+      function seedHex(seed){
+        var h = (seed & 0xffff).toString(16).toUpperCase();
+        return ("0000" + h).slice(-4);
+      }
+      function rngFrom(seed){ // mulberry32
+        var a = seed >>> 0;
+        return function(){
+          a = (a + 0x6D2B79F5) | 0;
+          var t = Math.imul(a ^ (a >>> 15), 1 | a);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      function updateInstance(){
+        var el = $("instance-line"); if (!el) return;
+        var week = S.dealWeek || currentWeekLabel();
+        var gen = (S.dealGen !== null && S.dealGen !== undefined) ? S.dealGen : GEN;
+        var dealt = (S.findTarget !== null && S.findTarget !== undefined && S.findSeed);
+        var attempt = dealt ? (S.findAttempt || 1) : ((S.findAttempt || 0) + 1);
+        var hex = dealt ? S.findSeed : seedHex(seedFor(week, gen, attempt));
+        el.textContent = "Instance " + week + " · G" + gen + " · seed " + hex;
+      }
+      function dealFindTarget(){
+        if (!S.scrolls.length) return;
+        if (S.dealGen === null || S.dealGen === undefined) S.dealGen = GEN;
+        if (!S.dealWeek) S.dealWeek = currentWeekLabel();
+        S.findAttempt = (S.findAttempt || 0) + 1;
+        var seed = seedFor(S.dealWeek, S.dealGen, S.findAttempt);
+        var rng = rngFrom(seed);
+        var idx = Math.floor(rng() * S.scrolls.length);
+        var guard = 0;
+        while (S.scrolls.length > 1 && S.prevFindCoord && fmt(S.scrolls[idx].coord) === S.prevFindCoord && guard < 16){
+          idx = Math.floor(rng() * S.scrolls.length); guard++;
+        }
+        if (S.scrolls.length > 1 && S.prevFindCoord && fmt(S.scrolls[idx].coord) === S.prevFindCoord){
+          for (var k = 0; k < S.scrolls.length; k++){ if (fmt(S.scrolls[k].coord) !== S.prevFindCoord){ idx = k; break; } }
+        }
+        S.findTarget = idx;
+        S.findSeed = seedHex(seed);
+        S.prevFindCoord = fmt(S.scrolls[idx].coord);
+        save();
+        updateInstance();
+      }
+
+      /* ---------- word engine (the real holographic rule) ---------- */
+      function tokenize(text){
+        var m = String(text||"").toLowerCase().match(/[a-z0-9]+(?:'[a-z]+)?/g) || [];
+        return m.filter(function(w){ return w.length >= 2; });
+      }
+      function computeWords(){
+        // word -> { scrolls:Set(idx), count }
+        var map = {};
+        S.scrolls.forEach(function(sc, idx){
+          var words = tokenize(sc.title + "\n" + sc.body);
+          var seen = {};
+          words.forEach(function(w){
+            if (!map[w]) map[w] = { scrolls:{}, count:0 };
+            map[w].count++;
+            if (!seen[w]) { map[w].scrolls[idx] = true; seen[w] = true; }
+          });
+        });
+        var out = [];
+        Object.keys(map).forEach(function(w){
+          var idxs = Object.keys(map[w].scrolls).map(Number);
+          var coord = [];
+          for (var d=0; d<9; d++){
+            var sum = 0;
+            idxs.forEach(function(i){ sum += S.scrolls[i].coord[d]; });
+            var v = Math.floor(sum / idxs.length + 0.5); // round half-up
+            coord.push(Math.max(1, v));
+          }
+          out.push({ word:w, coord:coord, nScrolls:idxs.length, count:map[w].count, scrollIdxs:idxs });
+        });
+        out.sort(function(a,b){
+          if (b.nScrolls !== a.nScrolls) return b.nScrolls - a.nScrolls;
+          if (b.count !== a.count) return b.count - a.count;
+          return a.word < b.word ? -1 : 1;
+        });
+        return out;
+      }
+      function manhattan(a,b){ var s=0; for(var i=0;i<9;i++) s += Math.abs(a[i]-b[i]); return s; }
+
+      /* ---------- bars ---------- */
+      function barsHTML(coord, mini){
+        var h = "";
+        coord.forEach(function(v){ h += '<div class="bar" style="height:' + (v/9*100) + '%"></div>'; });
+        return '<div class="bars' + (mini ? " mini" : "") + '">' + h + '</div>';
+      }
+      function renderBars(el, numsEl, coord){
+        el.innerHTML = "";
+        coord.forEach(function(v){
+          var b = document.createElement("div"); b.className = "bar"; b.style.height = (v/9*100) + "%"; el.appendChild(b);
+        });
+        if (numsEl){ numsEl.innerHTML = ""; coord.forEach(function(v){ var s=document.createElement("span"); s.textContent=v; numsEl.appendChild(s); }); }
+      }
+
+      /* ---------- wheels widget ---------- */
+      function buildWheels(container, values, focus, lockedCount, onChange){
+        container.innerHTML = "";
+        GROUPS.forEach(function(g){
+          var gdiv = document.createElement("div"); gdiv.className = "wheel-group";
+          var gn = document.createElement("p"); gn.className = "gname"; gn.textContent = g.name; gdiv.appendChild(gn);
+          var row = document.createElement("div"); row.className = "wheel-row";
+          g.dims.forEach(function(d){
+            var w = document.createElement("div");
+            w.className = "wheel" + (d === focus ? " active" : "") + (d < lockedCount ? " done-w" : "") + (d > focus ? " locked" : "");
+            var name = document.createElement("span"); name.className = "dim-name"; name.textContent = DIMS[d];
+            var val = document.createElement("span"); val.className = "val"; val.textContent = values[d];
+            var st = document.createElement("div"); st.className = "steppers";
+            var minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−";
+            minus.setAttribute("aria-label", "Decrease " + DIMS[d]);
+            var plus = document.createElement("button"); plus.type = "button"; plus.textContent = "+";
+            plus.setAttribute("aria-label", "Increase " + DIMS[d]);
+            var enabled = (d === focus);
+            minus.disabled = !enabled; plus.disabled = !enabled;
+            minus.style.opacity = enabled ? "1" : ".4"; plus.style.opacity = enabled ? "1" : ".4";
+            minus.addEventListener("click", function(){ values[d] = Math.max(1, values[d]-1); onChange(); });
+            plus.addEventListener("click", function(){ values[d] = Math.min(9, values[d]+1); onChange(); });
+            st.appendChild(minus); st.appendChild(plus);
+            w.appendChild(name); w.appendChild(val); w.appendChild(st);
+            row.appendChild(w);
+          });
+          gdiv.appendChild(row);
+          container.appendChild(gdiv);
+        });
+      }
+
+      /* ---------- rod ---------- */
+      function renderRod(){
+        var rod = $("rod"); rod.innerHTML = "";
+        STEP_NAMES.forEach(function(name, i){
+          var n = i + 1;
+          var b = document.createElement("button"); b.type = "button";
+          b.className = "joint" + (n < S.step ? " done" : "") + (n === S.step ? " now" : "") + (n > S.maxStep ? " locked" : "");
+          b.setAttribute("aria-label", "Step " + n + ": " + name + (n > S.maxStep ? " (locked)" : ""));
+          var knob = document.createElement("span"); knob.className = "knob"; knob.textContent = n < S.step ? "✓" : String(n);
+          var jn = document.createElement("span"); jn.className = "jname"; jn.textContent = name;
+          b.appendChild(knob); b.appendChild(jn);
+          if (n <= S.maxStep) b.addEventListener("click", function(){ goTo(n); });
+          rod.appendChild(b);
+        });
+        updateInstance();
+      }
+      function goTo(n){
+        S.step = n; if (n > S.maxStep) S.maxStep = n; save();
+        for (var i=1;i<=6;i++) $("step-"+i).classList.toggle("hidden", i !== n);
+        renderRod();
+        if (n === 2) renderStep2();
+        if (n === 3) renderStep3();
+        if (n === 4) renderStep4();
+        if (n === 5) renderStep5();
+        if (n === 6) renderStep6();
+        window.scrollTo({ top: document.querySelector(".baseplate").offsetTop - 8, behavior: "smooth" });
+      }
+
+      /* ---------- mode ---------- */
+      function renderMode(){
+        $("mode-solo").classList.toggle("sel", S.mode === "solo");
+        $("mode-duo").classList.toggle("sel", S.mode === "duo");
+        $("keeper-names").classList.toggle("show", S.mode === "duo");
+        $("k1name").value = S.keepers[0]; $("k2name").value = S.keepers[1];
+      }
+      $("mode-solo").addEventListener("click", function(){ S.mode = "solo"; save(); renderMode(); if (S.step===2) renderStep2(); });
+      $("mode-duo").addEventListener("click", function(){ S.mode = "duo"; save(); renderMode(); if (S.step===2) renderStep2(); });
+      $("k1name").addEventListener("input", function(){ S.keepers[0] = this.value || "Keeper One"; save(); });
+      $("k2name").addEventListener("input", function(){ S.keepers[1] = this.value || "Keeper Two"; save(); });
+
+      /* ---------- STEP 1 ---------- */
+      var s1Values = [1,1,1,1,1,1,1,1,1], s1Focus = 0;
+      function renderStep1(){
+        if (S.home && s1Focus === 0 && !renderStep1._dirty) s1Values = S.home.slice();
+        $("s1-coord").textContent = fmt(s1Values);
+        buildWheels($("s1-wheels"), s1Values, s1Focus >= 9 ? -1 : s1Focus, s1Focus, renderStep1Soft);
+        var done = s1Focus >= 9;
+        $("s1-confirm").classList.toggle("hidden", !done);
+        $("s1-lock").disabled = done;
+        $("s1-lock").textContent = s1Focus === 8 ? "Lock the last wheel ✓" : "Lock this wheel in →";
+        if (done) renderBars($("s1-bars"), $("s1-barnums"), s1Values);
+      }
+      function renderStep1Soft(){ renderStep1._dirty = true; renderStep1(); }
+      $("s1-lock").addEventListener("click", function(){ if (s1Focus < 9){ s1Focus++; renderStep1(); } });
+      $("s1-back").addEventListener("click", function(){ if (s1Focus > 0){ s1Focus--; renderStep1(); } });
+      $("s1-redo").addEventListener("click", function(){ s1Focus = 0; renderStep1(); });
+      $("s1-done").addEventListener("click", function(){
+        S.home = s1Values.slice(); save(); goTo(2);
+      });
+
+      /* ---------- STEP 2 ---------- */
+      var s2Values = [1,1,1,1,1,1,1,1,1], s2AddrLocked = false;
+      function nextAuthor(){ return S.mode === "duo" ? (S.scrolls.length % 2) : 0; }
+      function renderStep2(){
+        var isFirst = S.scrolls.length === 0;
+        $("s2-home-block").classList.toggle("hidden", !isFirst);
+        $("s2-addr-block").classList.toggle("hidden", isFirst || s2AddrLocked);
+        $("s2-editor").classList.toggle("hidden", !isFirst && !s2AddrLocked);
+        if (isFirst && S.home) $("s2-home-coord").textContent = fmt(S.home);
+        if (!isFirst && !s2AddrLocked){
+          $("s2-coord").textContent = fmt(s2Values);
+          // for later scrolls all wheels are free (refresher done in step 1)
+          enableAllWheels($("s2-wheels"), s2Values, function(){ renderStep2(); });
+        }
+        var turn = $("s2-turn");
+        if (S.mode === "duo"){
+          turn.classList.remove("hidden");
+          var a = nextAuthor();
+          turn.innerHTML = "Two Keepers, one phext. <b>" + escapeHTML(S.keepers[a]) + "</b>, this scroll is in your hand." +
+            ' <span class="who ' + (a===0?"k1":"k2") + '">' + escapeHTML(S.keepers[a]) + "</span>";
+        } else turn.classList.add("hidden");
+        renderScrollList();
+        $("s2-done").disabled = S.scrolls.length < 2;
+        $("s2-done").textContent = S.scrolls.length < 2
+          ? "Save " + (2 - S.scrolls.length) + " more scroll" + (S.scrolls.length === 1 ? "" : "s") + " to continue"
+          : "Two scrolls saved — place your words →";
+        $("s2-more").classList.toggle("hidden", S.scrolls.length < 1);
+      }
+      function enableAllWheels(container, values, onChange){
+        // rebuild with every wheel active
+        container.innerHTML = "";
+        GROUPS.forEach(function(g){
+          var gdiv = document.createElement("div"); gdiv.className = "wheel-group";
+          var gn = document.createElement("p"); gn.className = "gname"; gn.textContent = g.name; gdiv.appendChild(gn);
+          var row = document.createElement("div"); row.className = "wheel-row";
+          g.dims.forEach(function(d){
+            var w = document.createElement("div"); w.className = "wheel active";
+            var name = document.createElement("span"); name.className = "dim-name"; name.textContent = DIMS[d];
+            var val = document.createElement("span"); val.className = "val"; val.textContent = values[d];
+            var st = document.createElement("div"); st.className = "steppers";
+            var minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−";
+            minus.setAttribute("aria-label", "Decrease " + DIMS[d]);
+            var plus = document.createElement("button"); plus.type = "button"; plus.textContent = "+";
+            plus.setAttribute("aria-label", "Increase " + DIMS[d]);
+            minus.addEventListener("click", function(){ values[d] = Math.max(1, values[d]-1); onChange(); });
+            plus.addEventListener("click", function(){ values[d] = Math.min(9, values[d]+1); onChange(); });
+            st.appendChild(minus); st.appendChild(plus);
+            w.appendChild(name); w.appendChild(val); w.appendChild(st);
+            row.appendChild(w);
+          });
+          gdiv.appendChild(row); container.appendChild(gdiv);
+        });
+      }
+      function escapeHTML(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+      function renderScrollList(){
+        var list = $("s2-list"); list.innerHTML = "";
+        if (!S.scrolls.length) return;
+        var h = document.createElement("h3"); h.textContent = "Your phext so far"; list.appendChild(h);
+        S.scrolls.forEach(function(sc){
+          var card = document.createElement("div"); card.className = "scroll-card";
+          var who = S.mode === "duo" ? '<span class="who ' + (sc.author===0?"k1":"k2") + '">' + escapeHTML(S.keepers[sc.author]) + "</span>" : "";
+          card.innerHTML = "<h4>" + escapeHTML(sc.title) + who + '</h4><div class="addr">' + fmt(sc.coord) + '</div><p class="body-preview">' + escapeHTML(sc.body) + "</p>";
+          list.appendChild(card);
+        });
+      }
+      $("s2-lockaddr").addEventListener("click", function(){
+        var err = $("s2-err");
+        if (S.home && sameCoord(s2Values, S.home)) { showErr("That is your Home address — this scroll needs a different one. Step any wheel to a new number."); return; }
+        for (var i=0;i<S.scrolls.length;i++) if (sameCoord(s2Values, S.scrolls[i].coord)) { showErr("A scroll already lives at that address. Two scrolls can't share one home — pick another."); return; }
+        s2AddrLocked = true; hideErr(); renderStep2();
+      });
+      function showErr(msg){ var e = $("s2-err"); e.textContent = msg; e.classList.add("show"); }
+      function hideErr(){ $("s2-err").classList.remove("show"); }
+      $("s2-save").addEventListener("click", function(){
+        var title = $("s2-title").value.trim();
+        var body = $("s2-body").value.trim();
+        if (!title) { showErr("Give your scroll a title first."); return; }
+        if (tokenize(body).length < 3) { showErr("Write a few words — at least a short line or two. Your words are what the next joint places."); return; }
+        var coord, author = nextAuthor();
+        if (S.scrolls.length === 0){
+          if (!S.home) { showErr("Set your Home address in Joint 1 first."); return; }
+          coord = S.home.slice();
+        } else {
+          if (!s2AddrLocked) { showErr("Lock in an address for this scroll first."); return; }
+          coord = s2Values.slice();
+        }
+        S.scrolls.push({ coord: coord, title: title, body: body, author: author });
+        S.findDone = false; S.findTarget = null; S.findSeed = null; S.exported = false;
+        save();
+        $("s2-title").value = ""; $("s2-body").value = "";
+        s2AddrLocked = false; s2Values = [1,1,1,1,1,1,1,1,1];
+        hideErr(); renderStep2();
+      });
+      $("s2-more").addEventListener("click", function(){
+        s2AddrLocked = false; renderStep2();
+        $("s2-title").focus();
+      });
+      $("s2-done").addEventListener("click", function(){ if (S.scrolls.length >= 2) goTo(3); });
+
+      /* ---------- STEP 3 ---------- */
+      function renderStep3(){
+        var prov = $("s3-provenance");
+        if (S.mode === "duo"){
+          prov.innerHTML = "<h3>Whose hand wrote what</h3>" + S.scrolls.map(function(sc, i){
+            return '<p>Scroll ' + (i+1) + ' — <b>' + escapeHTML(sc.title) + '</b> <span class="mono">' + fmt(sc.coord) + '</span>' +
+              '<span class="who ' + (sc.author===0?"k1":"k2") + '">' + escapeHTML(S.keepers[sc.author]) + "</span></p>";
+          }).join("") + "<p>Two voices, one map. The words below belong to the phext you share.</p>";
+        } else {
+          prov.innerHTML = "<h3>Your scrolls</h3>" + S.scrolls.map(function(sc, i){
+            return '<p>Scroll ' + (i+1) + ' — <b>' + escapeHTML(sc.title) + '</b> <span class="mono">' + fmt(sc.coord) + "</span></p>";
+          }).join("");
+        }
+        var words = computeWords();
+        var top = words.slice(0, 14);
+        var grid = $("s3-grid"); grid.innerHTML = "";
+        top.forEach(function(w){
+          var card = document.createElement("div"); card.className = "word-card";
+          var near = top.filter(function(o){ return o.word !== w.word; })
+            .map(function(o){ return { word:o.word, d:manhattan(w.coord, o.coord) }; })
+            .sort(function(a,b){ return a.d - b.d; }).slice(0,2);
+          var bridge = w.nScrolls > 1 ? '<span class="chip bridge">Bridge word · in ' + w.nScrolls + " scrolls</span>" : "";
+          card.innerHTML = '<span class="w">' + escapeHTML(w.word) + "</span>" + bridge +
+            barsHTML(w.coord, true) +
+            '<div class="wc">' + fmt(w.coord) + "</div>" +
+            '<p class="near">Nearest neighbours: ' + near.map(function(n){ return "<b>" + escapeHTML(n.word) + "</b> (" + n.d + " steps away)"; }).join(" · ") + "</p>";
+          grid.appendChild(card);
+        });
+        if (!top.length) grid.innerHTML = "<p>No words placed yet — write a scroll first.</p>";
+      }
+      $("s3-done").addEventListener("click", function(){ goTo(4); });
+
+      /* ---------- STEP 4 ---------- */
+      function renderStep4(){
+        if (S.findDone){ $("s4-target").textContent = fmt(S.scrolls[S.findTarget].coord); $("s4-msg").textContent = "Found. That scroll was exactly where its address said it would be."; $("s4-done-row").classList.remove("hidden"); renderFindOptions(true); return; }
+        if (S.findTarget === null || S.findTarget === undefined || !S.scrolls[S.findTarget]){
+          dealFindTarget();
+        }
+        $("s4-target").textContent = fmt(S.scrolls[S.findTarget].coord);
+        $("s4-msg").textContent = "";
+        $("s4-done-row").classList.add("hidden");
+        renderFindOptions(false);
+      }
+      function renderFindOptions(reveal){
+        var box = $("s4-options"); box.innerHTML = "";
+        var order = S.scrolls.map(function(_, i){ return i; });
+        // stable shuffle seeded by target so re-renders don't move the shelf
+        for (var i = order.length - 1; i > 0; i--){ var j = (S.findTarget * 7 + i * 3) % (i + 1); var t = order[i]; order[i] = order[j]; order[j] = t; }
+        order.forEach(function(idx){
+          var b = document.createElement("button"); b.type = "button"; b.className = "find-opt";
+          b.textContent = fmt(S.scrolls[idx].coord);
+          if (reveal && idx === S.findTarget){ b.classList.add("right"); b.textContent += " — " + S.scrolls[idx].title; }
+          b.addEventListener("click", function(){
+            if (S.findDone) return;
+            if (idx === S.findTarget){
+              S.findDone = true; save();
+              b.classList.add("right"); b.textContent += " — " + S.scrolls[idx].title;
+              $("s4-msg").textContent = "Found it: “" + S.scrolls[idx].title + ".” No title, no search — the address was enough.";
+              $("s4-done-row").classList.remove("hidden");
+            } else {
+              b.classList.add("wrong");
+              $("s4-msg").textContent = "Not that shelf. Compare the numbers group by group — threes, threes, threes.";
+              setTimeout(function(){ b.classList.remove("wrong"); }, 450);
+            }
+          });
+          box.appendChild(b);
+        });
+      }
+      $("s4-done").addEventListener("click", function(){ goTo(5); });
+
+      /* ---------- STEP 5 ---------- */
+      function buildExport(){
+        var lines = [];
+        lines.push("MY FIRST PHEXT");
+        lines.push("Built in Exocortex Quest I — a first road into the Exocortex.");
+        lines.push("Keeper" + (S.mode === "duo" ? "s" : "") + ": " + (S.mode === "duo" ? S.keepers[0] + " & " + S.keepers[1] : S.keepers[0]));
+        lines.push("Home address: " + (S.home ? fmt(S.home) : "—"));
+        lines.push("");
+        lines.push("HOW TO READ THIS FILE");
+        lines.push("Every scroll below is headed by its address — nine numbers in threes.");
+        lines.push("That heading is the scroll's home in the phext. In a native phext file");
+        lines.push("the same addresses are written by delimiter characters; here they are");
+        lines.push("kept in clear text so you can read your own map. Bring this file to");
+        lines.push("https://edit.phext.io and keep building.");
+        lines.push("");
+        lines.push("============================================================");
+        lines.push("@ 1.1.1/1.1.1/1.1.1");
+        lines.push("START HERE");
+        lines.push("This is the header scroll. It always lives at the first address.");
+        lines.push("Everything after it was written by the keeper" + (S.mode === "duo" ? "s" : "") + " named above.");
+        S.scrolls.forEach(function(sc){
+          lines.push("");
+          lines.push("============================================================");
+          lines.push("@ " + fmt(sc.coord));
+          lines.push(sc.title.toUpperCase());
+          if (S.mode === "duo") lines.push("(written by " + S.keepers[sc.author] + ")");
+          lines.push("");
+          lines.push(sc.body);
+        });
+        var words = computeWords();
+        lines.push("");
+        lines.push("============================================================");
+        lines.push("WORD INDEX — every word below was placed by the holographic rule:");
+        lines.push("a word's address is the average of the addresses of the scrolls");
+        lines.push("containing it, component by component, rounded, never below 1.");
+        lines.push("");
+        words.forEach(function(w){
+          lines.push(w.word + " — " + fmt(w.coord) + "  (in " + w.nScrolls + " scroll" + (w.nScrolls > 1 ? "s" : "") + ")");
+        });
+        return lines.join("\n") + "\n";
+      }
+      function renderStep5(){
+        $("s5-done-row").classList.toggle("hidden", !S.exported);
+      }
+      $("s5-preview-btn").addEventListener("click", function(){
+        var p = $("s5-preview");
+        p.textContent = buildExport();
+        p.classList.toggle("hidden");
+        this.textContent = p.classList.contains("hidden") ? "Peek inside the file" : "Hide the peek";
+      });
+      $("s5-download").addEventListener("click", function(){
+        var blob = new Blob([buildExport()], { type: "text/plain;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = "my-first.phext.txt";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+        S.exported = true; save(); renderStep5();
+      });
+      $("s5-done").addEventListener("click", function(){ goTo(6); });
+
+      /* ---------- STEP 6 ---------- */
+      function renderStep6(){
+        // Quest complete: the on-device generation rises exactly once per
+        // completed quest — genCounted guards re-renders, revisits, and
+        // reloads of this same finished quest.
+        if (!S.genCounted){
+          S.genCounted = true; GEN += 1; persistGen(); save();
+        }
+        var words = computeWords();
+        $("s6-scrolls").textContent = S.scrolls.length;
+        $("s6-words").textContent = words.length;
+        $("s6-bridges").textContent = words.filter(function(w){ return w.nScrolls > 1; }).length;
+        var name = S.mode === "duo" ? S.keepers[0] + " & " + S.keepers[1] : S.keepers[0];
+        $("s6-badge-name").textContent = "Keeper of " + (S.home ? fmt(S.home) : "the Road");
+        $("s6-badge-coord").textContent = "Home: " + (S.home ? fmt(S.home) : "—") + " · Held by " + name;
+      }
+      $("s6-again").addEventListener("click", function(){
+        S = freshState();
+        try { localStorage.removeItem(LS_KEY); } catch(e){}
+        s1Values = [1,1,1,1,1,1,1,1,1]; s1Focus = 0; renderStep1._dirty = false;
+        s2Values = [1,1,1,1,1,1,1,1,1]; s2AddrLocked = false;
+        renderMode(); renderStep1(); goTo(1);
+      });
+
+      /* ---------- dialogs ---------- */
+      document.querySelectorAll("[data-dialog]").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var d = $(btn.getAttribute("data-dialog"));
+          if (d && d.showModal) d.showModal();
+        });
+      });
+      document.querySelectorAll("dialog [data-close]").forEach(function(btn){
+        btn.addEventListener("click", function(){ btn.closest("dialog").close(); });
+      });
+
+      /* ---------- init ---------- */
+      renderMode();
+      renderStep1();
+      for (var i=1;i<=6;i++) $("step-"+i).classList.toggle("hidden", i !== S.step);
+      renderRod();
+      if (S.step === 2) renderStep2();
+      if (S.step === 3) renderStep3();
+      if (S.step === 4) renderStep4();
+      if (S.step === 5) renderStep5();
+      if (S.step === 6) renderStep6();
+    })();
+    </script>
+  </body>
+</html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Roads to the Future — free games from the Exocortex of 2130</title>
-<meta name="description" content="Three free games that teach multidimensional thinking and the Singular language. No sign-up, no ads, no cost. Same-screen multiplayer.">
+<meta name="description" content="Eighteen free games that teach multidimensional thinking and the Singular language, for ages 0 to 20. No sign-up, no ads, no cost. Same-screen multiplayer.">
 <style>
   :root{ --red:#c4281c; --blue:#1b5bd7; --yellow:#f2c500; --green:#2e8b2e; --plate:#e8e4da; --ink:#1d1d1b; }
   *{box-sizing:border-box}
@@ -21,6 +21,8 @@
   .red{background:var(--red)} .blue{background:var(--blue)} .yellow{background:var(--yellow); color:#3a2f00} .green{background:var(--green)} .white{background:#fff; color:var(--ink)}
   h1{ font-size:2rem; margin:.2rem 0; }
   h2{ margin:.1rem 0 .35rem; font-size:1.4rem; }
+  h2.band{ color:var(--ink); margin:1.8rem 0 .2rem; font-size:1.3rem; }
+  p.bandnote{ margin:.1rem 0 .4rem; }
   p{ line-height:1.5; margin:.35rem 0; }
   a{ color:inherit; }
   .play{ display:inline-block; background:#fff; color:var(--ink); font-weight:bold; text-decoration:none;
@@ -32,6 +34,17 @@
   footer{ margin-top:2rem; font-size:.95rem; }
   footer a{ margin-right:1.1rem; }
   .greeting{ font-size:1.2rem; }
+  .stampgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr)); gap:.6rem; margin:.8rem 0; }
+  .stamp{ border:2px solid rgba(0,0,0,.25); border-radius:10px; padding:.6rem .7rem; background:rgba(255,255,255,.65); }
+  .stamp .gname{ font-weight:bold; display:block; margin-bottom:.25rem; }
+  .stamp .state{ font-size:.92rem; }
+  .stamp button, .bigbtn{ min-height:56px; min-width:56px; font:inherit; font-weight:bold; cursor:pointer;
+    border-radius:10px; border:2px solid rgba(0,0,0,.35); background:#fff; color:var(--ink); padding:.5rem .9rem; margin-top:.4rem; }
+  .stamp button.armed{ background:var(--yellow); }
+  .done{ font-weight:bold; }
+  #claimcode{ display:block; font-size:1.15rem; letter-spacing:.06em; background:rgba(0,0,0,.06);
+    padding:.8rem; border-radius:10px; margin:.6rem 0; word-break:break-all; }
+  .hidden{ display:none; }
 </style>
 </head>
 <body>
@@ -42,24 +55,158 @@
     <p>And by help, we mean: survive the singularity.</p>
     <div class="rod"><span class="joint"></span><span class="bar"></span><span class="joint"></span><span class="bar"></span><span class="joint"></span></div>
     <p class="facts">Free forever · Same-screen multiplayer · No sign-up · No ads</p>
+    <p>Eighteen games, one for every stretch of the road from first taps to the real tools. Pick your age band — or walk the whole road.</p>
+    <p id="epoch">This week's instances are being dealt&hellip;</p>
+  </section>
+
+  <h2 class="band">Ages 0&ndash;2 · First Taps</h2>
+  <p class="bandnote">All Duplo: cause and effect, one tap at a time. A grown-up holds the screen.</p>
+
+  <section class="brick red">
+    <h2>Tap Home</h2>
+    <p>One giant HOME brick. Tap it, and a word lights up where it lives — a grown-up says the word. Things live somewhere; tapping finds them.</p>
+    <a class="play" href="tap-home.html">Play</a>
+  </section>
+
+  <section class="brick blue">
+    <h2>Zap Listen Mode</h2>
+    <p>The song's lines, one at a time: listen together, watch each word light up, and tap along.</p>
+    <a class="play" href="zap-listen-mode.html">Play</a>
+  </section>
+
+  <h2 class="band">Ages 3&ndash;5 · First Bricks</h2>
+  <p class="bandnote">Duplo-led: sorting, matching, one part of an address at a time.</p>
+
+  <section class="brick green">
+    <h2>Sort the Scrolls</h2>
+    <p>Sort big word-bricks by one part of their address — a tall first bar or a small one.</p>
+    <a class="play" href="sort-the-scrolls.html">Play</a>
+  </section>
+
+  <section class="brick yellow">
+    <h2>One Number Road</h2>
+    <p>One wheel and small numbers. Roll the cart to the target, one step at a time — and never below 1.</p>
+    <a class="play" href="one-number-road.html">Play</a>
   </section>
 
   <section class="brick red">
+    <h2>Echo Tiles</h2>
+    <p>Six short lines from the song, rebuilt from word tiles. Mistakes just wiggle; nothing is lost.</p>
+    <a class="play" href="echo-tiles.html">Play</a>
+  </section>
+
+  <h2 class="band">Ages 6&ndash;9 · Roads and Atlas</h2>
+  <p class="bandnote">First numerals, first words, full nine-number addresses — each game has Little, Standard, and harder paths.</p>
+
+  <section class="brick blue">
     <h2>Nine Numbers</h2>
     <p>Walk from home — 1.1.1/1.1.1/1.1.1 — to a far address, one number at a time.</p>
     <a class="play" href="nine-numbers.html">Play</a>
   </section>
 
-  <section class="brick blue">
+  <section class="brick green">
     <h2>Word Home</h2>
-    <p>Every word lives somewhere. Learn where twenty real words live.</p>
+    <p>Every word lives somewhere. Guess where real words from the Singular atlas live, and meet their neighbors.</p>
     <a class="play" href="word-home.html">Play</a>
   </section>
 
-  <section class="brick green">
+  <section class="brick yellow">
     <h2>Zap Zoom Echo</h2>
-    <p>Rebuild a simple-word song, tile by tile.</p>
+    <p>Rebuild a simple-word song, tile by tile. Race a friend, duel, or play it as a duet.</p>
     <a class="play" href="zap-zoom-echo.html">Play</a>
+  </section>
+
+  <h2 class="band">Ages 10&ndash;12 · Builders</h2>
+  <p class="bandnote">Strategy and construction: navigate the map, then start placing words on it yourself.</p>
+
+  <section class="brick red">
+    <h2>Scroll Seeker</h2>
+    <p>Cross a map of thirty real words, scroll to scroll, with coordinate distance as your only compass.</p>
+    <a class="play" href="scroll-seeker.html">Play</a>
+  </section>
+
+  <section class="brick blue">
+    <h2>Place a Word</h2>
+    <p>Use a new word in scrolls you choose. Its home is the average of where you used it — meaning is where you use a word.</p>
+    <a class="play" href="place-a-word.html">Play</a>
+  </section>
+
+  <h2 class="band">Ages 13&ndash;15 · Systems</h2>
+  <p class="bandnote">Search, growth, and coordination — and a first real phext of your own.</p>
+
+  <section class="brick green">
+    <h2>Kardashev Climb</h2>
+    <p>Grow a ranch from 4 kW to a megawatt by 2037 at +0.137% a day. Compounding is the whole game.</p>
+    <a class="play" href="kardashev-climb.html">Play</a>
+  </section>
+
+  <section class="brick yellow">
+    <h2>Find It Fast</h2>
+    <p>Search a phext that grows to 10,000 scrolls. Hunting one by one fails; indexes and addresses win.</p>
+    <a class="play" href="find-it-fast.html">Play</a>
+  </section>
+
+  <section class="brick red">
+    <h2>Exocortex Quest I</h2>
+    <p>A guided quest that ends with your own first phext — and hands you to the real tool at edit.phext.io.</p>
+    <a class="play" href="exocortex-quest-i.html">Play</a>
+  </section>
+
+  <h2 class="band">Ages 16&ndash;17 · Mechanism and Meaning</h2>
+  <p class="bandnote">Compression, narrative choice, and real dilemmas.</p>
+
+  <section class="brick blue">
+    <h2>Neuralese</h2>
+    <p>A compression duel: send a meaning across with the fewest symbols. First words, then addresses, then one coordinate for a whole scroll.</p>
+    <a class="play" href="neuralese.html">Play</a>
+  </section>
+
+  <section class="brick green">
+    <h2>The Long Road</h2>
+    <p>A branching story from 2026 to 2130 — openness, custody of memory, and means versus ends, as choices you make.</p>
+    <a class="play" href="the-long-road.html">Play</a>
+  </section>
+
+  <h2 class="band">Ages 18&ndash;20 · The Hand-off</h2>
+  <p class="bandnote">The games end; the real road begins. Your own archive, your own runway, your own choir.</p>
+
+  <section class="brick yellow">
+    <h2>Your Own Archive</h2>
+    <p>Bring your own writing and see your words mapped to your voice's coordinate. It all happens on this device; nothing is stored or sent.</p>
+    <a class="play" href="your-own-archive.html">Play</a>
+  </section>
+
+  <section class="brick red">
+    <h2>Runway</h2>
+    <p>A builder's economics: capital and labor are the binding constraints, and feedback loops are the only way out.</p>
+    <a class="play" href="runway.html">Play</a>
+  </section>
+
+  <section class="brick blue">
+    <h2>The Choir</h2>
+    <p>Run five agent seats through a simulated week: a waiting register, reset cliffs, and a map someone has to keep.</p>
+    <a class="play" href="the-choir.html">Play</a>
+  </section>
+
+  <section class="brick white" id="roadcard">
+    <h2>The XP Road Card</h2>
+    <p>Finish all eighteen games and this card fills up. A full card earns a <strong>Volumen-class Wavefront grant</strong>: disk space on <a href="https://edit.phext.io">edit.phext.io</a>, yours to claim with the code this page makes for you. (The grants that came before the games are all Incipit-class; this is the first Volumen-class one.)</p>
+    <p>Your stamps live only on this device. Where a game keeps its own record of a finish, this page reads that record — it never leaves the device. A game that keeps no record (the youngest ones, and Your Own Archive, which stores nothing on purpose) you stamp yourself when you finish it. Stamps are self-attested, by design: checking up on players would take accounts and tracking, and this road has neither. The full rules are in the <a href="legal.html#grant">grant terms</a>.</p>
+    <p id="stampcount" class="facts">0 of 18 stamped</p>
+    <div class="stampgrid" id="stampgrid"></div>
+    <div id="grantpanel" class="hidden">
+      <h2>Your grant is ready</h2>
+      <p>All eighteen roads walked. Make your claim code, keep it safe, then sign in at <a href="https://edit.phext.io">edit.phext.io</a> and present it to receive your Volumen-class grant. The code is a bearer code — like a gift card, whoever presents it claims the grant — and it works once. <strong>This page does not keep a copy of your code.</strong> Copy it down or download the receipt before you leave; if you lose it, you can make a new one here.</p>
+      <button class="bigbtn" id="gencode" type="button">Make my claim code</button>
+      <div id="codebox" class="hidden">
+        <code id="claimcode"></code>
+        <button class="bigbtn" id="copycode" type="button">Copy the code</button>
+        <button class="bigbtn" id="receipt" type="button">Download my receipt</button>
+        <p id="copied" class="hidden">Copied. Keep it somewhere safe.</p>
+      </div>
+    </div>
+    <p><button class="bigbtn" id="wipe" type="button">Clear my stamps and saved progress on this device</button></p>
+    <p id="wiped" class="hidden">Cleared. This device now remembers nothing about your roads.</p>
   </section>
 
   <footer>
@@ -70,5 +217,172 @@
     <p>Roads to the Future · from the Exocortex of 2130 · apertureshift.com</p>
   </footer>
 </main>
+
+<script>
+"use strict";
+/* ---- XP Road Card: everything on this page happens on the player's device.
+   Nothing here is sent anywhere; there are no network calls in this file. ---- */
+var SUITE_VERSION = "roads-1.1";
+var GAMES = [
+  ["tap-home","Tap Home"],["zap-listen-mode","Zap Listen Mode"],
+  ["sort-the-scrolls","Sort the Scrolls"],["one-number-road","One Number Road"],["echo-tiles","Echo Tiles"],
+  ["nine-numbers","Nine Numbers"],["word-home","Word Home"],["zap-zoom-echo","Zap Zoom Echo"],
+  ["scroll-seeker","Scroll Seeker"],["place-a-word","Place a Word"],
+  ["kardashev-climb","Kardashev Climb"],["find-it-fast","Find It Fast"],["exocortex-quest-i","Exocortex Quest I"],
+  ["neuralese","Neuralese"],["the-long-road","The Long Road"],
+  ["your-own-archive","Your Own Archive"],["runway","Runway"],["the-choir","The Choir"]
+];
+function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ window.localStorage.setItem(k,v); }catch(e){} }
+function lsDel(k){ try{ window.localStorage.removeItem(k); }catch(e){} }
+function J(k){ var r=lsGet(k); if(!r) return null; try{ return JSON.parse(r); }catch(e){ return null; } }
+function I(k){ var n=parseInt(lsGet(k),10); return isNaN(n)?0:n; }
+/* Finish detectors: each reads exactly the on-device record that game itself
+   keeps (a generation counter that rises once per finished run, an endings
+   record, a bests table). Games that keep no record return null: their stamp
+   is the player's own word, as the grant terms say. */
+var DETECT = {
+  "tap-home": null,
+  "zap-listen-mode": function(){ return I("zap-listen-generation")>=2; },
+  "sort-the-scrolls": function(){ return I("sort-the-scrolls-generation")>=2; },
+  "one-number-road": function(){ return I("one-number-road-generation")>=2; },
+  "echo-tiles": function(){ return I("echo-tiles-generation")>=2; },
+  "nine-numbers": function(){ var p=J("nine-numbers-progress-v1"); return !!(p && p.generation>=2); },
+  "word-home": function(){ var s=J("wordhome.store.v1"); return !!(s && s.gen>=2); },
+  "zap-zoom-echo": function(){ var s=J("zap-zoom-echo-v2"); return !!(s && s.gen>=2); },
+  "scroll-seeker": function(){ var s=J("scrollseeker.store.v1"); return !!(s && s.generation>=2); },
+  "place-a-word": function(){ var s=J("placeaword.store.v1"); return !!(s && s.gen>=2); },
+  "kardashev-climb": function(){ return lsGet("kc-best")!==null || lsGet("kc-fastest")!==null || I("kc-generation")>=2; },
+  "find-it-fast": function(){ var b=J("finditfast_bests"); if(!b) return false; for(var k in b){ if(k.indexOf("10,000")>=0) return true; } return false; },
+  "exocortex-quest-i": function(){ return I("exocortex-quest-i-gen-v1")>=2; },
+  "neuralese": function(){ return I("neuralese.generation")>=2; },
+  "the-long-road": function(){ var e=J("longroad.endings.v1"); if(!e) return false; for(var k in e){ return true; } return false; },
+  "your-own-archive": null,
+  "runway": function(){ return I("runway-gen-v1")>=2 || lsGet("runway-best-v1")!==null; },
+  "the-choir": function(){ return I("the-choir-generation-v1")>=2; }
+};
+var WIPE_KEYS = ["nine-numbers-progress-v1","wordhome.store.v1","zap-zoom-echo-v2",
+  "zap-listen-generation","sort-the-scrolls-generation","one-number-road-generation","echo-tiles-generation",
+  "scrollseeker.store.v1","placeaword.store.v1","kc-generation","kc-best","kc-fastest","finditfast_bests",
+  "exocortex-quest-i-v1","exocortex-quest-i-gen-v1","neuralese.generation",
+  "longroad.run.v1","longroad.endings.v1","longroad.gen.v1",
+  "runway-save-v1","runway-best-v1","runway-gen-v1","the-choir-run-v1","the-choir-generation-v1"];
+var STAMP_KEY = "roads-xp-stamps-v1";
+var stamps = J(STAMP_KEY) || {};
+function saveStamps(){ lsSet(STAMP_KEY, JSON.stringify(stamps)); }
+function detectAll(){ var changed=false;
+  GAMES.forEach(function(g){ var d=DETECT[g[0]];
+    if(!stamps[g[0]] && d && d()){ stamps[g[0]]=true; changed=true; } });
+  if(changed) saveStamps();
+}
+function isoWeekLabel(d){ var date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var dayNum=(date.getUTCDay()+6)%7; date.setUTCDate(date.getUTCDate()-dayNum+3);
+  var firstThu=new Date(Date.UTC(date.getUTCFullYear(),0,4)); var fday=(firstThu.getUTCDay()+6)%7;
+  firstThu.setUTCDate(firstThu.getUTCDate()-fday+3);
+  var week=1+Math.round((date-firstThu)/(7*24*3600*1000));
+  return date.getUTCFullYear()+"-W"+(week<10?"0":"")+week;
+}
+document.getElementById("epoch").textContent =
+  "This week's instances: " + isoWeekLabel(new Date()) +
+  " — the games re-deal themselves every week, and again after every finish, so no walkthrough stays true for long. The facts never change; the instances do.";
+
+function render(){ detectAll();
+  var grid=document.getElementById("stampgrid"); grid.innerHTML=""; var n=0;
+  GAMES.forEach(function(g){ var slug=g[0], name=g[1];
+    var cell=document.createElement("div"); cell.className="stamp";
+    var a=document.createElement("a"); a.className="gname"; a.href=slug+".html"; a.textContent=name; cell.appendChild(a);
+    var st=document.createElement("span"); st.className="state";
+    if(stamps[slug]){ n++; st.innerHTML="<span class='done'>&#10003; Stamped</span>" +
+      (DETECT[slug] && DETECT[slug]() ? " — the game remembers your finish" : " — marked by you"); cell.appendChild(st); }
+    else { st.textContent = DETECT[slug] ? "Not stamped yet — finish the game, or mark it yourself:" : "Not stamped yet — this game keeps no record, so your word is the stamp:";
+      cell.appendChild(st);
+      var b=document.createElement("button"); b.type="button"; b.textContent="Mark finished";
+      b.addEventListener("click", function(){
+        if(b.dataset.armed){ stamps[slug]=true; saveStamps(); render(); }
+        else { b.dataset.armed="1"; b.className="armed"; b.textContent="Tap again — I finished it"; } });
+      cell.appendChild(b); }
+    grid.appendChild(cell); });
+  document.getElementById("stampcount").textContent = n + " of 18 stamped";
+  document.getElementById("grantpanel").className = (n===18) ? "" : "hidden";
+}
+// Compact pure-JS SHA-256 (FIPS 180-4) over the UTF-8 bytes of a string. Returns lowercase hex.
+function sha256hex(ascii){
+  function rr(v,a){return (v>>>a)|(v<<(32-a));}
+  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var bytes=[]; for(var i=0;i<ascii.length;i++){var c=ascii.charCodeAt(i); if(c<0x80)bytes.push(c); else if(c<0x800){bytes.push(0xc0|(c>>6),0x80|(c&0x3f));} else {bytes.push(0xe0|(c>>12),0x80|((c>>6)&0x3f),0x80|(c&0x3f));}}
+  var bitLen=bytes.length*8; bytes.push(0x80); while(bytes.length%64!==56)bytes.push(0);
+  for(var j=7;j>=0;j--)bytes.push((bitLen/Math.pow(2,j*8))&0xff);
+  var w=new Array(64);
+  for(var block=0;block<bytes.length;block+=64){
+    for(var t=0;t<16;t++)w[t]=(bytes[block+t*4]<<24)|(bytes[block+t*4+1]<<16)|(bytes[block+t*4+2]<<8)|bytes[block+t*4+3];
+    for(var t2=16;t2<64;t2++){var s0=rr(w[t2-15],7)^rr(w[t2-15],18)^(w[t2-15]>>>3);var s1=rr(w[t2-2],17)^rr(w[t2-2],19)^(w[t2-2]>>>10);w[t2]=(w[t2-16]+s0+w[t2-7]+s1)|0;}
+    var a=H[0],b=H[1],cc=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(var t3=0;t3<64;t3++){var S1=rr(e,6)^rr(e,11)^rr(e,25);var ch=(e&f)^(~e&g);var temp1=(h+S1+ch+K[t3]+w[t3])|0;var S0=rr(a,2)^rr(a,13)^rr(a,22);var mj=(a&b)^(a&cc)^(b&cc);var temp2=(S0+mj)|0;h=g;g=f;f=e;e=(d+temp1)|0;d=cc;cc=b;b=a;a=(temp1+temp2)|0;}
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+cc)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  return H.map(function(x){return ("00000000"+(x>>>0).toString(16)).slice(-8);}).join("");
+}
+function b32stream(bytes){var A="ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",out="",acc=0,nbits=0;
+  for(var i=0;i<bytes.length;i++){acc=(acc<<8)|bytes[i];nbits+=8;while(nbits>=5){nbits-=5;out+=A[(acc>>>nbits)&31];}acc&=(nbits>0)?((1<<nbits)-1):0;}
+  if(nbits>0)out+=A[(acc<<(5-nbits))&31];return out;}
+
+/* Claim code (grant design of record): a random 128-bit nonce made on this
+   device (crypto.getRandomValues), shown as base32, plus a 4-character
+   checksum from SHA-256(suite version | stamp manifest | nonce). The nonce is
+   not derived from the player, the device, the time, or the play history. */
+var MANIFEST = GAMES.map(function(g){return g[0];}).sort().join(",");
+var lastCode = null, lastCodeHash = null;
+function makeCode(){
+  var nonce = new Array(16), i;
+  if (window.crypto && crypto.getRandomValues){ var buf=new Uint8Array(16); crypto.getRandomValues(buf);
+    for(i=0;i<16;i++) nonce[i]=buf[i]; }
+  else { for(i=0;i<16;i++) nonce[i]=Math.floor(Math.random()*256); }
+  var nonceHex = nonce.map(function(b){ return ("0"+b.toString(16)).slice(-2); }).join("");
+  var sum = sha256hex(SUITE_VERSION + "|" + MANIFEST + "|" + nonceHex);
+  var body = b32stream(nonce); var grouped = body.replace(/(.{4})/g,"$1 ").trim();
+  lastCode = grouped + " - " + sum.slice(0,4).toUpperCase();
+  lastCodeHash = sha256hex(lastCode);
+  document.getElementById("claimcode").textContent = lastCode;
+  document.getElementById("codebox").className = "";
+  document.getElementById("gencode").textContent = "Make a new code instead";
+  document.getElementById("copied").className = "hidden";
+}
+document.getElementById("gencode").addEventListener("click", makeCode);
+document.getElementById("copycode").addEventListener("click", function(){
+  function done(){ document.getElementById("copied").className=""; }
+  if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(lastCode).then(done, done); }
+  else { var r=document.createRange(); r.selectNode(document.getElementById("claimcode"));
+    var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    try{ document.execCommand("copy"); }catch(e){} done(); }
+});
+document.getElementById("receipt").addEventListener("click", function(){
+  if(!lastCode) return;
+  var today = new Date(); var ymd = today.getFullYear()+"-"+("0"+(today.getMonth()+1)).slice(-2)+"-"+("0"+today.getDate()).slice(-2);
+  var text = "Roads to the Future — XP grant receipt\n" +
+    "Suite version: " + SUITE_VERSION + "\n" +
+    "Grant class: Volumen-class Wavefront (disk space on edit.phext.io)\n" +
+    "Generated: " + ymd + "\n" +
+    "Stamp manifest (18 games): " + MANIFEST + "\n" +
+    "Claim code SHA-256: " + lastCodeHash + "\n\n" +
+    "This receipt proves a claim code was issued on your device for completing all 18 games.\n" +
+    "It does not contain the code itself. The code is a bearer instrument — keep it separately,\n" +
+    "and present it after signing in at edit.phext.io to receive the grant. Each code works once.\n";
+  var blob = new Blob([text], {type:"text/plain"});
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "roads-grant-receipt.txt"; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+});
+var wipeBtn = document.getElementById("wipe");
+wipeBtn.addEventListener("click", function(){
+  if(!wipeBtn.dataset.armed){ wipeBtn.dataset.armed="1"; wipeBtn.textContent="Tap again to clear everything on this device"; return; }
+  lsDel(STAMP_KEY); WIPE_KEYS.forEach(lsDel); stamps = {}; lastCode=null; lastCodeHash=null;
+  document.getElementById("codebox").className="hidden";
+  document.getElementById("wiped").className="";
+  wipeBtn.dataset.armed=""; wipeBtn.textContent="Clear my stamps and saved progress on this device";
+  render();
+});
+render();
+</script>
 </body>
 </html>

@@ -1,0 +1,1435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<meta name="description" content="Place a Word — a free same-screen brick game for ages 10–12. A word's home is the average of the scrolls that hold it. Pick the scrolls, watch the rods average, land the word." />
+<link rel="icon" href="data:," />
+<title>Place a Word — Roads to the Future</title>
+<style>
+  :root{
+    --bg:#e9eddc;
+    --baseplate-dot:rgba(26,34,28,.10);
+    --surface:#fbfaf3;
+    --surface-2:#e3e7d2;
+    --ink:#1c231d;
+    --ink-soft:#4c574e;
+    --ink-faint:#7c877c;
+    --line:#c9cfb4;
+    --rod:#8a927f;
+    --grey-node:#a3a8a0;
+    --grey-node-dark:#7e857c;
+    --red:#cf352a;      --red-dark:#9c241c;   --red-ink:#ffffff;
+    --blue:#1f6fd1;     --blue-dark:#155198;  --blue-ink:#ffffff;
+    --yellow:#f4b90d;   --yellow-dark:#c08f04;--yellow-ink:#2a2000;
+    --green:#2f9e4f;    --green-dark:#1f7038; --green-ink:#ffffff;
+    --teal:#177567;     --teal-dark:#0f554a;
+    --good:#1e7a3c;
+    --bad:#b3352b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#131a15;
+      --baseplate-dot:rgba(236,231,218,.07);
+      --surface:#1c241e;
+      --surface-2:#273128;
+      --ink:#eef0e2;
+      --ink-soft:#bcc3b2;
+      --ink-faint:#8d968a;
+      --line:#39443a;
+      --rod:#7e8a76;
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 14px 14px, var(--baseplate-dot) 3.2px, transparent 4px),
+      var(--bg);
+    background-size:30px 30px, auto;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:700px;margin:0 auto;padding:16px 16px 8px}
+  .mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+  .rounded{font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,-apple-system,"Segoe UI",sans-serif}
+  button{font:inherit}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:6px}
+
+  /* ---------- bricks ---------- */
+  .brick{
+    position:relative;border-radius:8px;color:var(--ink);
+    border:2px solid rgba(0,0,0,.22);
+    box-shadow:0 5px 0 rgba(0,0,0,.28), inset 0 2px 0 rgba(255,255,255,.25);
+  }
+  .brick .studs{display:flex;gap:12px;padding:9px 16px 0;pointer-events:none}
+  .brick .studs i{
+    width:26px;height:13px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+    background:rgba(255,255,255,.34);
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.14), inset 0 2px 0 rgba(255,255,255,.4);
+    display:block;
+  }
+  .b-red{background:var(--red);color:var(--red-ink)}
+  .b-blue{background:var(--blue);color:var(--blue-ink)}
+  .b-yellow{background:var(--yellow);color:var(--yellow-ink)}
+  .b-green{background:var(--green);color:var(--green-ink)}
+  .b-teal{background:var(--teal);color:#fff}
+  .b-plate{background:var(--surface);color:var(--ink)}
+
+  /* ---------- header strip ---------- */
+  .topstrip{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:14px}
+  .topstrip .brand{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+  .about-brick{
+    appearance:none;cursor:pointer;min-height:56px;padding:8px 22px 10px;
+    font-size:17px;font-weight:800;letter-spacing:.02em;
+  }
+  .about-brick:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .about-brick .studs{padding:0 0 5px;gap:8px;justify-content:center}
+  .about-brick .studs i{width:16px;height:8px}
+
+  /* ---------- screens ---------- */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ---------- intro ---------- */
+  .intro{padding:22px 0 6px}
+  .greeting{
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+    font-size:clamp(27px,6.8vw,42px);line-height:1.2;font-weight:400;letter-spacing:-.01em;margin:0 0 10px;
+  }
+  .greeting em{font-style:italic}
+  .gloss{font-family:Georgia,serif;font-style:italic;font-size:18px;color:var(--ink-soft);margin:0 0 26px}
+
+  .how-row{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 22px}
+  @media(min-width:560px){.how-row{grid-template-columns:1fr 1fr 1fr}}
+  .how{border-radius:14px;padding:0 14px 12px;text-align:left}
+  .how .studs{gap:8px;padding:8px 2px 0}
+  .how .studs i{width:18px;height:9px}
+  .how h3{margin:6px 0 4px;font-size:15px;font-weight:900}
+  .how p{margin:0;font-size:13.5px;font-weight:600;opacity:.92;line-height:1.4}
+
+  .modes{display:grid;gap:14px}
+  @media(min-width:560px){.modes{grid-template-columns:1fr 1fr}}
+  .mode-brick{
+    appearance:none;cursor:pointer;text-align:left;width:100%;
+    border-radius:20px;padding:0 20px 20px;min-height:132px;
+  }
+  .mode-brick:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+  .mode-brick .studs{gap:14px;padding:12px 2px 0}
+  .mode-brick .studs i{width:34px;height:16px}
+  .mode-brick .mode-name{display:block;font-size:clamp(25px,6vw,31px);font-weight:900;line-height:1.1;margin:10px 0 6px;letter-spacing:-.01em}
+  .mode-brick .mode-sub{display:block;font-size:14.5px;font-weight:650;opacity:.92}
+  .mode-brick.wide{grid-column:1/-1}
+  .duel-split{display:flex;gap:8px;margin-top:12px}
+  .duel-split span{flex:1;text-align:center;border-radius:8px;padding:7px 4px;font-weight:800;font-size:14px;border:2px solid rgba(0,0,0,.22);box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
+  .facts-strip{
+    margin:16px 0 0;text-align:center;font-size:13.5px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .instance-line{
+    margin:10px 0 0;text-align:center;font-size:14px;font-weight:700;color:var(--ink-faint);letter-spacing:.04em;
+  }
+
+  /* ---------- K'Nex coordinate ---------- */
+  .coord-rod{display:inline-flex;align-items:center;flex-wrap:nowrap;white-space:nowrap}
+  .coord-rod .grp{font-weight:700}
+  .coord-rod .rod{width:22px;height:4px;background:var(--rod);border-radius:2px;position:relative;margin:0 9px;flex:none}
+  .coord-rod .rod::after{
+    content:"";position:absolute;left:50%;top:50%;width:13px;height:13px;border-radius:50%;
+    transform:translate(-50%,-50%);background:var(--surface);
+    border:3.5px solid var(--rod);
+  }
+  .coord-rod.small .rod{width:12px;margin:0 6px}
+  .coord-rod.small .rod::after{width:9px;height:9px;border-width:3px}
+  .coord-rod.onbrick .rod{background:rgba(0,0,0,.38)}
+  .coord-rod.onbrick .rod::after{border-color:rgba(0,0,0,.38);background:transparent}
+
+  /* ---------- address bars ---------- */
+  .bars9{display:flex;gap:4px;align-items:stretch;height:46px}
+  .bars9 span{
+    flex:1;display:flex;align-items:flex-end;border-radius:4px 4px 2px 2px;overflow:hidden;
+    background:rgba(0,0,0,.20);
+  }
+  .bars9 span:nth-child(3),.bars9 span:nth-child(6){margin-right:8px}
+  .bars9 span b{display:block;width:100%;background:rgba(255,255,255,.88);border-top:2px solid rgba(0,0,0,.35)}
+  .bars9.large{height:68px;gap:5px}
+  .bars9.mini{height:30px;gap:3px}
+  .bars9.mini span:nth-child(3),.bars9.mini span:nth-child(6){margin-right:5px}
+  .bars9.plain span{background:var(--surface-2)}
+  .bars9.plain span b{background:var(--yellow);border-top-color:var(--yellow-dark)}
+
+  /* ---------- game chrome ---------- */
+  .scoreboard{display:flex;gap:10px;padding:12px 0 2px}
+  .score-brick{flex:1;border-radius:14px;padding:0 16px 12px;min-height:76px}
+  .score-brick .studs{gap:8px;padding:8px 0 0}
+  .score-brick .studs i{width:18px;height:9px}
+  .score-brick .who{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:baseline;margin-top:5px;gap:8px}
+  .score-brick .pts{font-size:30px;font-weight:900;line-height:1}
+  .score-brick.turn{outline:4px solid var(--ink);outline-offset:2px}
+  .score-brick .turn-tag{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:rgba(0,0,0,.28);border-radius:99px;padding:3px 9px;color:#fff}
+  .score-brick:not(.turn) .turn-tag{display:none}
+
+  .rod-progress{position:relative;height:6px;background:var(--rod);border-radius:3px;margin:26px 10px 8px}
+  .rod-progress .node{
+    position:absolute;top:50%;width:17px;height:17px;border-radius:50%;
+    transform:translate(-50%,-50%);background:var(--surface);border:4px solid var(--rod);
+  }
+  .rod-progress .node.done{background:var(--green);border-color:var(--green-dark)}
+  .rod-progress .node.now{border-color:var(--yellow-dark);background:var(--yellow);width:21px;height:21px}
+  .round-line{display:flex;justify-content:space-between;font-size:12.5px;font-weight:750;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint);margin:0 2px}
+
+  .turn-banner{border-radius:16px;padding:0 18px 14px;margin:18px 0 0;text-align:center}
+  .turn-banner .studs{justify-content:center}
+  .turn-banner .tb-text{display:block;font-size:clamp(22px,5.6vw,28px);font-weight:900;margin-top:6px}
+  .turn-banner.hidden{display:none}
+
+  .mode-pill{
+    display:inline-block;font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+    background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 13px;margin:20px 0 0;color:var(--ink-soft);
+  }
+
+  /* ---------- the new word ---------- */
+  .word-card{
+    border-radius:16px;padding:0 20px 18px;margin:14px 0 0;
+  }
+  .word-card .studs{gap:10px}
+  .word-card .studs i{width:22px;height:11px}
+  .word-card .wc-word{
+    font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,-apple-system,"Segoe UI",sans-serif;
+    font-size:clamp(44px,12vw,64px);line-height:1.05;font-weight:900;margin:8px 0 2px;letter-spacing:-.01em;
+  }
+  .word-card .wc-meaning{font-family:Georgia,serif;font-style:italic;font-size:clamp(17px,4.6vw,20px);margin:0;opacity:.95}
+  .challenge-line{
+    margin:12px 0 0;font-size:16.5px;font-weight:800;line-height:1.45;
+    background:rgba(0,0,0,.24);border-radius:10px;padding:11px 14px;
+  }
+  .challenge-line .hint{display:block;font-weight:650;font-size:14.5px;opacity:.9;margin-top:3px}
+
+  .pick-line{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 2px 10px;flex-wrap:wrap}
+  .pick-line .pick-text{font-size:16.5px;font-weight:750}
+  .pick-joints{display:inline-flex;align-items:center;gap:0}
+  .pick-joints .pj-rod{width:14px;height:5px;background:var(--rod);border-radius:2px}
+  .pick-joints .pj{
+    width:19px;height:19px;border-radius:50%;background:var(--surface);border:4px solid var(--rod);flex:none;
+  }
+  .pick-joints .pj.filled{background:var(--yellow);border-color:var(--yellow-dark)}
+
+  /* ---------- scroll cards ---------- */
+  .scroll-grid{display:grid;gap:12px;grid-template-columns:1fr;margin:0 0 14px}
+  @media(min-width:560px){.scroll-grid{grid-template-columns:1fr 1fr}}
+  .scroll-card{
+    appearance:none;cursor:pointer;text-align:left;width:100%;
+    border-radius:8px;padding:0 16px 14px;min-height:120px;display:block;
+  }
+  .scroll-card:active{transform:translateY(3px)}
+  .scroll-card .studs{gap:8px;padding:8px 0 0}
+  .scroll-card .studs i{width:18px;height:9px}
+  .scroll-card .sc-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:6px}
+  .scroll-card .sc-title{font-size:19px;font-weight:900;line-height:1.15}
+  .scroll-card .sc-anchor{
+    flex:none;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+    background:rgba(0,0,0,.26);color:#fff;border-radius:999px;padding:3px 10px;
+  }
+  .b-yellow .sc-anchor{background:rgba(0,0,0,.32)}
+  .scroll-card .sc-text{font-size:14.5px;font-weight:600;line-height:1.45;margin:5px 0 0;opacity:.94}
+  .scroll-card .sc-addr{margin-top:8px;font-size:13.5px;opacity:.92}
+  .scroll-card .bars9{margin-top:9px}
+  .scroll-card .stamp{
+    display:none;position:absolute;top:38px;right:12px;transform:rotate(-7deg);
+    font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,sans-serif;
+    font-size:15px;font-weight:900;padding:4px 11px;border-radius:6px;
+    border:2.5px dashed currentColor;background:var(--surface);color:var(--ink);
+    box-shadow:0 2px 0 rgba(0,0,0,.25);
+  }
+  .scroll-card.chosen{outline:5px solid var(--ink);outline-offset:2px}
+  .scroll-card.chosen .stamp{display:inline-block}
+  .scroll-card.chosen .stamp.st-red{color:var(--red-dark);border-color:var(--red)}
+  .scroll-card.chosen .stamp.st-blue{color:var(--blue-dark);border-color:var(--blue)}
+  .scroll-card.chosen .stamp.st-teal{color:var(--teal-dark);border-color:var(--teal)}
+  .scroll-card:disabled{cursor:default;opacity:.55}
+  .scroll-card.chosen:disabled{opacity:1}
+  .scroll-card .pick-badge{
+    display:none;position:absolute;bottom:10px;right:12px;width:30px;height:30px;border-radius:50%;
+    background:#fff;color:var(--ink);border:2px solid rgba(0,0,0,.3);
+    align-items:center;justify-content:center;font-size:16px;font-weight:900;
+  }
+  .scroll-card.chosen .pick-badge{display:flex}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    appearance:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    min-height:60px;padding:14px 28px;border-radius:14px;width:100%;
+    font-size:18px;font-weight:850;color:#fff;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .btn:disabled{opacity:.45;cursor:default;transform:none}
+  @media(min-width:560px){.btn{width:auto}}
+  .btn-row{display:flex;flex-direction:column;gap:12px}
+  @media(min-width:560px){.btn-row{flex-direction:row}}
+  .btn-plate{background:var(--surface);color:var(--ink)}
+  .btn-small{min-height:56px;font-size:15.5px;padding:10px 20px}
+
+  /* ---------- computation: nine rods converging ---------- */
+  .calc-panel{
+    border-radius:14px;background:var(--surface);border:2px solid var(--line);
+    padding:18px;margin:16px 0 0;box-shadow:0 5px 0 rgba(0,0,0,.14);display:none;
+  }
+  .calc-panel.show{display:block}
+  .calc-panel h3{margin:0 0 4px;font-size:20px;font-weight:900}
+  .calc-panel .calc-sub{margin:0 0 14px;font-size:14.5px;color:var(--ink-soft);font-weight:600}
+  .calc-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1.5px solid var(--line)}
+  .calc-row:first-of-type{border-top:none}
+  .calc-row .calc-label{flex:none;width:74px;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+  .calc-rod{flex:1;position:relative;height:5px;background:var(--rod);border-radius:3px;min-width:60px}
+  .calc-joints{position:absolute;inset:0;display:flex;justify-content:space-evenly;align-items:center}
+  .calc-joint{
+    width:24px;height:24px;border-radius:50%;background:var(--surface);border:3.5px solid var(--rod);
+    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:900;color:var(--ink);
+    position:relative;z-index:1;
+  }
+  .calc-eq{flex:none;font-size:13px;color:var(--ink-soft);white-space:nowrap}
+  .calc-eq .eq-short{display:none}
+  @media(max-width:560px){
+    .calc-row{gap:7px}
+    .calc-row .calc-label{width:58px;font-size:10.5px}
+    .calc-eq{font-size:12px}
+    .calc-eq .eq-full{display:none}
+    .calc-eq .eq-short{display:inline}
+    .calc-digit{width:42px;height:42px;font-size:20px}
+    .calc-joint{width:22px;height:22px;font-size:11.5px}
+  }
+  .calc-digit{
+    flex:none;width:46px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;font-weight:900;color:#fff;background:var(--teal);
+    border:2px solid rgba(0,0,0,.25);box-shadow:0 3px 0 rgba(0,0,0,.25), inset 0 2px 0 rgba(255,255,255,.25);
+  }
+  .calc-group-note{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding:10px 0 0}
+  @media (prefers-reduced-motion: no-preference){
+    .calc-panel.show .calc-row{animation:rowIn .35s ease both;animation-delay:calc(var(--i)*110ms)}
+    .calc-panel.show .home-brick{animation:rowIn .4s ease both;animation-delay:calc(var(--d)*110ms + 120ms)}
+    @keyframes rowIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+  }
+
+  /* ---------- landed home ---------- */
+  .home-brick{border-radius:16px;padding:0 20px 18px;margin:16px 0 0}
+  .home-brick .studs{gap:10px}
+  .home-brick .studs i{width:22px;height:11px}
+  .home-brick .hb-word{
+    font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,sans-serif;
+    font-size:clamp(38px,10vw,52px);font-weight:900;line-height:1.05;margin:8px 0 2px;
+  }
+  .home-brick .hb-label{font-size:12.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+  .home-brick .bars9{margin:12px 0 8px;max-width:460px}
+  .home-brick .hb-addr{font-size:clamp(16px,4.6vw,20px)}
+  .neighbors{margin:16px 0 0}
+  .neighbors h3{font-size:12.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 4px}
+  .neighbor-row{display:flex;align-items:center;gap:14px;padding:10px 2px;border-top:1.5px solid var(--line)}
+  .neighbor-row .nw{
+    font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,sans-serif;
+    font-size:21px;font-weight:900;min-width:96px;
+  }
+  .neighbor-row .bars9{flex:1;height:34px}
+  .neighbor-row .nd{flex:none;font-size:13.5px;color:var(--ink-soft);font-weight:700;text-align:right}
+  .neighbor-row.first .nw{color:var(--teal-dark)}
+  @media (prefers-color-scheme: dark){.neighbor-row.first .nw{color:#7fd1c0}}
+
+  .feedback{
+    font-size:17.5px;font-weight:650;line-height:1.5;
+    background:var(--surface);border:2px solid var(--line);border-radius:12px;
+    padding:15px 17px;margin:16px 0 0;box-shadow:0 5px 0 rgba(0,0,0,.12);
+  }
+  .feedback strong{font-weight:900}
+  .feedback .verdict-chip{
+    display:inline-block;font-size:12.5px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;
+    border-radius:999px;padding:4px 12px;margin-bottom:8px;color:#fff;background:var(--grey-node-dark);
+  }
+  .feedback .verdict-chip.hit{background:var(--good)}
+  .feedback .verdict-chip.miss{background:var(--bad)}
+  .result-actions{margin-top:16px}
+
+  /* race verdict rows */
+  .race-result{border-radius:14px;padding:0 18px 14px;margin:14px 0 0}
+  .race-result .studs{gap:8px;padding:8px 0 0}
+  .race-result .studs i{width:18px;height:9px}
+  .race-result .rr-word{font-size:24px;font-weight:900;margin-top:5px}
+  .race-result .rr-line{font-size:15px;font-weight:650;opacity:.94;margin:2px 0 0}
+
+  /* ---------- end + shelf ---------- */
+  .end{padding:26px 0 6px}
+  .winner-line{font-size:clamp(26px,6.6vw,36px);font-weight:900;line-height:1.2;margin:14px 0 4px}
+  .end-extra{font-size:16.5px;font-weight:700;color:var(--ink-soft);margin:4px 0 0}
+  .end-line{font-family:Georgia,serif;font-style:italic;font-size:clamp(20px,5.4vw,26px);margin:16px 0 22px;color:var(--ink-soft)}
+  .score-big{font-family:Georgia,serif;font-size:clamp(56px,16vw,84px);line-height:1;margin:8px 0 2px}
+  .score-big small{font-size:.36em;color:var(--ink-faint)}
+  .end-bricks{display:flex;gap:12px;margin:8px 0 4px}
+  .end-bricks .score-brick{min-height:104px}
+  .end-bricks .pts{font-size:44px}
+
+  .shelf{margin:26px 0 6px}
+  .shelf-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .shelf h3{font-size:12.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin:0}
+  .shelf-item{padding:13px 2px;border-top:1.5px solid var(--line)}
+  .shelf-item .sw{
+    font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,sans-serif;
+    font-size:25px;font-weight:900;display:block;
+  }
+  .shelf-item .bars9{max-width:440px;margin:7px 0 4px}
+  .shelf-item .sc{color:var(--ink-soft);font-size:13.5px;display:block}
+  .shelf-item .sc .mono{font-size:13px}
+  .shelf-empty{font-size:15px;color:var(--ink-soft);font-weight:600;padding:12px 2px;border-top:1.5px solid var(--line)}
+
+  /* ---------- footer / compliance ---------- */
+  footer{
+    margin:34px 0 26px;padding-top:16px;border-top:2px solid var(--line);
+    font-size:13.5px;color:var(--ink-faint);
+  }
+  .foot-links{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .foot-link{
+    appearance:none;cursor:pointer;min-height:56px;padding:10px 22px;border-radius:8px;
+    font-size:16px;font-weight:800;
+  }
+  .foot-link:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .foot-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .foot-meta .facts{font-weight:700;color:var(--ink-soft)}
+
+  /* ---------- About panel ---------- */
+  .panel-overlay{
+    position:fixed;inset:0;background:rgba(10,14,11,.55);z-index:50;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .panel-overlay.open{display:flex}
+  .panel{
+    background:
+      radial-gradient(circle at 14px 14px, var(--baseplate-dot) 3px, transparent 3.8px),
+      var(--bg);
+    background-size:30px 30px, auto;
+    width:100%;max-width:700px;max-height:92vh;overflow-y:auto;
+    border-radius:22px 22px 0 0;padding:20px 20px 30px;
+    box-shadow:0 -8px 40px rgba(0,0,0,.35);
+  }
+  @media(min-width:560px){.panel-overlay{align-items:center;padding:20px}.panel{border-radius:22px}}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:-20px;background:var(--bg);padding:14px 0 10px;z-index:2}
+  .panel-head h2{margin:0;font-size:24px;font-weight:900}
+  .close-brick{appearance:none;cursor:pointer;min-height:56px;min-width:56px;border-radius:8px;font-size:20px;font-weight:900;color:#fff}
+  .panel-nav{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 8px}
+  .panel-nav a{
+    display:inline-flex;align-items:center;min-height:48px;padding:8px 16px;border-radius:999px;
+    background:var(--surface);border:2px solid var(--line);color:var(--ink);text-decoration:none;font-weight:800;font-size:14.5px;
+  }
+  .panel section{padding:16px 0 6px;border-top:2px solid var(--line)}
+  .panel section h3{margin:0 0 8px;font-size:19px;font-weight:900}
+  .panel section p{margin:0 0 10px;font-size:15.5px;color:var(--ink-soft)}
+  .panel section p strong{color:var(--ink)}
+  .panel .legal p{font-size:15px}
+  .atlas-list{list-style:none;margin:6px 0 0;padding:0}
+  .atlas-list li{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:8px 0;border-top:1.5px solid var(--line);font-size:13.5px}
+  .atlas-list .w{font-family:Georgia,serif;font-style:italic;font-size:17px}
+  .atlas-list .c{color:var(--ink-soft);font-size:12.5px;text-align:right}
+  .bars{display:flex;gap:4px;margin:12px 0 2px;max-width:420px}
+  .bars span{flex:1;text-align:center}
+  .bars i{display:block;height:36px;border-radius:5px 5px 0 0;background:var(--surface-2);position:relative;overflow:hidden}
+  .bars i b{position:absolute;left:0;right:0;bottom:0;background:var(--yellow);display:block;border-top:2px solid var(--yellow-dark)}
+  .bars em{font-style:normal;font-size:12px;color:var(--ink-soft);display:block;margin-top:4px}
+  .bars-cap{font-size:12.5px;color:var(--ink-faint)}
+
+  @media (prefers-reduced-motion: no-preference){
+    .screen.active{animation:fade .25s ease both}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topstrip">
+    <span class="brand">Roads to the Future · Ages 10–12</span>
+    <button class="about-brick brick b-yellow rounded" id="btn-about-top" type="button" aria-haspopup="dialog">
+      <span class="studs" aria-hidden="true"><i></i><i></i></span>About
+    </button>
+  </div>
+
+  <!-- ================= INTRO ================= -->
+  <section class="screen active" id="screen-intro">
+    <div class="intro">
+      <h1 class="greeting">&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the <em>Exocortex of 2130</em>, and I&rsquo;m here to help.&rdquo;</h1>
+      <p class="gloss">And by help, we mean: survive the singularity.</p>
+
+      <div class="how-row" aria-label="How placing a word works">
+        <div class="how brick b-teal">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>1 · Pick scrolls</h3>
+          <p>Stamp a new word into 3 to 5 scrolls where it belongs.</p>
+        </div>
+        <div class="how brick b-yellow">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>2 · The rods average</h3>
+          <p>Nine numbers, averaged one by one into a single joint.</p>
+        </div>
+        <div class="how brick b-green">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>3 · The word lands</h3>
+          <p>Its home appears on the map, beside its nearest neighbors.</p>
+        </div>
+      </div>
+
+      <div class="modes">
+        <button class="mode-brick brick b-green rounded" id="btn-solo" type="button">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="mode-name">1 Builder</span>
+          <span class="mode-sub">5 words drawn each game · 2 free placements, then 3 challenges</span>
+        </button>
+        <button class="mode-brick brick b-teal rounded" id="btn-coop" type="button">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="mode-name">Two Builders</span>
+          <span class="mode-sub">Take turns stamping scrolls · judge the landing together</span>
+          <span class="duel-split" aria-hidden="true">
+            <span style="background:var(--red);color:#fff">RED</span>
+            <span style="background:var(--blue);color:#fff">BLUE</span>
+          </span>
+        </button>
+        <button class="mode-brick brick b-yellow rounded wide" id="btn-race" type="button">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="mode-name">Two Builders — Race</span>
+          <span class="mode-sub">3 challenge rounds · separate word draws · land beside the target word to score</span>
+        </button>
+      </div>
+      <p class="facts-strip">Free forever · Same screen · No sign-up</p>
+      <p class="instance-line mono" id="instance-line">Instance 2026-W45 · G1 · seed 0000</p>
+
+      <div class="shelf" id="intro-shelf" style="display:none">
+        <div class="shelf-head">
+          <h3>Your Atlas — words you have placed</h3>
+          <button class="btn brick b-plate btn-small rounded" id="btn-clear-shelf" type="button">Clear shelf</button>
+        </div>
+        <div id="intro-shelf-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section class="screen" id="screen-game" aria-live="polite">
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="rod-progress" id="rod-progress" aria-hidden="true"></div>
+    <div class="round-line"><span id="hud-round">Round 1 / 5</span><span>9 numbers · 1 home</span></div>
+
+    <div class="turn-banner brick hidden" id="turn-banner">
+      <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="tb-text rounded" id="turn-text">Red&rsquo;s pick</span>
+    </div>
+
+    <span class="mode-pill" id="mode-pill">Free placement</span>
+
+    <div class="word-card brick b-plate" id="word-card">
+      <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <div class="wc-word rounded" id="wc-word">lullaby</div>
+      <p class="wc-meaning" id="wc-meaning"></p>
+      <p class="challenge-line" id="challenge-line" style="display:none"></p>
+    </div>
+
+    <div id="pick-zone">
+      <div class="pick-line">
+        <span class="pick-text" id="pick-text"></span>
+        <span class="pick-joints" id="pick-joints" aria-hidden="true"></span>
+      </div>
+      <div class="scroll-grid" id="scroll-grid"></div>
+      <div class="btn-row">
+        <button class="btn brick b-green rounded" id="btn-place" type="button" disabled>Place it!</button>
+        <button class="btn brick b-plate rounded" id="btn-clear" type="button">Clear picks</button>
+      </div>
+    </div>
+
+    <div class="calc-panel" id="calc-panel">
+      <h3 class="rounded" id="calc-title">The rods average&hellip;</h3>
+      <p class="calc-sub" id="calc-sub"></p>
+      <div id="calc-rows"></div>
+      <div id="calc-home"></div>
+    </div>
+
+    <div id="result-zone"></div>
+  </section>
+
+  <!-- ================= END ================= -->
+  <section class="screen" id="screen-end">
+    <div class="end">
+      <span class="mode-pill">The road, walked</span>
+      <div id="end-scores"></div>
+      <p class="winner-line rounded" id="winner-line"></p>
+      <p class="end-extra" id="end-extra"></p>
+      <p class="end-line">Meaning is where a word is used.</p>
+
+      <div class="btn-row">
+        <button class="btn brick b-green rounded" id="btn-again" type="button">Build again →</button>
+        <button class="btn brick b-plate rounded" id="btn-home" type="button">Change builders</button>
+      </div>
+
+      <div class="shelf">
+        <h3>Your Atlas — every word on the shelf</h3>
+        <div id="end-shelf-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-links">
+      <button class="foot-link brick b-yellow rounded" type="button" data-open-panel="sec-about">About</button>
+      <button class="foot-link brick b-blue rounded" type="button" data-open-panel="sec-privacy">Privacy</button>
+      <button class="foot-link brick b-red rounded" type="button" data-open-panel="sec-terms">Terms</button>
+    </div>
+    <div class="foot-meta">
+      <span class="facts">Free forever · Same screen · No sign-up</span>
+      <span>© Will Bickford · Exocortex</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ================= ABOUT PANEL ================= -->
+<div class="panel-overlay" id="panel-overlay">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" id="panel">
+    <div class="panel-head">
+      <h2 class="rounded" id="panel-title">About Place a Word</h2>
+      <button class="close-brick brick b-red" id="btn-close-panel" type="button" aria-label="Close panel">✕</button>
+    </div>
+    <nav class="panel-nav" aria-label="Panel sections">
+      <a href="#sec-about">About</a>
+      <a href="#sec-atlas">The atlas</a>
+      <a href="#sec-access">Accessibility</a>
+      <a href="#sec-privacy">Privacy</a>
+      <a href="#sec-terms">Terms</a>
+    </nav>
+
+    <section id="sec-about">
+      <h3>About us — the long version</h3>
+      <p>Place a Word is one of the <strong>Roads to the Future</strong> games, built to teach two things at once: how to think in more dimensions than the world is about to demand of you, and <strong>Singular</strong> — Will Bickford&rsquo;s language, drawn from his own archive of words.</p>
+      <p>In Singular, a word&rsquo;s home address is not assigned. It is <strong>computed</strong>: the address of a word is the <strong>average of the addresses of every scroll that contains it</strong>. Use a word in new places, and its home moves. That is <strong>holographic positioning</strong> — no single scroll decides; every scroll pulls a little, and the word settles where the pulls balance.</p>
+      <p>It is not a made-up rule for this game. In Will&rsquo;s real atlas, <strong>&ldquo;echo&rdquo; appears in 186 scrolls</strong>, and its address — <span class="mono">16.7.7/7.7.9/5.6.6</span> — is the average of all of them. Nobody placed &ldquo;echo&rdquo; there by hand. It landed there because of where it was used. <strong>Meaning is where a word is used.</strong></p>
+      <div class="bars" id="about-bars" aria-hidden="true"></div>
+      <p class="bars-cap">One address as heights: <em>echo</em>, 16.7.7/7.7.9/5.6.6 — three groups of three.</p>
+      <p>Here you play the rule yourself. Stamp a new word into 3 to 5 of the twelve scrolls, and the game averages their addresses — each of the nine numbers separately, halves rounded up, never below 1 — exactly as the atlas does. Then the word lands on the map beside its nearest real neighbors, measured as a straight distance through all nine numbers.</p>
+      <p><strong>Challenges</strong> turn the rule into aim: land a word so a named neighbor is its closest one. There is no trick — an average always lands in the middle of what you picked, so the scrolls you choose are the whole strategy. In <strong>Two Builders</strong>, partners alternate stamps and judge the landing together; in <strong>Race</strong>, each builder draws their own challenge word and scores by landing beside the target.</p>
+    </section>
+
+    <section id="sec-atlas">
+      <h3>The atlas — the points your words land beside</h3>
+      <p>The twelve scrolls are real atlas words at their real addresses, and six more atlas words wait on the map as neighbors. Distances are straight-line (Euclidean) through all nine numbers.</p>
+      <ul class="atlas-list" id="atlas-list"></ul>
+    </section>
+
+    <section id="sec-access">
+      <h3>Accessibility</h3>
+      <p><strong>Big tap targets.</strong> Every brick you can tap is at least 56px tall, and the scroll cards are bigger still. <strong>Chosen scrolls are never shown by color alone</strong> — a chosen scroll also gets a thick outline, a stamp with the word itself, and a ✓ badge, and the pick count is always spelled out in words. The whole game plays by keyboard: Tab to a scroll, Enter to stamp or unstamp it. The averaging rods animate only when your device allows motion; with reduced motion on, every number is simply there.</p>
+    </section>
+
+    <section id="sec-privacy" class="legal">
+      <h3>Privacy</h3>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Progress is stored only on this device, in this browser. It is never sent anywhere. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+    </section>
+
+    <section id="sec-terms" class="legal">
+      <h3>Terms</h3>
+      <p>Free to play, forever. No purchases, no ads, nothing to buy. MIT licensed — copy, remix, share.</p>
+      <p>© Will Bickford · Exocortex</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ------- The 12 scrolls: real atlas words at their real addresses ------- */
+  var SCROLLS = [
+    {anchor:"sky",   title:"The Night Sky",   coord:[5,6,6, 5,5,5, 6,6,6],       text:"The stars come out one by one. The dark is wide, and quiet, and full of light."},
+    {anchor:"song",  title:"Campfire Songs",  coord:[7,6,5, 9,7,9, 5,6,6],       text:"We sit in a circle and sing together. Every voice joins in, even the shy ones."},
+    {anchor:"fire",  title:"The Fire Keeper", coord:[8,6,7, 8,5,7, 7,6,7],       text:"She feeds the flame one stick at a time. A small fire, tended well, warms the whole camp."},
+    {anchor:"heart", title:"A Brave Heart",   coord:[9,8,14, 11,10,12, 7,8,7],   text:"His hands shake, but he steps forward anyway. Courage is love that refuses to run."},
+    {anchor:"earth", title:"Garden Earth",    coord:[10,4,4, 5,4,5, 4,4,6],      text:"Seeds sleep in the dark soil. Rain comes, sun comes, and green things rise."},
+    {anchor:"love",  title:"Love Letters",    coord:[13,8,15, 11,9,12, 8,8,8],   text:"She writes to her friend every week. The letters say: I remember you, I am here."},
+    {anchor:"dream", title:"Dream Journal",   coord:[14,7,13, 17,10,13, 8,6,8],  text:"He writes down last night\u2019s dream before it fades. In it, the house could fly."},
+    {anchor:"light", title:"Lamplight",       coord:[15,12,8, 15,8,15, 7,9,8],   text:"A lamp glows in the window all evening. It says someone is awake, and glad of it."},
+    {anchor:"echo",  title:"The Echo Cave",   coord:[16,7,7, 7,7,9, 5,6,6],      text:"Shout into the cave and your voice comes back. The stone remembers every sound."},
+    {anchor:"star",  title:"Star Charts",     coord:[21,5,10, 7,7,15, 4,6,8],    text:"They draw the stars on paper, dot by dot. A good map lets you sail anywhere."},
+    {anchor:"home",  title:"Going Home",      coord:[24,8,15, 10,10,24, 10,9,10],text:"The road bends, the gate creaks, the dog runs out. Every step is closer to home."},
+    {anchor:"map",   title:"The Great Map",   coord:[42,3,5, 7,5,8, 4,3,7],      text:"One map for rivers, roads, and stars. If it exists, there is a place for it here."}
+  ];
+  /* Six more real atlas points that wait on the map as neighbors. */
+  var EXTRA = [
+    {word:"sing",    coord:[5,7,6, 8,7,6, 5,5,6]},
+    {word:"silence", coord:[9,6,7, 8,6,10, 5,5,6]},
+    {word:"flame",   coord:[12,13,14, 15,9,19, 7,9,7]},
+    {word:"sacred",  coord:[12,7,11, 9,8,17, 5,5,9]},
+    {word:"pattern", coord:[16,11,13, 14,8,16, 8,9,8]},
+    {word:"memory",  coord:[26,16,18, 19,15,21, 13,14,14]}
+  ];
+  var ATLAS_ALL = SCROLLS.map(function(s){ return {word:s.anchor, coord:s.coord}; }).concat(EXTRA);
+
+  /* Neighborhood character, by nearest neighbor. */
+  var DESC = {
+    sky:"wide-open", star:"starlit", light:"bright", song:"singing", sing:"singing",
+    dream:"dreamy", silence:"quiet", heart:"brave-hearted", love:"kind",
+    fire:"warm", flame:"warm", earth:"green", echo:"answering", home:"homey",
+    map:"mapped", pattern:"patterned", sacred:"still", memory:"remembering"
+  };
+
+  /* The new-word pool: 10 words. Rounds are drawn, not fixed — each game
+     draws 2 free rounds + 3 challenge rounds from this pool (see the
+     seeded generator below). Facts never mutate; only the deal does. */
+  var WORD_POOL = [
+    {word:"lullaby", meaning:"a soft song that helps someone sleep"},
+    {word:"rocket",  meaning:"a ship that flies to the stars"},
+    {word:"harvest", meaning:"gathering the food you grew"},
+    {word:"whisper", meaning:"speaking very softly"},
+    {word:"voyage",  meaning:"a long journey over water"},
+    {word:"beacon",  meaning:"a light that guides travellers home"},
+    {word:"tide",    meaning:"the sea moving in and out"},
+    {word:"ember",   meaning:"a small glowing piece of a fire"},
+    {word:"chorus",  meaning:"many voices singing together"},
+    {word:"atlas",   meaning:"a book of maps"}
+  ];
+  function poolEntry(name){
+    for(var i=0;i<WORD_POOL.length;i++) if(WORD_POOL[i].word===name) return WORD_POOL[i];
+    return null;
+  }
+  /* Free rounds are drawn from these five. */
+  var FREE_WORDS = ["lullaby","harvest","tide","chorus","atlas"];
+  /* Challenge rounds are drawn from these five pairings.
+     Every target was checked against every possible 3–5 scroll pick
+     (1,507 pick sets, computed with the game's own averaging rule):
+     star 246 landings, silence 273, pattern 63, fire 42 — all winnable.
+     ember→fire (42) matches the already-shipped harvest→fire standard,
+     and beacon→star (246) is the most winnable target of all, so both
+     new pairings are verified and ship. No unverified challenge ships. */
+  var CHALLENGE_DEFS = [
+    {word:"rocket",  target:"star",
+     hint:"Star Charts pulls hard toward star — and averages land in the middle of your picks."},
+    {word:"whisper", target:"silence",
+     hint:"Quiet, low scrolls pull toward silence. Loud, tall ones pull away."},
+    {word:"voyage",  target:"pattern",
+     hint:"Sailors steer by the pattern of the stars. This is the hard one — aim carefully."},
+    {word:"ember",   target:"fire",
+     hint:"The Fire Keeper tends the flame — warm, close scrolls pull toward fire."},
+    {word:"beacon",  target:"star",
+     hint:"A beacon shines like a star to guide travellers home — Star Charts pulls hard toward star."}
+  ];
+  /* Race pool: each builder draws 3 of these from the same generation's
+     pool. lullaby→heart (64 landings) and harvest→fire (42) join the
+     main pairings, plus the verified ember→fire (42) and beacon→star (246). */
+  var RACE_POOL = [
+    {word:"rocket",  target:"star"},
+    {word:"whisper", target:"silence"},
+    {word:"voyage",  target:"pattern"},
+    {word:"lullaby", target:"heart"},
+    {word:"harvest", target:"fire"},
+    {word:"ember",   target:"fire"},
+    {word:"beacon",  target:"star"}
+  ].map(function(d){
+    var e=poolEntry(d.word);
+    return {word:d.word, meaning:e.meaning, target:d.target};
+  });
+
+  var BRICKS = ["b-teal","b-green","b-yellow","b-blue","b-red"];
+  var PLAYERS = [
+    {name:"Red",  cls:"b-red",  stamp:"st-red"},
+    {name:"Blue", cls:"b-blue", stamp:"st-blue"}
+  ];
+  var ORD = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth"];
+
+  /* ------- Your Atlas shelf: kept words, stored only on this device -------
+     The shelf is the player's own record and persists across generations
+     untouched. The generation counter (gen) lives alongside it and only
+     ever moves by the single guarded increment in endGame(). */
+  var STORE_KEY = "placeaword.store.v1";
+  var store = {shelf:[], gen:1};
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      var parsed = JSON.parse(raw);
+      if(parsed && Array.isArray(parsed.shelf)) store.shelf = parsed.shelf;
+      if(parsed && typeof parsed.gen === "number" && isFinite(parsed.gen) && parsed.gen >= 1) store.gen = Math.floor(parsed.gen);
+    }
+  }catch(e){ /* storage unavailable — play on without it */ }
+  function saveStore(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){} }
+  function currentGen(){ return (typeof store.gen === "number" && store.gen >= 1) ? Math.floor(store.gen) : 1; }
+
+  /* ------- Instance generator: seeded by ISO week + generation -------
+     Same week + same generation always deals the same rounds; a new
+     generation (or a new week) deals a new instance. No unseeded
+     randomness anywhere in round construction — all of it routes here. */
+  function isoWeekKey(now){
+    var d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    var dayNum = (d.getUTCDay() + 6) % 7;               /* Mon = 0 */
+    d.setUTCDate(d.getUTCDate() - dayNum + 3);          /* this Thursday */
+    var year = d.getUTCFullYear();
+    var first = new Date(Date.UTC(year, 0, 4));
+    var fDay = (first.getUTCDay() + 6) % 7;
+    first.setUTCDate(first.getUTCDate() - fDay + 3);    /* first Thursday */
+    var week = 1 + Math.round((d - first) / (7 * 24 * 3600 * 1000));
+    return year + "-W" + (week < 10 ? "0" : "") + week;
+  }
+  function seedFor(weekKey, gen){
+    var str = weekKey + "|G" + gen + "|place-a-word";
+    var h = 2166136261 >>> 0;
+    for(var i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function seedHex(seed){ return ("0000" + (seed & 0xFFFF).toString(16).toUpperCase()).slice(-4); }
+  function rngFromSeed(seed){
+    var a = seed >>> 0;
+    return function(){
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function instanceInfo(){
+    var key = isoWeekKey(new Date());
+    var gen = currentGen();
+    var seed = seedFor(key, gen);
+    return {key:key, gen:gen, seed:seed, label:"Instance " + key + " \u00B7 G" + gen + " \u00B7 seed " + seedHex(seed)};
+  }
+  function renderInstance(){
+    var el = document.getElementById("instance-line");
+    if(el) el.textContent = instanceInfo().label;
+  }
+  function seededShuffle(arr, rand){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){ var j = Math.floor(rand() * (i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+  /* Draw this generation's main rounds: 2 free, then 3 challenges. */
+  function drawMainRounds(){
+    var info = instanceInfo();
+    var rand = rngFromSeed(info.seed);
+    var free = seededShuffle(FREE_WORDS, rand).slice(0,2).map(function(name){
+      var e = poolEntry(name);
+      return {word:e.word, meaning:e.meaning, type:"free"};
+    });
+    var chal = seededShuffle(CHALLENGE_DEFS, rand).slice(0,3).map(function(d){
+      var e = poolEntry(d.word);
+      return {word:e.word, meaning:e.meaning, type:"challenge", target:d.target, hint:d.hint};
+    });
+    return free.concat(chal);
+  }
+  /* Race draws come from the same seed — the same generation's pool. */
+  function drawRaceRounds(){
+    var info = instanceInfo();
+    var rand = rngFromSeed(info.seed);
+    var drawsA = seededShuffle(RACE_POOL, rand).slice(0,3);
+    var drawsB = seededShuffle(RACE_POOL, rand).slice(0,3);
+    return drawsA.map(function(d,i){ return {red:d, blue:drawsB[i]}; });
+  }
+
+  /* ------- helpers ------- */
+  function fmt(c){ return c.slice(0,3).join(".") + "/" + c.slice(3,6).join(".") + "/" + c.slice(6,9).join("."); }
+  function coordHTML(c, small, onbrick){
+    var g=[c.slice(0,3).join("."), c.slice(3,6).join("."), c.slice(6,9).join(".")];
+    return '<span class="coord-rod mono'+(small?" small":"")+(onbrick?" onbrick":"")+'" aria-label="'+fmt(c)+'">'
+      + '<span class="grp">'+g[0]+'</span><span class="rod" aria-hidden="true"></span>'
+      + '<span class="grp">'+g[1]+'</span><span class="rod" aria-hidden="true"></span>'
+      + '<span class="grp">'+g[2]+'</span></span>';
+  }
+  function barsHTML(coord, maxV, cls){
+    var m = maxV || Math.max.apply(null, coord);
+    if(m < 1) m = 1;
+    var s = '<div class="bars9 '+(cls||"")+'" aria-hidden="true">';
+    for(var i=0;i<9;i++){
+      var pct = Math.max(5, Math.round(coord[i]/m*100));
+      s += '<span><b style="height:'+pct+'%"></b></span>';
+    }
+    return s + '</div>';
+  }
+  function dist(a,b){ var s=0; for(var i=0;i<9;i++){ var d=a[i]-b[i]; s+=d*d; } return Math.sqrt(s); }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+  function studs(n){
+    var s='<span class="studs" aria-hidden="true">';
+    for(var i=0;i<n;i++) s+="<i></i>";
+    return s+"</span>";
+  }
+  function scrollByAnchor(a){
+    for(var i=0;i<SCROLLS.length;i++) if(SCROLLS[i].anchor===a) return SCROLLS[i];
+    return null;
+  }
+  /* The real rule: home = average of the chosen scroll addresses,
+     each component rounded half-up, never below 1. */
+  function computeHome(picks){
+    var n = picks.length, home = [];
+    for(var i=0;i<9;i++){
+      var sum = 0;
+      picks.forEach(function(a){ sum += scrollByAnchor(a).coord[i]; });
+      home.push(Math.max(1, Math.floor(sum/n + 0.5)));
+    }
+    return home;
+  }
+  function neighborsOf(home){
+    return ATLAS_ALL.map(function(e){ return {word:e.word, coord:e.coord, d:dist(home, e.coord)}; })
+      .sort(function(a,b){ return a.d - b.d; }).slice(0,3);
+  }
+  function joinWords(list){
+    if(list.length<=1) return list.join("");
+    if(list.length===2) return list[0]+" and "+list[1];
+    return list.slice(0,-1).join(", ")+", and "+list[list.length-1];
+  }
+
+  /* ------- atlas list + bars (About panel) ------- */
+  document.getElementById("atlas-list").innerHTML =
+    ATLAS_ALL.map(function(e){
+      var isScroll = !!scrollByAnchor(e.word);
+      return '<li><span class="w">'+esc(e.word)+'</span><span class="c mono">'+fmt(e.coord)+(isScroll?" · scroll":" · neighbor")+'</span></li>';
+    }).join("");
+  (function(){
+    var coord=[16,7,7,7,7,9,5,6,6], max=16;
+    document.getElementById("about-bars").innerHTML = coord.map(function(v){
+      var hh=Math.max(8, Math.round(v/max*100));
+      return '<span><i><b style="height:'+hh+'%"></b></i><em class="mono">'+v+'</em></span>';
+    }).join("");
+  })();
+
+  /* ------- panel ------- */
+  var overlay=document.getElementById("panel-overlay");
+  var panel=document.getElementById("panel");
+  function openPanel(sectionId){
+    overlay.classList.add("open");
+    document.body.style.overflow="hidden";
+    if(sectionId){
+      var t=document.getElementById(sectionId);
+      if(t) setTimeout(function(){ t.scrollIntoView({block:"start"}); }, 40);
+    } else { panel.scrollTop=0; }
+    document.getElementById("btn-close-panel").focus();
+  }
+  function closePanel(){
+    overlay.classList.remove("open");
+    document.body.style.overflow="";
+  }
+  document.getElementById("btn-about-top").addEventListener("click", function(){ openPanel("sec-about"); });
+  var footLinks=document.querySelectorAll("[data-open-panel]");
+  for(var f=0;f<footLinks.length;f++){
+    footLinks[f].addEventListener("click", function(){ openPanel(this.getAttribute("data-open-panel")); });
+  }
+  document.getElementById("btn-close-panel").addEventListener("click", closePanel);
+  overlay.addEventListener("click", function(e){ if(e.target===overlay) closePanel(); });
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && overlay.classList.contains("open")) closePanel(); });
+  var navLinks=panel.querySelectorAll(".panel-nav a");
+  for(var n=0;n<navLinks.length;n++){
+    navLinks[n].addEventListener("click", function(e){
+      e.preventDefault();
+      var t=document.querySelector(this.getAttribute("href"));
+      if(t) t.scrollIntoView({block:"start", behavior:"smooth"});
+    });
+  }
+
+  /* ------- Your Atlas shelf rendering ------- */
+  function shelfItemHTML(e){
+    var maxV = Math.max.apply(null, e.home);
+    var line = "from "+joinWords(e.scrolls) + " · nearest: " + e.neighbors.join(", ");
+    if(e.target){
+      line += e.hit ? " · challenge landed beside "+e.target+" ✓" : " · aimed for "+e.target+", landed beside "+e.neighbors[0];
+    }
+    return '<div class="shelf-item"><span class="sw">'+esc(e.word)+'</span>'
+      + barsHTML(e.home, maxV, "plain")
+      + '<span class="sc"><span class="mono">'+fmt(e.home)+'</span> · '+esc(line)+'</span></div>';
+  }
+  function renderShelf(){
+    var introWrap=document.getElementById("intro-shelf");
+    var html = store.shelf.length
+      ? store.shelf.map(shelfItemHTML).join("")
+      : '<p class="shelf-empty">Nothing on the shelf yet — keep a word and it will live here.</p>';
+    document.getElementById("intro-shelf-list").innerHTML = html;
+    document.getElementById("end-shelf-list").innerHTML = html;
+    introWrap.style.display = store.shelf.length ? "block" : "none";
+  }
+  document.getElementById("btn-clear-shelf").addEventListener("click", function(){
+    store.shelf = [];
+    saveStore();
+    renderShelf();
+  });
+  renderShelf();
+  renderInstance();
+
+  /* ================= game state ================= */
+  var mode="solo";           /* solo | coop | race */
+  var rounds=[];             /* main: drawn rounds; race: [{red:draw, blue:draw} x3] */
+  var idx=0;
+  var picks=[];              /* scroll anchors, in pick order */
+  var pickOwners=[];         /* coop/race: 0 Red, 1 Blue per pick */
+  var phase="pick";          /* pick | placed | verdict (race) */
+  var keptCount=0, challengesHit=0, challengesSeen=0;
+  var coopScores=[0,0];      /* stamps placed per builder (participation, not points) */
+  var raceScores=[0,0];
+  var raceTurn=0;            /* 0 Red placing, 1 Blue placing */
+  var racePlaced={};         /* per-round placements: {0:{...},1:{...}} */
+  var gameCounted=false;     /* guard: one generation increment per completed game */
+  var lastPlacement=null;    /* {word, home, neighbors, picks, target, hit, owner} */
+
+  var screens={intro:document.getElementById("screen-intro"), game:document.getElementById("screen-game"), end:document.getElementById("screen-end")};
+  function show(name){
+    for(var k in screens) screens[k].classList.toggle("active", k===name);
+    window.scrollTo(0,0);
+  }
+
+  var scoreboard=document.getElementById("scoreboard"),
+      rodProgress=document.getElementById("rod-progress"),
+      hudRound=document.getElementById("hud-round"),
+      banner=document.getElementById("turn-banner"),
+      turnText=document.getElementById("turn-text"),
+      pill=document.getElementById("mode-pill"),
+      wordCard=document.getElementById("word-card"),
+      wcWord=document.getElementById("wc-word"),
+      wcMeaning=document.getElementById("wc-meaning"),
+      challengeLine=document.getElementById("challenge-line"),
+      pickZone=document.getElementById("pick-zone"),
+      pickText=document.getElementById("pick-text"),
+      pickJoints=document.getElementById("pick-joints"),
+      grid=document.getElementById("scroll-grid"),
+      placeBtn=document.getElementById("btn-place"),
+      clearBtn=document.getElementById("btn-clear"),
+      calcPanel=document.getElementById("calc-panel"),
+      calcSub=document.getElementById("calc-sub"),
+      calcRows=document.getElementById("calc-rows"),
+      calcHome=document.getElementById("calc-home"),
+      resultZone=document.getElementById("result-zone");
+
+  function currentDraw(){
+    if(mode==="race") return rounds[idx][raceTurn===0 ? "red" : "blue"];
+    return rounds[idx];
+  }
+  function currentPicker(){
+    if(mode==="coop") return (idx + picks.length) % 2;   /* starter alternates each round */
+    if(mode==="race") return raceTurn;
+    return -1;
+  }
+  function totalRounds(){ return rounds.length; }
+
+  /* ================= chrome ================= */
+  function renderScoreboard(){
+    if(mode==="coop"){
+      var p=currentPicker();
+      scoreboard.innerHTML = PLAYERS.map(function(pl,i){
+        return '<div class="score-brick brick '+pl.cls+((phase==="pick" && p===i)?" turn":"")+'">'
+          + studs(3)
+          + '<div class="who"><span>'+pl.name+((phase==="pick" && p===i)?' <span class="turn-tag">Picking</span>':"")
+          + '</span><span class="pts">'+coopScores[i]+'</span></div></div>';
+      }).join("");
+    } else if(mode==="race"){
+      scoreboard.innerHTML = PLAYERS.map(function(pl,i){
+        return '<div class="score-brick brick '+pl.cls+((phase!=="verdict" && raceTurn===i)?" turn":"")+'">'
+          + studs(3)
+          + '<div class="who"><span>'+pl.name+((phase!=="verdict" && raceTurn===i)?' <span class="turn-tag">Placing</span>':"")
+          + '</span><span class="pts">'+raceScores[i]+'</span></div></div>';
+      }).join("");
+    } else {
+      scoreboard.innerHTML =
+        '<div class="score-brick brick b-green turn">'+studs(3)
+        + '<div class="who"><span>Words on your shelf</span><span class="pts">'+keptCount+'</span></div></div>'
+        + '<div class="score-brick brick b-plate"><div class="who" style="margin-top:22px"><span style="color:var(--ink-faint)">Challenges landed</span><span class="pts">'+challengesHit+(challengesSeen?' / '+challengesSeen:"")+'</span></div></div>';
+    }
+  }
+  function renderProgress(doneCount){
+    rodProgress.innerHTML = rounds.map(function(r,i){
+      var left = rounds.length===1 ? 50 : (i/(rounds.length-1))*100;
+      var cls="node";
+      if(i<doneCount) cls += " done";
+      else if(i===idx) cls += " now";
+      return '<span class="'+cls+'" style="left:'+left+'%"></span>';
+    }).join("");
+    hudRound.textContent="Round "+(idx+1)+" / "+rounds.length;
+  }
+
+  /* ================= round rendering ================= */
+  function renderRound(){
+    phase="pick";
+    picks=[]; pickOwners=[];
+    lastPlacement=null;
+    var d=currentDraw();
+    renderScoreboard();
+    renderProgress(idx);
+    calcPanel.classList.remove("show");
+    resultZone.innerHTML="";
+    pickZone.style.display="block";
+
+    /* turn banner */
+    if(mode==="coop"){
+      var p=PLAYERS[currentPicker()];
+      banner.className="turn-banner brick "+p.cls;
+      turnText.textContent=p.name+"\u2019s pick";
+    } else if(mode==="race"){
+      var rp=PLAYERS[raceTurn];
+      banner.className="turn-banner brick "+rp.cls;
+      turnText.textContent=rp.name+"\u2019s placement";
+    } else {
+      banner.className="turn-banner brick hidden";
+    }
+
+    /* word card */
+    if(mode==="race"){
+      pill.textContent="Race · Challenge round";
+    } else if(d.type==="challenge"){
+      pill.textContent="Challenge round";
+    } else {
+      pill.textContent="Free placement";
+    }
+    wordCard.className="word-card brick "+(d.target ? "b-yellow" : "b-plate");
+    wcWord.textContent=d.word;
+    wcMeaning.textContent="\u201C"+d.word+"\u201D — "+d.meaning+".";
+    if(d.target){
+      challengeLine.style.display="block";
+      challengeLine.innerHTML="Challenge: place &ldquo;"+esc(d.word)+"&rdquo; so its nearest neighbor is <strong>"+esc(d.target)+"</strong>."
+        + (d.hint ? '<span class="hint">'+esc(d.hint)+"</span>" : "");
+    } else {
+      challengeLine.style.display="none";
+      challengeLine.innerHTML="";
+    }
+
+    renderGrid();
+    renderPickLine();
+  }
+
+  function renderGrid(){
+    var d=currentDraw();
+    var maxAll=42;
+    grid.innerHTML="";
+    SCROLLS.forEach(function(s,i){
+      var b=document.createElement("button");
+      b.type="button";
+      b.className="scroll-card brick "+BRICKS[i % BRICKS.length];
+      b.setAttribute("data-anchor", s.anchor);
+      b.innerHTML=studs(3)
+        + '<span class="stamp" aria-hidden="true">'+esc(d.word)+'</span>'
+        + '<span class="sc-head"><span class="sc-title rounded">'+esc(s.title)+'</span>'
+        + '<span class="sc-anchor">'+esc(s.anchor)+'</span></span>'
+        + '<span class="sc-text" style="display:block">'+esc(s.text)+'</span>'
+        + barsHTML(s.coord, maxAll, "mini")
+        + '<span class="sc-addr" style="display:block">'+coordHTML(s.coord, true, true)+'</span>'
+        + '<span class="pick-badge" aria-hidden="true">✓</span>';
+      b.setAttribute("aria-label", s.title+" — the "+s.anchor+" scroll, address "+fmt(s.coord));
+      b.addEventListener("click", function(){ togglePick(s.anchor); });
+      grid.appendChild(b);
+    });
+    syncGrid();
+  }
+  function syncGrid(){
+    var cards=grid.children;
+    for(var i=0;i<cards.length;i++){
+      var a=cards[i].getAttribute("data-anchor");
+      var pi=picks.indexOf(a);
+      cards[i].classList.toggle("chosen", pi>=0);
+      if(pi>=0){
+        var stamp=cards[i].querySelector(".stamp");
+        var owner=pickOwners[pi];
+        stamp.className="stamp "+(mode==="solo" ? "st-teal" : PLAYERS[owner].stamp);
+        cards[i].setAttribute("aria-pressed","true");
+      } else {
+        cards[i].setAttribute("aria-pressed","false");
+      }
+      /* at 5 picks, unchosen cards rest */
+      cards[i].disabled = (phase!=="pick") || (pi<0 && picks.length>=5);
+    }
+  }
+  function renderPickLine(){
+    var d=currentDraw();
+    pickJoints.innerHTML = [0,1,2,3,4].map(function(i){
+      return (i>0?'<span class="pj-rod"></span>':"")+'<span class="pj'+(i<picks.length?" filled":"")+'"></span>';
+    }).join("");
+    if(picks.length===0){
+      pickText.textContent="Tap scrolls to stamp \u201C"+d.word+"\u201D into them. Pick 3 to 5.";
+    } else if(picks.length<3){
+      pickText.textContent=picks.length+" stamped — pick "+(3-picks.length)+" more to place \u201C"+d.word+"\u201D.";
+    } else if(picks.length<5){
+      pickText.textContent=picks.length+" stamped. Add more, or place it!";
+    } else {
+      pickText.textContent="5 stamped — the most a word can hold. Place it!";
+    }
+    placeBtn.disabled = picks.length<3 || phase!=="pick";
+    placeBtn.textContent = picks.length>=3 ? "Place it! ("+picks.length+" scrolls)" : "Place it!";
+    clearBtn.disabled = picks.length===0 || phase!=="pick";
+  }
+
+  function togglePick(anchor){
+    if(phase!=="pick") return;
+    var pi=picks.indexOf(anchor);
+    if(pi>=0){
+      picks.splice(pi,1); pickOwners.splice(pi,1);
+    } else {
+      if(picks.length>=5) return;
+      if(mode!=="solo") pickOwners.push(currentPicker());
+      else pickOwners.push(-1);
+      picks.push(anchor);
+    }
+    syncGrid();
+    renderPickLine();
+    renderScoreboard();
+    if(mode==="coop" && phase==="pick"){
+      var p=PLAYERS[currentPicker()];
+      banner.className="turn-banner brick "+p.cls;
+      turnText.textContent=p.name+"\u2019s pick";
+    }
+  }
+  clearBtn.addEventListener("click", function(){
+    if(phase!=="pick") return;
+    picks=[]; pickOwners=[];
+    syncGrid(); renderPickLine(); renderScoreboard();
+    if(mode==="coop"){
+      var p=PLAYERS[currentPicker()];
+      banner.className="turn-banner brick "+p.cls;
+      turnText.textContent=p.name+"\u2019s pick";
+    }
+  });
+
+  /* ================= placing ================= */
+  placeBtn.addEventListener("click", function(){
+    if(picks.length<3 || phase!=="pick") return;
+    var d=currentDraw();
+    var home=computeHome(picks);
+    var neigh=neighborsOf(home);
+    var hit = d.target ? (neigh[0].word===d.target) : null;
+    lastPlacement={
+      word:d.word, home:home, neighbors:neigh, picks:picks.slice(), owners:pickOwners.slice(),
+      target:d.target||null, hit:hit, owner:(mode==="race"?raceTurn:-1)
+    };
+    phase="placed";
+    syncGrid(); renderPickLine(); renderScoreboard();
+    renderPlacement();
+  });
+
+  function renderPlacement(){
+    var lp=lastPlacement;
+    var n=lp.picks.length;
+    calcPanel.classList.add("show");
+    document.getElementById("calc-title").textContent="The rods average\u2026";
+    calcSub.textContent="Each of the nine numbers, averaged over your "+n+" scrolls — halves round up, never below 1.";
+
+    var rows="";
+    for(var i=0;i<9;i++){
+      if(i===0) rows+='<div class="calc-group-note">First group of three</div>';
+      if(i===3) rows+='<div class="calc-group-note">Second group of three</div>';
+      if(i===6) rows+='<div class="calc-group-note">Third group of three</div>';
+      var vals=lp.picks.map(function(a){ return scrollByAnchor(a).coord[i]; });
+      var sum=vals.reduce(function(x,y){return x+y;},0);
+      var avg=sum/n;
+      var joints=vals.map(function(v){ return '<span class="calc-joint mono">'+v+'</span>'; }).join("");
+      rows+='<div class="calc-row" style="--i:'+i+'">'
+        + '<span class="calc-label">'+ORD[i]+' no.</span>'
+        + '<span class="calc-rod"><span class="calc-joints">'+joints+'</span></span>'
+        + '<span class="calc-eq mono"><span class="eq-full">('+vals.join("+")+') ÷ '+n+' = '+(Math.round(avg*10)/10)+'</span><span class="eq-short">÷ '+n+' = '+(Math.round(avg*10)/10)+'</span></span>'
+        + '<span class="calc-digit mono">'+lp.home[i]+'</span>'
+        + '</div>';
+    }
+    calcRows.innerHTML=rows;
+
+    var scale=Math.max.apply(null, lp.home.concat(lp.neighbors.map(function(x){ return Math.max.apply(null,x.coord); })));
+    calcHome.innerHTML =
+      '<div class="home-brick brick b-teal" style="--d:9">'
+      + studs(4)
+      + '<div class="hb-label">&ldquo;'+esc(lp.word)+'&rdquo; lives here</div>'
+      + '<div class="hb-word rounded">'+esc(lp.word)+'</div>'
+      + barsHTML(lp.home, scale, "large")
+      + '<div class="hb-addr">'+coordHTML(lp.home, false, true)+'</div>'
+      + '</div>'
+      + '<div class="neighbors"><h3>Nearest neighbors on the real atlas</h3>'
+      + lp.neighbors.map(function(x,i2){
+          return '<div class="neighbor-row'+(i2===0?" first":"")+'"><span class="nw">'+esc(x.word)+'</span>'
+            + barsHTML(x.coord, scale, "")
+            + '<span class="nd">about '+Math.round(x.d)+' steps away<br><span class="mono">'+fmt(x.coord)+'</span></span></div>';
+        }).join("")
+      + '</div>';
+
+    renderResultActions();
+    calcPanel.scrollIntoView({block:"start", behavior:"smooth"});
+  }
+
+  function neighborSentence(lp){
+    var words=lp.neighbors.map(function(x){ return x.word; });
+    var desc=DESC[lp.neighbors[0].word] || "new";
+    return "You placed &ldquo;<strong>"+esc(lp.word)+"</strong>&rdquo; beside "+joinWords(words)
+      +" — a "+desc+" neighborhood. Does it feel right?";
+  }
+  function renderResultActions(){
+    var lp=lastPlacement;
+    var html="";
+    if(mode==="race"){
+      var owner=PLAYERS[lp.owner];
+      html+='<div class="feedback"><span class="verdict-chip '+(lp.hit?"hit":"miss")+'">'
+        + owner.name+" · "+(lp.hit?"Landed beside "+esc(lp.target)+" ✓":"Landed beside "+esc(lp.neighbors[0].word)+", not "+esc(lp.target))
+        + '</span><br>'+neighborSentence(lp)+'</div>';
+      html+='<div class="btn-row result-actions">';
+      if(raceTurn===0){
+        html+='<button class="btn brick b-blue rounded" id="btn-race-next" type="button">Blue&rsquo;s placement →</button>';
+      } else {
+        html+='<button class="btn brick b-green rounded" id="btn-race-next" type="button">See who landed it →</button>';
+      }
+      html+='<button class="btn brick b-plate rounded" id="btn-move" type="button">Move it — re-pick</button></div>';
+      resultZone.innerHTML=html;
+      document.getElementById("btn-race-next").addEventListener("click", raceAdvance);
+    } else if(lp.target){
+      html+='<div class="feedback"><span class="verdict-chip '+(lp.hit?"hit":"miss")+'">'
+        + (lp.hit?"Challenge landed ✓":"Challenge missed")+'</span><br>'
+        + (lp.hit
+            ? "It landed beside <strong>"+esc(lp.target)+"</strong> — exactly the neighborhood you aimed for. Keep it on your shelf?"
+            : "It landed beside <strong>"+esc(lp.neighbors[0].word)+"</strong>, not "+esc(lp.target)
+              +". An average always lands in the middle of your picks — different scrolls, different landing. Move it and aim again, or keep it anyway?")
+        + '</div>';
+      html+='<div class="btn-row result-actions">'
+        + '<button class="btn brick b-green rounded" id="btn-keep" type="button">Keep it</button>'
+        + '<button class="btn brick b-plate rounded" id="btn-move" type="button">Move it — re-pick</button></div>';
+      resultZone.innerHTML=html;
+      document.getElementById("btn-keep").addEventListener("click", keepWord);
+    } else {
+      html+='<div class="feedback">'+neighborSentence(lp)+'</div>';
+      html+='<div class="btn-row result-actions">'
+        + '<button class="btn brick b-green rounded" id="btn-keep" type="button">Keep it</button>'
+        + '<button class="btn brick b-plate rounded" id="btn-move" type="button">Move it — re-pick</button></div>';
+      resultZone.innerHTML=html;
+      document.getElementById("btn-keep").addEventListener("click", keepWord);
+    }
+    var mv=document.getElementById("btn-move");
+    if(mv) mv.addEventListener("click", moveWord);
+  }
+
+  function moveWord(){
+    phase="pick";
+    lastPlacement=null;
+    calcPanel.classList.remove("show");
+    resultZone.innerHTML="";
+    renderScoreboard();
+    syncGrid(); renderPickLine();
+    pickZone.scrollIntoView({block:"start", behavior:"smooth"});
+  }
+
+  function keepWord(){
+    var lp=lastPlacement;
+    store.shelf.push({
+      word:lp.word, home:lp.home, scrolls:lp.picks.slice(),
+      neighbors:lp.neighbors.map(function(x){ return x.word; }),
+      target:lp.target, hit:lp.hit
+    });
+    saveStore(); renderShelf();
+    if(mode==="coop"){
+      lp.owners.forEach(function(o){ if(o>=0) coopScores[o]++; });
+    }
+    keptCount++;
+    if(lp.target){ challengesSeen++; if(lp.hit) challengesHit++; }
+    idx++;
+    if(idx>=totalRounds()){ endGame(); return; }
+    renderRound();
+  }
+
+  /* ================= race flow ================= */
+  function raceAdvance(){
+    var lp=lastPlacement;
+    if(raceTurn===0){
+      racePlaced[0]=lp;
+      raceTurn=1;
+      renderRound();
+      return;
+    }
+    racePlaced[1]=lp;
+    /* judge */
+    if(racePlaced[0].hit) raceScores[0]++;
+    if(racePlaced[1].hit) raceScores[1]++;
+    /* race words join the shelf too — both builders placed them */
+    [0,1].forEach(function(i){
+      var p=racePlaced[i];
+      store.shelf.push({
+        word:p.word+" ("+PLAYERS[i].name+")", home:p.home, scrolls:p.picks.slice(),
+        neighbors:p.neighbors.map(function(x){ return x.word; }),
+        target:p.target, hit:p.hit
+      });
+    });
+    saveStore(); renderShelf();
+    phase="verdict";
+    renderScoreboard(); renderProgress(idx+1);
+    banner.className="turn-banner brick hidden";
+    pickZone.style.display="none";
+    calcPanel.classList.remove("show");
+    var html='<div class="feedback"><strong>Round '+(idx+1)+' judged.</strong> '
+      + PLAYERS[0].name+" aimed for "+esc(racePlaced[0].target)+" and landed beside "+esc(racePlaced[0].neighbors[0].word)
+      + (racePlaced[0].hit?" — landed it ✓.":" — missed.")
+      + " "+PLAYERS[1].name+" aimed for "+esc(racePlaced[1].target)+" and landed beside "+esc(racePlaced[1].neighbors[0].word)
+      + (racePlaced[1].hit?" — landed it ✓.":" — missed.")
+      + "</div>";
+    html+=[0,1].map(function(i){
+      var p=racePlaced[i];
+      return '<div class="race-result brick '+PLAYERS[i].cls+'">'+studs(3)
+        + '<div class="rr-word rounded">'+esc(p.word)+' → '+fmt(p.home)+'</div>'
+        + '<p class="rr-line">Stamped into '+joinWords(p.picks)+'. Nearest: '+esc(p.neighbors[0].word)
+        + (p.hit?' — <strong>point!</strong>':' (aimed for '+esc(p.target)+')')+'</p></div>';
+    }).join("");
+    html+='<div class="btn-row result-actions"><button class="btn brick b-green rounded" id="btn-race-continue" type="button">'
+      + (idx+1>=totalRounds() ? "Finish the race →" : "Next round →")+'</button></div>';
+    resultZone.innerHTML=html;
+    document.getElementById("btn-race-continue").addEventListener("click", function(){
+      idx++;
+      racePlaced={};
+      raceTurn=0;
+      if(idx>=totalRounds()){ endGame(); return; }
+      renderRound();
+    });
+    resultZone.scrollIntoView({block:"start", behavior:"smooth"});
+  }
+
+  /* ================= start / end ================= */
+  function startGame(m){
+    mode=m;
+    idx=0; keptCount=0; challengesHit=0; challengesSeen=0;
+    coopScores=[0,0]; raceScores=[0,0]; raceTurn=0; racePlaced={};
+    gameCounted=false;
+    if(mode==="race"){
+      rounds=drawRaceRounds();
+    } else {
+      rounds=drawMainRounds();
+    }
+    show("game");
+    renderRound();
+  }
+  document.getElementById("btn-solo").addEventListener("click", function(){ startGame("solo"); });
+  document.getElementById("btn-coop").addEventListener("click", function(){ startGame("coop"); });
+  document.getElementById("btn-race").addEventListener("click", function(){ startGame("race"); });
+
+  function endGame(){
+    /* Completing a game increments the generation exactly once (guarded),
+       so the next game is re-dealt. The shelf is never touched here. */
+    if(!gameCounted){
+      gameCounted=true;
+      store.gen=currentGen()+1;
+      saveStore();
+      renderInstance();
+    }
+    show("end");
+    renderShelf();
+    var winner=document.getElementById("winner-line");
+    var extra=document.getElementById("end-extra");
+    var scoresEl=document.getElementById("end-scores");
+    if(mode==="race"){
+      scoresEl.innerHTML='<div class="end-bricks">'+PLAYERS.map(function(pl,i){
+        return '<div class="score-brick brick '+pl.cls+'">'+studs(3)
+          + '<div class="who"><span>'+pl.name+'</span><span class="pts">'+raceScores[i]+'</span></div></div>';
+      }).join("")+'</div>';
+      if(raceScores[0]===raceScores[1]){
+        winner.textContent="Both builders win.";
+        extra.textContent="Tied at "+raceScores[0]+" landed challenge"+(raceScores[0]===1?"":"s")+" each — the averages were kind to everyone.";
+      } else {
+        var w=raceScores[0]>raceScores[1]?0:1;
+        winner.textContent=PLAYERS[w].name+" wins the race.";
+        extra.textContent=PLAYERS[w].name+" landed "+raceScores[w]+" of 3 challenges. Every word raced is on the shelf below.";
+      }
+    } else if(mode==="coop"){
+      scoresEl.innerHTML='<p class="score-big">'+keptCount+' <small>words placed together</small></p>';
+      winner.textContent="You speak in averages now — together.";
+      extra.textContent="Red stamped "+coopScores[0]+" scrolls, Blue stamped "+coopScores[1]
+        +". Challenges landed: "+challengesHit+" of "+challengesSeen+". Every kept word is on your shelf.";
+    } else {
+      scoresEl.innerHTML='<p class="score-big">'+keptCount+' <small>words placed</small></p>';
+      winner.textContent="You placed words the way the atlas does.";
+      extra.textContent="Challenges landed: "+challengesHit+" of "+challengesSeen
+        +". Your shelf holds every home you computed — and the real atlas works exactly the same way.";
+    }
+  }
+  document.getElementById("btn-again").addEventListener("click", function(){ startGame(mode); });
+  document.getElementById("btn-home").addEventListener("click", function(){ show("intro"); renderShelf(); renderInstance(); });
+
+})();
+</script>
+</body>
+</html>

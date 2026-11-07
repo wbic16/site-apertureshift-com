@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>The Choir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#eceeeb; --panel:#f7f8f5; --panel2:#e2e6e0; --ink:#17201a; --muted:#4c5a50;
+    --line:#b9c2b8; --line2:#8fa08f;
+    --amber:#9a5b00; --amber-bg:#fdf0d3; --teal:#0f6b5c; --teal-bg:#d9efe8;
+    --blue:#2456a6; --blue-bg:#dde8fa; --green:#2e7d32; --green-bg:#dff0dc;
+    --red:#a4261d; --red-bg:#fbe3e0; --signal:#c2410c;
+    --btn:#17201a; --btn-ink:#f7f8f5; --focus:#c2410c;
+    --shadow:0 1px 0 rgba(23,32,26,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1311; --panel:#171e1a; --panel2:#1f2923; --ink:#e6ece6; --muted:#a7b5a9;
+      --line:#39463c; --line2:#5a6d5e;
+      --amber:#f2b04a; --amber-bg:#3a2c10; --teal:#4fd1b5; --teal-bg:#12332c;
+      --blue:#7aa8f0; --blue-bg:#16283f; --green:#7fce85; --green-bg:#17301a;
+      --red:#ff9a8a; --red-bg:#3d1a16; --signal:#ff8a50;
+      --btn:#e6ece6; --btn-ink:#10160f; --focus:#ff8a50;
+      --shadow:0 1px 0 rgba(0,0,0,.5);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.45}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  button{font:inherit;cursor:pointer;color:inherit}
+  button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 14px 40px}
+
+  /* ---------- greeting ---------- */
+  .greet{border:2px solid var(--ink);background:var(--panel);padding:20px 18px 16px;box-shadow:4px 4px 0 var(--line2)}
+  .roadtag{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+  .greet h1{font-size:clamp(22px,4.6vw,34px);line-height:1.2;margin:0 0 8px;font-weight:700}
+  .greet .help{font-size:clamp(17px,3.4vw,22px);margin:0 0 12px;font-weight:600}
+  .greet p.intro{margin:0;color:var(--muted);max-width:68ch}
+  .greet p.intro strong{color:var(--ink)}
+
+  /* ---------- control strip ---------- */
+  .strip{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:14px 0 0}
+  .seg{display:flex;border:2px solid var(--ink);background:var(--panel)}
+  .seg button{min-height:56px;padding:10px 16px;border:0;background:transparent;font-weight:600;font-size:15px}
+  .seg button[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink)}
+  .seg button + button{border-left:2px solid var(--ink)}
+  .btn{min-height:56px;padding:10px 18px;border:2px solid var(--ink);background:var(--panel);font-weight:600;box-shadow:var(--shadow)}
+  .btn.primary{background:var(--btn);color:var(--btn-ink)}
+  .btn:disabled{opacity:.42;cursor:not-allowed}
+  .btn.small{min-height:56px;padding:8px 12px;font-size:14px}
+
+  /* ---------- readouts ---------- */
+  .readouts{display:grid;grid-template-columns:repeat(7,1fr);border:2px solid var(--ink);background:var(--panel);margin-top:14px}
+  .ro{padding:10px 8px 8px;text-align:center;border-left:1px solid var(--line)}
+  .ro:first-child{border-left:0}
+  .ro .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .ro .v{font-family:"IBM Plex Mono",monospace;font-size:clamp(18px,3.4vw,26px);font-weight:700;line-height:1.15}
+  .ro .v.warn{color:var(--red)}
+  @media (max-width:720px){.readouts{grid-template-columns:repeat(4,1fr)} .ro:nth-child(5){border-left:0} .ro{border-top:1px solid var(--line)} .ro:nth-child(-n+4){border-top:0}}
+
+  /* ---------- cliff calendar ---------- */
+  .cliff{margin-top:12px;border:2px solid var(--ink);background:var(--panel);padding:10px 12px}
+  .cliff h2{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px;color:var(--muted);font-weight:600}
+  .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .day{border:1px solid var(--line);padding:6px 6px 5px;min-height:52px;background:var(--panel2)}
+  .day.today{border:2px solid var(--signal);background:var(--panel)}
+  .day .d{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:13px}
+  .day .r{font-size:11.5px;line-height:1.3;color:var(--muted)}
+  .day .r b{color:var(--ink);font-weight:600}
+  @media (max-width:560px){.days{grid-template-columns:repeat(4,1fr)}}
+
+  /* ---------- wire + doctrine ---------- */
+  .wire{margin-top:12px;border:2px dashed var(--line2);background:var(--panel);padding:10px 14px;font-size:15px}
+  .wire .tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);font-weight:700;margin-right:8px}
+  .doctrine{margin-top:12px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+  @media (prefers-color-scheme: dark){.doctrine{background:var(--panel2);color:var(--ink);border-color:var(--line2)}}
+  .doctrine .tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;white-space:nowrap;padding-top:3px;color:var(--signal)}
+  @media (prefers-color-scheme: dark){.doctrine .tag{color:var(--signal)}}
+  .doctrine p{margin:0;font-size:16.5px;font-weight:600;line-height:1.4}
+
+  /* ---------- main grid ---------- */
+  .grid{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:14px;margin-top:14px;align-items:start}
+  @media (max-width:960px){.grid{grid-template-columns:1fr}}
+  .col{border:2px solid var(--ink);background:var(--panel);box-shadow:var(--shadow)}
+  .col > h2{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin:0;padding:10px 12px;border-bottom:2px solid var(--ink);display:flex;justify-content:space-between;align-items:baseline}
+  .col > h2 .n{font-size:12px;color:var(--muted);letter-spacing:0;text-transform:none}
+  .colbody{padding:10px}
+  .empty{color:var(--muted);font-size:14.5px;padding:8px 4px;margin:0}
+
+  /* queue tasks */
+  .task{width:100%;text-align:left;border:2px solid var(--line2);background:var(--panel);padding:10px 12px;margin:0 0 10px;min-height:64px;display:block}
+  .task:last-child{margin-bottom:0}
+  .task[aria-pressed="true"]{border-color:var(--signal);background:var(--amber-bg)}
+  .task .t{font-weight:600;font-size:16px;line-height:1.3}
+  .task .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;align-items:center}
+  .badge{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border:1.5px solid var(--ink)}
+  .badge.build{background:var(--amber-bg);color:var(--amber)} .badge.research{background:var(--teal-bg);color:var(--teal)}
+  .badge.edit{background:var(--blue-bg);color:var(--blue)} .badge.watch{background:var(--green-bg);color:var(--green)}
+  .chip{font-family:"IBM Plex Mono",monospace;font-size:11.5px;padding:3px 7px;border:1px solid var(--line2);color:var(--muted)}
+  .chip.human{border-color:var(--red);color:var(--red);font-weight:700}
+  .pips{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+  .pips b{color:var(--ink)}
+
+  /* seats */
+  .seat{border:2px solid var(--line2);background:var(--panel);margin:0 0 12px;padding:0;overflow:hidden}
+  .seat:last-child{margin-bottom:0}
+  .seat .head{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px 4px}
+  .seat .name{font-weight:700;font-size:18px}
+  .seat .owner{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:2px 7px;border:1.5px solid var(--ink)}
+  .owner.p1{background:var(--red-bg);color:var(--red)} .owner.p2{background:var(--blue-bg);color:var(--blue)}
+  .seat .status{padding:2px 12px 0;font-size:14.5px}
+  .seat .status .sleep{color:var(--muted)}
+  .seat .work{margin:8px 12px 0;border:1px solid var(--line);background:var(--panel2);padding:8px 10px;font-size:14.5px}
+  .seat .work .wt{font-weight:600}
+  .gauge{margin:10px 12px 0}
+  .gauge .gl{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .gauge .gl b{color:var(--ink)}
+  .bar{display:flex;gap:3px;margin-top:4px}
+  .bar i{flex:1;height:14px;background:var(--panel2);border:1px solid var(--line2)}
+  .bar i.on{background:var(--teal);border-color:var(--teal)}
+  .bar i.on.low{background:var(--signal);border-color:var(--signal)}
+  .bar i.on.zero{background:var(--red);border-color:var(--red)}
+  .seat .actions{display:flex;flex-wrap:wrap;gap:8px;padding:12px}
+  .seat .actions .btn{flex:1;min-width:130px}
+  .dispatch{margin-top:12px;border:2px solid var(--ink);background:var(--panel);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline}
+  .dispatch .seedline{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:15px;letter-spacing:.02em}
+  .dispatch .seednote{color:var(--muted);font-size:13.5px;flex:1;min-width:220px}
+  .bricks{display:flex;gap:4px;padding:0 12px 12px}
+  .bricks i{height:12px;flex:1;border:1.5px solid var(--ink);opacity:.55}
+  .bricks i:nth-child(odd){transform:translateY(3px)}
+  .seat.s-build .bricks i{background:var(--amber)} .seat.s-research .bricks i{background:var(--teal)}
+  .seat.s-edit .bricks i{background:var(--blue)} .seat.s-watch .bricks i{background:var(--green)}
+  .costline{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);padding:6px 12px 0}
+
+  /* register */
+  .reg{border:2px solid var(--line2);padding:10px 12px;margin:0 0 10px;background:var(--panel)}
+  .reg:last-child{margin-bottom:0}
+  .reg.oldest{border-color:var(--signal)}
+  .reg .rn{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:15px}
+  .reg .rt{font-weight:600;margin:2px 0}
+  .reg .ra{font-size:14.5px;color:var(--muted)}
+  .reg .btn{margin-top:8px;width:100%}
+
+  /* phase bar */
+  .phasebar{margin-top:14px;border:2px solid var(--ink);background:var(--panel);padding:12px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .phasebar .ph{font-family:"IBM Plex Mono",monospace;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:14px}
+  .phasebar .hint{flex:1;min-width:200px;color:var(--muted);font-size:14.5px}
+  .phasebar .btn{min-width:210px}
+  .dpips{display:flex;gap:6px;align-items:center}
+  .dpips .dp{width:20px;height:20px;border:2px solid var(--ink);border-radius:50%;background:var(--panel)}
+  .dpips .dp.on{background:var(--signal);border-color:var(--signal)}
+  .dpips .dl{font-family:"IBM Plex Mono",monospace;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:2px}
+
+  /* log */
+  details.logbox{margin-top:14px;border:2px solid var(--ink);background:var(--panel)}
+  details.logbox summary{min-height:56px;display:flex;align-items:center;padding:0 14px;font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-weight:600}
+  details.logbox .entries{padding:4px 14px 14px;font-family:"IBM Plex Mono",monospace;font-size:13.5px;line-height:1.6}
+  details.logbox .entries div{border-top:1px solid var(--line);padding:5px 0}
+  details.logbox .entries div:first-child{border-top:0}
+
+  /* ending */
+  .ending{margin-top:14px;border:3px solid var(--ink);background:var(--panel);padding:22px 18px;box-shadow:5px 5px 0 var(--line2)}
+  .ending h2{font-size:clamp(24px,5vw,36px);margin:0 0 8px;line-height:1.15}
+  .ending p{max-width:66ch}
+  .ending .stats{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .ending .stat{border:2px solid var(--ink);padding:8px 14px;font-family:"IBM Plex Mono",monospace}
+  .ending .stat b{font-size:20px}
+  .ending .grant{border:2px dashed var(--line2);padding:12px 14px;margin:14px 0;font-size:15px}
+  .ending .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+
+  /* footer */
+  footer{margin-top:22px;border-top:2px solid var(--ink);padding-top:12px}
+  .footbtns{display:flex;flex-wrap:wrap;gap:10px}
+  .panel{border:2px solid var(--ink);background:var(--panel);padding:16px;margin-top:12px}
+  .panel h2{margin:0 0 10px;font-size:19px}
+  .panel p,.panel li{font-size:15px}
+  .panel ul{margin:6px 0;padding-left:20px}
+  .panel li{margin:5px 0}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="greet">
+    <p class="roadtag">Roads to the Future · Road 18 of 18 · Ages 18–20 · The Capstone</p>
+    <h1>Hi, I&rsquo;m Will Bickford. I&rsquo;m from the Exocortex of 2130, and I&rsquo;m here to help.</h1>
+    <p class="help">And by help, we mean: survive the singularity.</p>
+    <p class="intro"><strong>The Choir.</strong> You are the Coordinator. Under you sit four seats that do the substantive work — a Builder, a Researcher, an Editor, and a Watcher. Run them for one simulated week: assign the queue, survive the run, and spend your three daily decisions where they matter. The doctrine is the game: <strong>flow over stock</strong> — what matters is work finishing, not work piling up.</p>
+  </header>
+
+  <div class="strip" role="group" aria-label="Run controls">
+    <div class="seg" role="group" aria-label="Players">
+      <button type="button" id="modeSolo" aria-pressed="true">One Coordinator</button>
+      <button type="button" id="modeDuo" aria-pressed="false">Two Coordinators</button>
+    </div>
+    <button type="button" class="btn" id="newRunBtn">↺ New week</button>
+  </div>
+  <p class="mono" id="duoNote" style="font-size:13px;color:var(--muted);margin:8px 2px 0" hidden>
+    TWO COORDINATORS — Red runs Builder + Researcher. Blue runs Editor + Watcher. The Coordinator chair (and its 3 daily decisions) alternates by day; counting the chair, the split is 2 + 3. One shared queue, one shared register, one shared score — and one shared dealt week: both coordinators play the same seed. Cooperation is the mechanic.
+  </p>
+
+  <div class="dispatch" aria-label="This week's deal">
+    <span class="seedline" id="dispatchLine">Week — · G— · seed —</span>
+    <span class="seednote">This week's task deck, daily events, and register landings were dealt from this seed. Completing the week advances the generation — the next week is a different deal. Restarting mid-week redeals this same seed.</span>
+  </div>
+
+  <section class="readouts" aria-label="Flow readouts">
+    <div class="ro"><div class="k">Day</div><div class="v" id="roDay">1 / 7</div></div>
+    <div class="ro"><div class="k">Phase</div><div class="v" id="roPhase" style="font-size:clamp(14px,2.6vw,19px);padding-top:4px">ASSIGN</div></div>
+    <div class="ro"><div class="k">Created</div><div class="v" id="roCreated">0</div></div>
+    <div class="ro"><div class="k">Completed</div><div class="v" id="roCompleted">0</div></div>
+    <div class="ro"><div class="k">Active WIP</div><div class="v" id="roWip">0</div></div>
+    <div class="ro"><div class="k">Register</div><div class="v" id="roRegister">0</div></div>
+    <div class="ro"><div class="k">Oldest wait</div><div class="v" id="roOldest">—</div></div>
+  </section>
+
+  <section class="cliff" aria-label="Reset cliff calendar">
+    <h2>Reset cliffs — headroom refills at dawn on the marked day</h2>
+    <div class="days" id="cliffDays"></div>
+  </section>
+
+  <div class="wire" id="wireBox"><span class="tag">The Wire</span><span id="wireText"></span></div>
+
+  <div class="doctrine" aria-live="polite">
+    <span class="tag">Doctrine</span>
+    <p id="doctrineText">Delegate substantive work. The coordinator decides — and verifies.</p>
+  </div>
+
+  <main class="grid" id="mainGrid">
+    <section class="col" aria-label="Task queue">
+      <h2>Queue <span class="n" id="queueCount"></span></h2>
+      <div class="colbody" id="queueBody"></div>
+    </section>
+
+    <section class="col" aria-label="Seats">
+      <h2>Seats <span class="n">one task each — delegation, not magic</span></h2>
+      <div class="colbody" id="seatsBody"></div>
+    </section>
+
+    <section class="col" aria-label="The register">
+      <h2>Register <span class="n">oldest first, always</span></h2>
+      <div class="colbody" id="registerBody"></div>
+    </section>
+  </main>
+
+  <section class="ending" id="endingBox" hidden></section>
+
+  <div class="phasebar" id="phaseBar">
+    <span class="ph" id="phaseLabel">Assign</span>
+    <span class="hint" id="phaseHint"></span>
+    <span class="dpips" id="decisionPips" hidden><span class="dl">Decisions</span></span>
+    <button type="button" class="btn primary" id="phaseBtn">Run the work →</button>
+  </div>
+
+  <details class="logbox">
+    <summary>Run log — your audit trail</summary>
+    <div class="entries" id="logEntries"></div>
+  </details>
+
+  <footer>
+    <div class="footbtns">
+      <button type="button" class="btn small" data-panel="aboutPanel" aria-expanded="false">About</button>
+      <button type="button" class="btn small" data-panel="privacyPanel" aria-expanded="false">Privacy</button>
+      <button type="button" class="btn small" data-panel="termsPanel" aria-expanded="false">Terms</button>
+    </div>
+
+    <section class="panel" id="aboutPanel" hidden>
+      <h2>About — the operating doctrine</h2>
+      <p>The Choir abstracts a real way of working: one coordinator running a small choir of AI seats for a week. The seats are roles, not portraits of specific systems. The rules below are the game — and they are also the doctrine.</p>
+      <ul>
+        <li><strong>Delegate substantive work.</strong> Seats do the heavy work. The coordinator&rsquo;s job is the pokes and the decisions — and verification. A report is not a result; check decisive numbers.</li>
+        <li><strong>Waits live in the register.</strong> A wait that exists only in chat does not exist. When work finishes into a human decision, it gets a permanent register number and waits there, in the open.</li>
+        <li><strong>Oldest first.</strong> Enumerate the register oldest-first. Recency is not priority.</li>
+        <li><strong>Headroom and reset cliffs are real constraints.</strong> Metered seats drain as they work and refill only at their reset cliff. Steering work around those cliffs is called substrate steering — plan for it, don&rsquo;t discover it.</li>
+        <li><strong>There is no wake layer unless you build one.</strong> A seat with no task sleeps. Assigning is free — but a finished seat&rsquo;s follow-up work only arrives if you spend a decision to poke it.</li>
+        <li><strong>Flow over stock.</strong> Created-vs-completed, work in progress, register size, and the oldest wait — those four readouts are the score. Piles are not progress.</li>
+      </ul>
+      <p><strong>Seeded weeks — no fixed week to memorize:</strong> every week is dealt from a seed made of the ISO week plus a generation counter kept on this device, shown on the dispatch screen as <span class="mono">Week 2026-W45 · G&lt;n&gt; · seed XXXX</span>. The task deck (types, sizes, and which tasks end with a human decision), the daily event draws, and which tasks complete into the register are all drawn from that seed. Completing a week increments the generation counter, so the next week is generated fresh — a published solution describes a deal that no longer exists. Restarting mid-week does not reroll: the same generation deals the same week.</p>
+      <p><strong>What never mutates:</strong> the seats, the staggered reset cliffs (Builder Day 3, Researcher Day 4, Editor Day 5, Watcher unmetered), the 3-decisions-per-day rule, permanent monotonic register numbers, oldest-first display, and the scoring doctrine — flow over stock, register ≤ 3 and ≥ 80% completed to hold the week.</p>
+      <p><strong>How a day runs:</strong> Assign (tap a queued task, then tap a seat) → Run (seats work; matching type runs full speed, mismatched runs half speed; the Watcher is unmetered and never sleeps, but slow) → Review (3 decisions: clear register items, poke sleeping seats, verify a flagged report — unspent decisions do not roll over).</p>
+      <p><strong>Winning the week:</strong> at the end of Day 7, hold the register to 3 or fewer and complete at least 80% of everything created. Every number in this game is computed on your device, from the run in front of you — the run log above is the complete audit trail of the week.</p>
+      <p><strong>XP:</strong> finishing all 18 Roads to the Future games grants you disk space on edit.phext.io as a Volumen-class Wavefront grant. Historic entries are all Incipit-class grants.</p>
+    </section>
+
+    <section class="panel" id="privacyPanel" hidden>
+      <h2>Privacy</h2>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing leaves this device. Runs are stored only on this device, in this browser. Multiplayer is same-screen only.</p>
+      <p>What is stored is only the state of the current run — the queue, the seats, the register, and the log — plus the generation counter (a single number that increments each time a week is completed, used only to seed the next week's deal), so a week in progress survives closing the page. It contains no personal information: no names, no identifiers, nothing about how you played beyond the run itself. Erasing the saved run below also resets the generation counter to G1.</p> The Volumen grant is redeemed separately at edit.phext.io, where accounts exist; this page creates no account and sends nothing there. If the hub issues a claim code when all 18 roads are finished, that code is random, generated on the device, and not derived from you, your device, or your play history — it identifies no one.</p>
+      <button type="button" class="btn small" id="wipeBtn">Erase the saved run on this device</button>
+    </section>
+
+    <section class="panel" id="termsPanel" hidden>
+      <h2>Terms</h2>
+      <p>Free to play, forever. No purchases, no ads. MIT licensed. © Will Bickford · Exocortex</p>
+    </section>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ================= THE CHOIR — a one-week dispatch simulation =================
+   Single page, no network. All state lives in this script + on-device storage. */
+
+var SEAT_DEFS = [
+  { id:"builder",    name:"Builder",    type:"build",    metered:true,  max:90, resetDay:3, blurb:"Heavy work, metered." },
+  { id:"researcher", name:"Researcher", type:"research", metered:true,  max:90, resetDay:4, blurb:"Metered." },
+  { id:"editor",     name:"Editor",     type:"edit",     metered:true,  max:90, resetDay:5, blurb:"Metered." },
+  { id:"watcher",    name:"Watcher",    type:"watch",    metered:false, max:0,  resetDay:0, blurb:"Unmetered local. Slow. Never sleeps." }
+];
+var TYPE_LABEL = { build:"Build", research:"Research", edit:"Edit", watch:"Watch" };
+var TITLES = {
+  build:["Build the scroll loader","Ship the coordinate parser fix","Assemble the node image","Merge the lattice patch","Build the export tool","Prototype the wake layer","Compile the claims checker","Raise the new node rack"],
+  research:["Count the benchmark twice","Survey un-indexed builders","Check the reset-cliff timings","Audit the claims ledger","Map the nearest neighbours","Verify the decisive number","Read the failure logs end to end","Price the solar pod parts"],
+  edit:["Draft the morning brief","Cut the release notes","Review the decisive diff","Write the handoff scroll","Tighten the doctrine page","Edit the field briefing","Prepare the merge summary","Polish the road map"],
+  watch:["Watch node temperatures","Monitor the mailbox","Keep the register honest","Watch the queue overnight","Track headroom drift","Watch the basement thermals","Mind the backup vault","Watch for stuck daemons"]
+};
+var HUMAN_ACTIONS = ["approve the merge","answer the question","press the button","sign the scroll","pick the name","ratify the change"];
+/* Event kinds and their wire phrasings. WHICH kind lands on WHICH day is
+   drawn from the week's seed at deal time — there is no fixed schedule. */
+var EVENT_WIRE = {
+  quiet: [
+    "All quiet on the wire. A clean first day — learn the loop.",
+    "All quiet on the wire. Nothing lands unannounced today."
+  ],
+  flood: [
+    "New tasks flood in (+3). The queue is not the enemy; the pile is.",
+    "The wire carries a flood (+3 new tasks). Intake is not progress — flow is."
+  ],
+  verify: [
+    "A seat's report was wrong on a decisive number. Verification in Review catches it — if you spend the decision. Otherwise it ships, and costs 2 tasks' credit.",
+    "Another report, another wrong decisive number. Verify in Review, or it ships unverified."
+  ],
+  selfResolve: [
+    "A register item resolved itself — someone acted. Validate before you ping: it leaves the register.",
+    "Word on the wire: a waiting item got acted on elsewhere. If the register holds it, it leaves — validate before you ping."
+  ],
+  early: [
+    "A result lands early. One queued task finishes ahead of schedule.",
+    "A result lands early this morning. The smallest queued task finishes ahead of schedule."
+  ]
+};
+
+var S = null;
+var SAVE_KEY = "the-choir-run-v1";
+var GEN_KEY = "the-choir-generation-v1";
+
+/* ---------- seeded weeks: seed = ISO week + generation ---------- */
+function pad2(n){ return (n < 10 ? "0" : "") + n; }
+function isoWeekOf(date){
+  var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  var dayNum = (d.getUTCDay() + 6) % 7; /* Mon=0 .. Sun=6 */
+  d.setUTCDate(d.getUTCDate() - dayNum + 3); /* Thursday of this week */
+  var isoYear = d.getUTCFullYear();
+  var firstThursday = new Date(Date.UTC(isoYear, 0, 4));
+  var fDayNum = (firstThursday.getUTCDay() + 6) % 7;
+  firstThursday.setUTCDate(firstThursday.getUTCDate() - fDayNum + 3);
+  var week = 1 + Math.round((d - firstThursday) / (7 * 24 * 3600 * 1000));
+  return { year: isoYear, week: week };
+}
+function hashSeedString(str){
+  var h = 2166136261;
+  for (var i = 0; i < str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function seedFor(isoYear, isoWeek, gen){
+  var str = isoYear + "-W" + pad2(isoWeek) + "-G" + gen;
+  var h = hashSeedString(str);
+  var display = ("000" + (h & 0xffff).toString(16).toUpperCase()).slice(-4);
+  return { str: str, numeric: (h % 2147483646) + 1, display: display };
+}
+function dispatchText(st){
+  return "Week " + st.isoYear + "-W" + pad2(st.isoWeek) + " · G" + st.generation + " · seed " + st.seedDisplay;
+}
+function loadGeneration(){
+  try {
+    var n = parseInt(localStorage.getItem(GEN_KEY), 10);
+    return (isFinite(n) && n >= 1) ? n : 1;
+  } catch(e){ return 1; }
+}
+function storeGeneration(n){
+  try { localStorage.setItem(GEN_KEY, String(n)); } catch(e){}
+}
+function makeSeededRng(seedNumeric){
+  var state = seedNumeric;
+  return function(){
+    state = (state * 1103515245 + 12345) % 2147483648;
+    return state / 2147483648;
+  };
+}
+/* Deal the week's event plan from the seed: Day 1 is always the quiet
+   onboarding day; the remaining six days draw, without replacement, the
+   week's event kinds (1 flood, 2 verify, 1 self-resolve, 2 early) in a
+   seeded order — same counts, never the same calendar twice. */
+function generateEventPlan(seedNumeric){
+  var rngFn = makeSeededRng(seedNumeric);
+  var kinds = ["flood", "verify", "selfResolve", "early", "verify", "early"];
+  for (var i = kinds.length - 1; i > 0; i--){
+    var j = Math.floor(rngFn() * (i + 1));
+    var tmp = kinds[i]; kinds[i] = kinds[j]; kinds[j] = tmp;
+  }
+  var plan = [{ type: "quiet", wire: EVENT_WIRE.quiet[Math.floor(rngFn() * EVENT_WIRE.quiet.length)] }];
+  kinds.forEach(function(k){
+    var wires = EVENT_WIRE[k];
+    plan.push({ type: k, wire: wires[Math.floor(rngFn() * wires.length)] });
+  });
+  return plan;
+}
+/* Saves dealt before seeded weeks existed get a fixed legacy plan so an
+   in-progress run keeps the schedule it started with. */
+function legacyEventPlan(){
+  var kinds = ["quiet", "flood", "verify", "selfResolve", "early", "verify", "early"];
+  return kinds.map(function(k){ return { type: k, wire: EVENT_WIRE[k][0] }; });
+}
+function ensureSeedFields(s){
+  if (typeof s.generation === "number" && s.seedDisplay && s.eventPlan) return s;
+  var gen = (typeof s.generation === "number" && s.generation >= 1) ? s.generation : loadGeneration();
+  var iso = isoWeekOf(new Date());
+  var seed = seedFor(iso.year, iso.week, gen);
+  s.generation = gen;
+  s.isoYear = iso.year; s.isoWeek = iso.week;
+  s.seedDisplay = seed.display;
+  if (!s.eventPlan) s.eventPlan = legacyEventPlan();
+  if (typeof s.generationCounted !== "boolean") s.generationCounted = !!s.ended;
+  return s;
+}
+
+function rnd(){
+  S.rng = (S.rng * 1103515245 + 12345) % 2147483648;
+  return S.rng / 2147483648;
+}
+function pick(arr){ return arr[Math.floor(rnd() * arr.length)]; }
+
+function newState(mode){
+  var gen = loadGeneration();
+  var iso = isoWeekOf(new Date());
+  var seed = seedFor(iso.year, iso.week, gen);
+  var plan = generateEventPlan(seed.numeric);
+  return {
+    mode: mode || "solo",
+    day: 1, phase: "assign",
+    rng: seed.numeric,
+    generation: gen, isoYear: iso.year, isoWeek: iso.week,
+    seedDisplay: seed.display, eventPlan: plan, generationCounted: false,
+    nextTask: 1, nextReg: 1,
+    created: 0, completed: 0, shippedUnverified: 0, idleRuns: 0,
+    decisions: 3, bonusDecisions: 0,
+    pendingVerify: false,
+    selectedTaskId: null,
+    queue: [], register: [],
+    seats: SEAT_DEFS.map(function(d){
+      return { id:d.id, task:null, progress:0, headroom:d.max, justCompleted:false, followUp:false };
+    }),
+    log: [], doctrine: "Delegate substantive work. The coordinator decides — and verifies.",
+    wire: plan[0].wire,
+    ended: false, ending: null
+  };
+}
+function seatDef(id){ for (var i=0;i<SEAT_DEFS.length;i++) if (SEAT_DEFS[i].id===id) return SEAT_DEFS[i]; return null; }
+function seat(id){ for (var i=0;i<S.seats.length;i++) if (S.seats[i].id===id) return S.seats[i]; return null; }
+
+function titleInUse(title){
+  var i;
+  for (i=0;i<S.queue.length;i++) if (S.queue[i].title === title) return true;
+  for (i=0;i<S.seats.length;i++) if (S.seats[i].task && S.seats[i].task.title === title) return true;
+  for (i=0;i<S.register.length;i++) if (S.register[i].title === title) return true;
+  return false;
+}
+function makeTask(forceType){
+  var types = ["build","research","edit","watch"];
+  var type = forceType || pick(types);
+  var r = rnd();
+  var size = r < 0.4 ? 1 : (r < 0.75 ? 2 : 3);
+  var title = pick(TITLES[type]);
+  for (var tries=0; tries<8 && titleInUse(title); tries++) title = pick(TITLES[type]);
+  if (titleInUse(title)) title = title + " (second pass)";
+  var t = {
+    id: S.nextTask++,
+    title: title,
+    type: type,
+    size: size,
+    needsHuman: rnd() < 0.45,
+    action: pick(HUMAN_ACTIONS),
+    createdDay: S.day
+  };
+  S.created++;
+  return t;
+}
+function spawnTasks(n, why){
+  for (var i=0;i<n;i++) S.queue.push(makeTask());
+  if (why) logLine("Day " + S.day + " — " + why + " (+" + n + " tasks). Queue: " + S.queue.length + ".");
+}
+function logLine(s){ S.log.push(s); }
+function setDoctrine(s){ S.doctrine = s; }
+
+function chairName(){
+  if (S.mode === "solo") return "You";
+  return (S.day % 2 === 1) ? "Red (Player 1)" : "Blue (Player 2)";
+}
+function ownerOf(seatId){
+  if (S.mode === "solo") return null;
+  return (seatId === "builder" || seatId === "researcher") ? "p1" : "p2";
+}
+function ownerLabel(seatId){
+  var o = ownerOf(seatId);
+  if (!o) return "";
+  return o === "p1" ? "RED · P1" : "BLUE · P2";
+}
+function taskAge(t){ return Math.max(0, S.day - t.createdDay); }
+function ageText(days){ return days <= 0 ? "new today" : days + "d old"; }
+function runCost(task, def){
+  if (!def.metered) return 0;
+  var match = task.type === def.type;
+  return (15 + task.size * 10) + (match ? 0 : 10);
+}
+
+/* ---------------- persistence (on-device only) ---------------- */
+function save(){
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch(e){}
+}
+function load(){
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    var s = JSON.parse(raw);
+    if (!s || !s.seats || typeof s.day !== "number") return null;
+    return s;
+  } catch(e){ return null; }
+}
+function wipeSave(){
+  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(GEN_KEY); } catch(e){}
+}
+
+/* ---------------- morning / events ---------------- */
+function morning(){
+  /* reset cliffs at dawn */
+  SEAT_DEFS.forEach(function(d){
+    if (d.metered && d.resetDay === S.day){
+      var st = seat(d.id);
+      st.headroom = d.max;
+      logLine("Day " + S.day + " dawn — " + d.name + " hit its reset cliff. Headroom refilled to " + d.max + ".");
+    }
+  });
+  /* today's event was dealt from the week's seed at deal time */
+  var ev = (S.eventPlan && S.eventPlan[S.day - 1]) || { type: "quiet", wire: "All quiet on the wire." };
+  S.wire = ev.wire;
+  if (ev.type === "flood"){ spawnTasks(3, "flood on the wire"); }
+  if (ev.type === "verify"){ S.pendingVerify = true; }
+  if (ev.type === "selfResolve"){
+    if (S.register.length){
+      var gone = S.register.shift();
+      S.completed++;
+      logLine("Day " + S.day + " — register #" + gone.num + " (\"" + gone.title + "\") resolved itself: someone acted. It leaves the register. Validate before you ping.");
+      setDoctrine("Validate before you ping. Someone acted — the register tells the truth.");
+    } else {
+      S.bonusDecisions = 1;
+      logLine("Day " + S.day + " — the wire said a register item resolved itself, but the register was empty. The quiet converts to +1 decision in today's Review.");
+    }
+  }
+  if (ev.type === "early"){ earlyResult(); }
+}
+function earlyResult(){
+  if (!S.queue.length){ logLine("Day " + S.day + " — a result tried to land early, but the queue was empty. Nothing to land on."); return; }
+  var idx = 0;
+  for (var i=1;i<S.queue.length;i++) if (S.queue[i].size < S.queue[idx].size) idx = i;
+  var t = S.queue.splice(idx,1)[0];
+  finishTask(t, null, "landed early");
+}
+
+/* ---------------- task completion ---------------- */
+function finishTask(t, seatName, how){
+  if (t.needsHuman){
+    var item = { num: S.nextReg++, title: t.title, action: t.action, day: S.day };
+    S.register.push(item);
+    logLine("\"" + t.title + "\" finished (" + how + ") → Register #" + item.num + ": needs the human to " + t.action + ".");
+  } else {
+    S.completed++;
+    logLine("\"" + t.title + "\" finished (" + how + ") — completed outright." + (seatName ? "" : ""));
+  }
+}
+
+/* ---------------- phases ---------------- */
+function doRun(){
+  var anyWork = false;
+  S.seats.forEach(function(st){
+    var d = seatDef(st.id);
+    if (!st.task){
+      if (d.id !== "watcher" || true) { /* watcher idles too, it just never sleeps */
+        if (S.day > 1 || true) S.idleRuns += 0; /* idle counted below, once per run */
+      }
+      S.idleRuns++;
+      return;
+    }
+    anyWork = true;
+    var t = st.task;
+    var match = t.type === d.type;
+    if (d.metered){
+      var cost = runCost(t, d);
+      st.headroom = Math.max(0, st.headroom - cost);
+    }
+    var gain = (d.id === "watcher") ? 1 : (match ? 2 : 1);
+    st.progress += gain;
+    logLine(d.name + " ran \"" + t.title + "\" — " + (match ? "matched type, full speed" : (d.id==="watcher" ? "steady local pace" : "mismatched type, half speed")) + ", progress " + Math.min(st.progress, t.size) + "/" + t.size + (d.metered ? ", headroom −" + runCost(t,d) + " → " + st.headroom : ", unmetered") + ".");
+    if (st.progress >= t.size){
+      st.task = null; st.progress = 0;
+      var hasFollow = rnd() < 0.6;
+      if (d.id === "watcher"){
+        finishTask(t, d.name, "Watcher");
+        if (hasFollow){
+          var f = makeTask(d.type); f.size = 1; f.title = "Follow-up: " + f.title.charAt(0).toLowerCase() + f.title.slice(1);
+          S.queue.push(f);
+          logLine("The Watcher never sleeps — its follow-up arrived on its own: \"" + f.title + "\" joined the queue.");
+        }
+      } else {
+        st.justCompleted = true; st.followUp = hasFollow;
+        finishTask(t, d.name, d.name);
+        if (hasFollow) logLine(d.name + " has follow-up work waiting — but there is no wake layer. Poke it in Review (1 decision) or the follow-up never arrives.");
+        else logLine(d.name + " is done and drifts to sleep. No follow-up this time.");
+      }
+      if (d.metered && st.headroom <= 0) logLine(d.name + " is at 0 headroom — it refuses new work until its Day " + d.resetDay + " reset cliff.");
+    }
+  });
+  if (!anyWork){
+    logLine("Day " + S.day + " Run — nobody had work. The choir sat idle.");
+    setDoctrine("Seats idle, hands full is still a stall. Delegate the work, then decide.");
+  } else {
+    setDoctrine("The run is done. What finished into a human decision is in the register — oldest first.");
+  }
+  S.phase = "run";
+  save(); render();
+}
+
+function beginReview(){
+  S.phase = "review";
+  S.decisions = 3 + S.bonusDecisions;
+  S.bonusDecisions = 0;
+  if (S.pendingVerify) setDoctrine("A decisive number in a report is wrong today. Spend a decision to verify — or it ships, and costs 2 tasks' credit.");
+  else setDoctrine("Review: 3 decisions. Clear the register oldest-first, poke a sleeping seat, or hold. Unspent decisions do not roll over.");
+  logLine("Day " + S.day + " Review — " + chairName() + " hold" + (S.mode==="solo" ? "s" : "s") + " the chair with " + S.decisions + " decisions.");
+  save(); render();
+}
+
+function endDay(){
+  if (S.pendingVerify){
+    S.completed = Math.max(0, S.completed - 2);
+    S.shippedUnverified++;
+    logLine("Day " + S.day + " closed UNVERIFIED — the wrong number shipped. Cost: 2 tasks' credit.");
+    S.pendingVerify = false;
+  }
+  if (S.decisions > 0) logLine(S.decisions + " decision(s) unspent on Day " + S.day + " — they do not roll over.");
+  S.seats.forEach(function(st){
+    if (st.justCompleted && st.followUp){
+      logLine(seatDef(st.id).name + "'s follow-up expired unpoked. No wake layer, no follow-up.");
+    }
+    st.justCompleted = false; st.followUp = false;
+  });
+  S.selectedTaskId = null;
+  if (S.day >= 7){ finishWeek(); return; }
+  S.day++;
+  S.phase = "assign";
+  spawnTasks(2, "morning intake");
+  morning();
+  setDoctrine(S.day === 2 ? "Day 2. Same loop: assign, run, review. Watch the register's oldest wait — that number is the week's conscience." : "Day " + S.day + ". Assign first, argue later. Flow over stock.");
+  save(); render();
+}
+
+function finishWeek(){
+  S.phase = "done"; S.ended = true;
+  var eff = S.completed;
+  var ratio = S.created ? eff / S.created : 0;
+  var title, body;
+  if (S.register.length <= 3 && ratio >= 0.8){
+    title = "The week held. Flow over stock.";
+    body = "Register at " + S.register.length + ", completion at " + Math.round(ratio*100) + "% of everything created. The queue moved, the waits stayed visible, and the human's three decisions a day went where they mattered. This is what the Choir sounds like when it holds together.";
+  } else if (S.register.length > 3){
+    title = "Register Drowned";
+    body = "The week ended with " + S.register.length + " waits in the register. The seats did work — but work that finishes into an uncleared decision is stock, not flow. Next week: fewer assignments, more clearing, oldest first.";
+  } else if (S.shippedUnverified > 0){
+    title = "Shipped Unverified";
+    body = "Completion reached " + Math.round(ratio*100) + "% and the register held — but " + S.shippedUnverified + " wrong number(s) shipped because verification lost the daily contest for decisions. A report is not a result. Spend the decision.";
+  } else if (S.idleRuns >= 6){
+    title = "Seats Idle, Hands Full";
+    body = "The register held and nothing shipped unverified — but seats sat idle through " + S.idleRuns + " seat-runs while the queue waited. Completion: " + Math.round(ratio*100) + "%. The coordinator's scarcest resource was never headroom; it was attention at Assign time.";
+  } else {
+    title = "Short of the Line";
+    body = "Register at " + S.register.length + ", nothing shipped unverified, seats mostly fed — and still only " + Math.round(ratio*100) + "% completed against the 80% line. Honest shortfall: the week needed tighter matching and fewer size-3 gambles.";
+  }
+  S.ending = { title: title, body: body, ratio: ratio };
+  logLine("Day 7 Review closed the week — " + title);
+  /* anti-viral step: a completed week advances the on-device generation,
+     so the next week is dealt from a new seed and this deal is retired. */
+  if (!S.generationCounted){
+    S.generationCounted = true;
+    storeGeneration(S.generation + 1);
+    logLine(dispatchText(S) + " is complete — generation counter advanced. The next week deals as G" + (S.generation + 1) + " from a new seed; this week's deal will not repeat.");
+  }
+  save(); render();
+}
+
+/* ---------------- player actions ---------------- */
+function selectTask(id){
+  if (S.phase !== "assign") return;
+  S.selectedTaskId = (S.selectedTaskId === id) ? null : id;
+  render();
+}
+function assignTo(seatId){
+  if (S.phase !== "assign" || S.selectedTaskId == null) return;
+  var st = seat(seatId), d = seatDef(seatId);
+  if (st.task) return;
+  if (d.metered && st.headroom <= 0){
+    setDoctrine(d.name + " is at 0 headroom and refuses work until its Day " + d.resetDay + " reset cliff. Headroom is a real constraint.");
+    render(); return;
+  }
+  var idx = -1;
+  for (var i=0;i<S.queue.length;i++) if (S.queue[i].id === S.selectedTaskId) idx = i;
+  if (idx < 0) return;
+  var t = S.queue.splice(idx,1)[0];
+  st.task = t; st.progress = 0;
+  S.selectedTaskId = null;
+  logLine("Assigned \"" + t.title + "\" → " + d.name + (t.type === d.type ? " (matched)." : " (MISMATCH — half speed, higher drain)."));
+  setDoctrine(t.type === d.type
+    ? "Matched. Delegate substantive work; the coordinator decides and verifies."
+    : "Mismatched type runs at half speed and drains more. Sometimes the week forces it — know that you chose it.");
+  save(); render();
+}
+function unassign(seatId){
+  if (S.phase !== "assign") return;
+  var st = seat(seatId);
+  if (!st.task) return;
+  S.queue.unshift(st.task);
+  logLine("Pulled \"" + st.task.title + "\" back from " + seatDef(seatId).name + " to the queue.");
+  st.task = null; st.progress = 0;
+  save(); render();
+}
+function clearRegister(num){
+  if (S.phase !== "review" || S.decisions <= 0) return;
+  var idx = -1;
+  for (var i=0;i<S.register.length;i++) if (S.register[i].num === num) idx = i;
+  if (idx < 0) return;
+  var wasOldest = idx === 0;
+  var item = S.register.splice(idx,1)[0];
+  S.decisions--; S.completed++;
+  logLine("Register #" + item.num + " cleared — " + item.action + " (\"" + item.title + "\"). " + (wasOldest ? "Oldest first." : "NOT the oldest — #" + S.register[0].num + " still waits."));
+  setDoctrine(wasOldest
+    ? "Oldest first. The register is enumerated, not remembered."
+    : "Recency is not priority. You cleared a newer wait while an older one still sits. The register keeps the receipt.");
+  save(); render();
+}
+function poke(seatId){
+  if (S.phase !== "review" || S.decisions <= 0) return;
+  var st = seat(seatId), d = seatDef(seatId);
+  if (!st.justCompleted || !st.followUp) return;
+  S.decisions--;
+  var f = makeTask(d.type); f.size = 1;
+  f.title = "Follow-up: " + f.title.charAt(0).toLowerCase() + f.title.slice(1);
+  S.queue.push(f);
+  st.justCompleted = false; st.followUp = false;
+  logLine("Poked " + d.name + " awake — its follow-up arrived: \"" + f.title + "\" joined the queue.");
+  setDoctrine("There is no wake layer unless you build one. That poke was the wake layer.");
+  save(); render();
+}
+function verifyReport(){
+  if (S.phase !== "review" || S.decisions <= 0 || !S.pendingVerify) return;
+  S.decisions--; S.pendingVerify = false;
+  logLine("Verified the flagged report — the wrong decisive number was caught before it shipped. 1 decision, 2 tasks' credit saved.");
+  setDoctrine("Verification caught it. A report is not a result — checking decisive numbers is coordinator work.");
+  save(); render();
+}
+function phaseAdvance(){
+  if (S.phase === "assign") doRun();
+  else if (S.phase === "run") beginReview();
+  else if (S.phase === "review") endDay();
+}
+function newRun(mode){
+  S = newState(mode || (S ? S.mode : "solo"));
+  spawnTasks(4, "the week opens");
+  logLine("Day 1 — " + dispatchText(S) + " dealt: the task deck, the daily event draws, and which tasks land in the register all come from this seed.");
+  logLine("Day 1 — the week opens with 4 tasks in the queue. Builder resets Day 3, Researcher Day 4, Editor Day 5. The Watcher never resets because it never drains.");
+  save(); render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ---------------- rendering ---------------- */
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function sizePips(t){
+  var s = "";
+  for (var i=0;i<3;i++) s += i < t.size ? "●" : "○";
+  return "<span class='pips'>size <b>" + s + "</b> " + t.size + (t.size===1?" phase":" phases") + "</span>";
+}
+function render(){
+  /* mode buttons */
+  document.getElementById("modeSolo").setAttribute("aria-pressed", S.mode==="solo" ? "true":"false");
+  document.getElementById("modeDuo").setAttribute("aria-pressed", S.mode==="duo" ? "true":"false");
+  document.getElementById("duoNote").hidden = S.mode !== "duo";
+  document.getElementById("dispatchLine").textContent = dispatchText(S);
+
+  /* readouts */
+  var wip = S.seats.filter(function(st){ return !!st.task; }).length;
+  document.getElementById("roDay").textContent = S.ended ? "7 / 7" : S.day + " / 7";
+  document.getElementById("roPhase").textContent = S.phase.toUpperCase();
+  document.getElementById("roCreated").textContent = S.created;
+  document.getElementById("roCompleted").textContent = S.completed;
+  document.getElementById("roWip").textContent = wip;
+  var regEl = document.getElementById("roRegister");
+  regEl.textContent = S.register.length;
+  regEl.className = "v" + (S.register.length > 3 ? " warn" : "");
+  document.getElementById("roOldest").textContent = S.register.length ? (S.day - S.register[0].day) + "d" : "—";
+
+  /* cliff calendar */
+  var cd = "";
+  for (var day=1; day<=7; day++){
+    var marks = [];
+    SEAT_DEFS.forEach(function(d){ if (d.resetDay === day) marks.push("<b>↺ " + d.name + "</b>"); });
+    cd += "<div class='day" + (day===S.day && !S.ended ? " today":"") + "'><div class='d'>DAY " + day + "</div><div class='r'>" +
+      (marks.length ? marks.join("<br>") + " refills" : "no cliff") + "</div></div>";
+  }
+  document.getElementById("cliffDays").innerHTML = cd;
+
+  document.getElementById("wireText").textContent = S.wire;
+  document.getElementById("doctrineText").textContent = S.doctrine;
+
+  /* queue */
+  document.getElementById("queueCount").textContent = S.queue.length + " waiting";
+  var q = "";
+  if (!S.queue.length) q = "<p class='empty'>Queue empty. Everything is assigned, done, or waiting on the human.</p>";
+  S.queue.forEach(function(t){
+    q += "<button type='button' class='task' aria-pressed='" + (S.selectedTaskId===t.id) + "' onclick='selectTask(" + t.id + ")' " + (S.phase!=="assign" ? "disabled":"") + ">" +
+      "<span class='t'>" + esc(t.title) + "</span>" +
+      "<span class='meta'><span class='badge " + t.type + "'>" + TYPE_LABEL[t.type] + "</span>" + sizePips(t) +
+      (t.needsHuman ? "<span class='chip human'>⚑ ends with the human</span>" : "<span class='chip'>completes outright</span>") +
+      "<span class='chip'>" + ageText(taskAge(t)) + "</span></span></button>";
+  });
+  document.getElementById("queueBody").innerHTML = q;
+
+  /* seats */
+  var sh = "";
+  S.seats.forEach(function(st){
+    var d = seatDef(st.id);
+    var own = ownerLabel(st.id);
+    var status;
+    if (st.task) status = "Working — progress " + Math.min(st.progress, st.task.size) + "/" + st.task.size + " phases";
+    else if (st.justCompleted) status = "<span class='sleep'>Finished. Asleep — follow-up " + (st.followUp ? "waiting on a poke" : "none") + ".</span>";
+    else if (d.metered && st.headroom <= 0) status = "<span class='sleep'>Refusing work — 0 headroom until Day " + d.resetDay + " cliff.</span>";
+    else if (d.id === "watcher") status = "<span class='sleep'>Idle — awake, on watch. It never sleeps. Assigning is free.</span>";
+    else status = "<span class='sleep'>Idle — sleeping. Assigning is free.</span>";
+    sh += "<div class='seat s-" + d.type + "'>" +
+      "<div class='head'><span class='name'>" + d.name + "</span><span class='badge " + d.type + "'>" + TYPE_LABEL[d.type] + "</span>" +
+      (own ? "<span class='owner " + ownerOf(st.id) + "'>" + own + "</span>" : "") +
+      "<span class='chip'>" + esc(d.blurb) + "</span></div>" +
+      "<div class='status'>" + status + "</div>";
+    if (st.task){
+      sh += "<div class='work'><span class='wt'>" + esc(st.task.title) + "</span><br><span class='mono' style='font-size:12.5px;color:var(--muted)'>" +
+        TYPE_LABEL[st.task.type] + " · size " + st.task.size + (st.task.needsHuman ? " · ⚑ ends in the register" : " · completes outright") + "</span></div>";
+    }
+    if (d.metered){
+      var pct = Math.round(st.headroom / d.max * 10);
+      var bars = "";
+      for (var i=0;i<10;i++){
+        var cls = i < pct ? ("on" + (pct<=2 ? " zero" : pct<=4 ? " low" : "")) : "";
+        bars += "<i class='" + cls + "'></i>";
+      }
+      sh += "<div class='gauge'><div class='gl'><span>Headroom</span><span><b>" + st.headroom + "</b> / " + d.max + " · ↺ Day " + d.resetDay + "</span></div><div class='bar'>" + bars + "</div></div>";
+      if (st.task) sh += "<div class='costline'>this run drains " + runCost(st.task, d) + (st.task.type===d.type ? " (matched)" : " (mismatch surcharge)") + "</div>";
+    } else {
+      sh += "<div class='gauge'><div class='gl'><span>Headroom</span><span><b>unmetered</b> · +1/run</span></div></div>";
+    }
+    sh += "<div class='actions'>";
+    if (st.task){
+      sh += "<button type='button' class='btn small' onclick='unassign(\"" + st.id + "\")' " + (S.phase!=="assign"?"disabled":"") + ">← Pull back to queue</button>";
+    } else {
+      var dis = (S.phase!=="assign" || S.selectedTaskId==null || (d.metered && st.headroom<=0)) ? "disabled" : "";
+      sh += "<button type='button' class='btn small' onclick='assignTo(\"" + st.id + "\")' " + dis + ">" +
+        (d.metered && st.headroom<=0 ? "Refuses — 0 headroom" : (S.selectedTaskId==null ? "Assign here (pick a task first)" : "Assign selected task here")) + "</button>";
+    }
+    if (S.phase==="review" && st.justCompleted && st.followUp){
+      sh += "<button type='button' class='btn small primary' onclick='poke(\"" + st.id + "\")' " + (S.decisions<=0?"disabled":"") + ">Poke awake — 1 decision</button>";
+    }
+    sh += "</div><div class='bricks' aria-hidden='true'><i></i><i></i><i></i><i></i><i></i></div></div>";
+  });
+  document.getElementById("seatsBody").innerHTML = sh;
+
+  /* register */
+  var rg = "";
+  if (!S.register.length) rg = "<p class='empty'>Register empty. Nothing is waiting on the human. This is the goal state — hold it.</p>";
+  S.register.forEach(function(item, i){
+    var age = S.day - item.day;
+    rg += "<div class='reg" + (i===0 ? " oldest":"") + "'><span class='rn'>#" + item.num + "</span>" +
+      (i===0 ? " <span class='chip human'>oldest wait</span>" : "") +
+      "<div class='rt'>" + esc(item.title) + "</div>" +
+      "<div class='ra'>Needs the human: " + esc(item.action) + " · waiting " + age + "d</div>" +
+      "<button type='button' class='btn small' onclick='clearRegister(" + item.num + ")' " + ((S.phase==="review" && S.decisions>0) ? "" : "disabled") + ">Decide — clear #" + item.num + " (1 decision)</button></div>";
+  });
+  document.getElementById("registerBody").innerHTML = rg;
+
+  /* phase bar */
+  var pb = document.getElementById("phaseBar");
+  var endBox = document.getElementById("endingBox");
+  if (S.ended){
+    pb.hidden = true;
+    document.getElementById("mainGrid").style.opacity = ".55";
+    var e = S.ending;
+    endBox.hidden = false;
+    endBox.innerHTML = "<p class='roadtag' style='margin-bottom:6px'>Day 7 · Review closed · " + esc(dispatchText(S)) + "</p><h2>" + esc(e.title) + "</h2><p>" + esc(e.body) + "</p>" +
+      "<p>This week's deal is retired: the generation counter has advanced, so the next week is generated as G" + (S.generation + 1) + " from a new seed — there is no fixed week left to memorize.</p>" +
+      "<div class='stats'><span class='stat'>Created <b>" + S.created + "</b></span><span class='stat'>Completed <b>" + S.completed + "</b> (" + Math.round(e.ratio*100) + "%)</span>" +
+      "<span class='stat'>Register <b>" + S.register.length + "</b></span><span class='stat'>Shipped unverified <b>" + S.shippedUnverified + "</b></span></div>" +
+      "<div class='grant'><strong>Road 18 complete.</strong> This run lives only on this device. When all 18 Roads to the Future games are finished, the hub's XP Road Card reveals your Volumen-class Wavefront grant — disk space on edit.phext.io. Historic entries are all Incipit-class grants.</div>" +
+      "<div class='row'><button type='button' class='btn primary' onclick='newRun()'>Run another week</button>" +
+      "<button type='button' class='btn' onclick='downloadReceipt()'>Download run receipt (.txt)</button></div>";
+  } else {
+    pb.hidden = false; endBox.hidden = true;
+    document.getElementById("mainGrid").style.opacity = "";
+    var label = document.getElementById("phaseLabel"), hint = document.getElementById("phaseHint"),
+        btn = document.getElementById("phaseBtn"), pips = document.getElementById("decisionPips");
+    if (S.phase === "assign"){
+      label.textContent = "Phase 1 · Assign";
+      hint.textContent = "Tap a queued task, then tap a seat's Assign button. Matched type = full speed. Seats hold one task each.";
+      btn.textContent = "Run the work →";
+      pips.hidden = true;
+    } else if (S.phase === "run"){
+      label.textContent = "Phase 2 · Run";
+      hint.textContent = "The seats have worked. Read the log, then take your decisions in Review.";
+      btn.textContent = "Begin Review →";
+      pips.hidden = true;
+    } else {
+      label.textContent = "Phase 3 · Review — " + chairName() + " in the chair";
+      hint.innerHTML = S.pendingVerify
+        ? "A report today carries a <strong>wrong decisive number</strong>. Verify it (1 decision) or it ships at day's end and costs 2 tasks' credit."
+        : "Spend decisions: clear register items, poke sleeping seats. Unspent decisions vanish at day's end.";
+      btn.textContent = S.day >= 7 ? "Close the week →" : "End Day " + S.day + " →";
+      pips.hidden = false;
+      var ph = "<span class='dl'>Decisions</span>";
+      for (var i=0;i<3 + 1;i++){
+        if (i < Math.max(S.decisions,0) || i < 3) ph += "<span class='dp" + (i < S.decisions ? " on":"") + "'></span>";
+        if (i>=3 && S.decisions<=3) break;
+      }
+      if (S.pendingVerify){
+        ph += " <button type='button' class='btn small primary' onclick='verifyReport()' " + (S.decisions<=0?"disabled":"") + " style='margin-left:8px'>Verify the report — 1 decision</button>";
+      }
+      pips.innerHTML = ph;
+    }
+  }
+
+  /* log */
+  var le = "";
+  for (var j = S.log.length - 1; j >= 0; j--) le += "<div>" + esc(S.log[j]) + "</div>";
+  document.getElementById("logEntries").innerHTML = le || "<div>No entries yet.</div>";
+}
+
+function downloadReceipt(){
+  var lines = [];
+  lines.push("THE CHOIR — run receipt");
+  lines.push("Deal: " + dispatchText(S));
+  lines.push("Ending: " + (S.ending ? S.ending.title : "—"));
+  lines.push("Created: " + S.created + " · Completed: " + S.completed + " · Register at close: " + S.register.length + " · Shipped unverified: " + S.shippedUnverified);
+  lines.push("This receipt contains no personal information. It was generated on this device.");
+  lines.push("");
+  lines.push("RUN LOG");
+  S.log.forEach(function(l){ lines.push("- " + l); });
+  var blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "the-choir-receipt.txt";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+
+/* ---------------- wiring ---------------- */
+document.getElementById("phaseBtn").addEventListener("click", phaseAdvance);
+document.getElementById("newRunBtn").addEventListener("click", function(){ newRun(); });
+document.getElementById("modeSolo").addEventListener("click", function(){ if (S.mode!=="solo"){ S.mode="solo"; logLine("Switched to One Coordinator."); save(); render(); } });
+document.getElementById("modeDuo").addEventListener("click", function(){ if (S.mode!=="duo"){ S.mode="duo"; logLine("Switched to Two Coordinators — seats split Red/Blue, chair alternates by day, score shared."); save(); render(); } });
+document.getElementById("wipeBtn").addEventListener("click", function(){
+  wipeSave(); newRun("solo");
+  document.getElementById("privacyPanel").hidden = false;
+});
+document.querySelectorAll("[data-panel]").forEach(function(b){
+  b.addEventListener("click", function(){
+    var p = document.getElementById(b.getAttribute("data-panel"));
+    var open = p.hidden;
+    ["aboutPanel","privacyPanel","termsPanel"].forEach(function(id){ document.getElementById(id).hidden = true; });
+    document.querySelectorAll("[data-panel]").forEach(function(x){ x.setAttribute("aria-expanded","false"); });
+    p.hidden = !open;
+    b.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+});
+
+/* ---------------- boot ---------------- */
+var restored = load();
+if (restored){
+  S = ensureSeedFields(restored);
+  render();
+} else {
+  newRun("solo");
+}
+</script>
+</body>
+</html>

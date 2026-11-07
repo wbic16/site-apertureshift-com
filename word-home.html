@@ -128,6 +128,9 @@
   .facts-strip{
     margin:16px 0 0;text-align:center;font-size:13.5px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
   }
+  .instance-line{
+    margin:10px 0 0;text-align:center;font-size:13.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;
+  }
 
   /* ---------- K'Nex coordinate ---------- */
   .coord-rod{display:inline-flex;align-items:center;flex-wrap:nowrap;white-space:nowrap}
@@ -432,6 +435,7 @@
         </button>
       </div>
       <p class="facts-strip">Free forever · Same screen · No sign-up</p>
+      <p class="instance-line mono" id="instance-line" aria-label="Current game instance"></p>
     </div>
   </section>
 
@@ -598,12 +602,13 @@
 
   /* ------- on-device store: best score per deck + duel tallies ------- */
   var STORE_KEY = "wordhome.store.v1";
-  var store = {best:{little:null, standard:null, master:null}, duel:{red:0, blue:0, ties:0, games:0}};
+  var store = {best:{little:null, standard:null, master:null}, duel:{red:0, blue:0, ties:0, games:0}, gen:1};
   try{
     var raw = localStorage.getItem(STORE_KEY);
     if(raw){
       var parsed = JSON.parse(raw);
       if(parsed && parsed.best && parsed.duel) store = parsed;
+      if(!store.gen || typeof store.gen!=="number" || store.gen<1) store.gen=1;
     }
   }catch(e){ /* storage unavailable — play on without it */ }
   function saveStore(){
@@ -639,18 +644,65 @@
     var s=0; for(var i=0;i<9;i++){ var d=a[i]-b[i]; s+=d*d; }
     return Math.sqrt(s);
   }
+  /* ------- anti-viral instance generator -------
+     Facts never mutate: the atlas above is byte-identical in every deal.
+     What is dealt is only the selection and order of rounds (and, for
+     Standard where-rounds, the established evidence-on-screen distractors),
+     drawn by a generator seeded with (ISO week + generation counter).
+     Completing a full game increments the counter, so the next game is a
+     fresh deal. The two tutorial specials are exempt by design. */
+  function isoWeekParts(d){
+    var date=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dayNum=(date.getUTCDay()+6)%7;
+    date.setUTCDate(date.getUTCDate()-dayNum+3);
+    var isoYear=date.getUTCFullYear();
+    var firstThu=new Date(Date.UTC(isoYear,0,4));
+    var fDay=(firstThu.getUTCDay()+6)%7;
+    firstThu.setUTCDate(firstThu.getUTCDate()-fDay+3);
+    var week=1+Math.round((date-firstThu)/(7*24*3600*1000));
+    return {year:isoYear, week:week};
+  }
+  function isoWeekString(d){
+    var p=isoWeekParts(d);
+    return p.year+"-W"+(p.week<10?"0":"")+p.week;
+  }
+  function hashStr(s){
+    var h=0x811c9dc5;
+    for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,0x01000193); }
+    return h>>>0;
+  }
+  function instanceInfo(){
+    var week=isoWeekString(new Date());
+    var gen=store.gen||1;
+    var seedNum=hashStr("wordhome|"+week+"|G"+gen);
+    var hex=("0000"+((seedNum>>>16)^(seedNum&0xffff)).toString(16).toUpperCase()).slice(-4);
+    /* Pad/truncate to exactly 4 hex chars */
+    hex=("0000"+hex).slice(-4);
+    return {week:week, gen:gen, seedNum:seedNum, seedHex:hex,
+            label:"Instance "+week+" \u00B7 G"+gen+" \u00B7 seed "+hex};
+  }
+  function mulberry32(a){
+    return function(){
+      a|=0; a=a+0x6D2B79F5|0;
+      var t=Math.imul(a^a>>>15,1|a);
+      t=t+Math.imul(t^t>>>7,61|t)^t;
+      return ((t^t>>>14)>>>0)/4294967296;
+    };
+  }
+  var dealRng=null;
+  function rand(){ return dealRng ? dealRng() : Math.random(); }
   function shuffle(arr){
     var a=arr.slice();
-    for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    for(var i=a.length-1;i>0;i--){ var j=Math.floor(rand()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
     return a;
   }
   function sameCoord(a,b){ for(var i=0;i<9;i++){ if(a[i]!==b[i]) return false; } return true; }
   function perturb(coord){
     var out=coord.slice();
-    var idxs=shuffle([0,1,2,3,4,5,6,7,8]).slice(0, 3 + Math.floor(Math.random()*2));
+    var idxs=shuffle([0,1,2,3,4,5,6,7,8]).slice(0, 3 + Math.floor(rand()*2));
     var deltas=[-7,-5,-4,-3,3,4,5,7];
     for(var k=0;k<idxs.length;k++){
-      var d=deltas[Math.floor(Math.random()*deltas.length)];
+      var d=deltas[Math.floor(rand()*deltas.length)];
       out[idxs[k]]=Math.max(1, out[idxs[k]]+d);
     }
     if(sameCoord(out,coord)) out[0]=out[0]+4;
@@ -702,6 +754,7 @@
   /* ------- state (declared early: the panel hook reads it) ------- */
   var deck="standard", players="solo", rounds=[], idx=0, scores=[0,0], locked=false, results=[];
   var starter=0, currentAssisted=false;
+  var gameCompleted=false, currentInstance=null;
 
   /* ------- panel ------- */
   var overlay=document.getElementById("panel-overlay");
@@ -900,7 +953,12 @@
       nextBtn=document.getElementById("btn-next");
   var LETTERS=["A","B","C"];
 
+  function renderInstance(){
+    var el=document.getElementById("instance-line");
+    if(el) el.textContent=instanceInfo().label;
+  }
   function renderStore(){
+    renderInstance();
     function bestText(d, total){
       var b=store.best[d];
       return (b===null || b===undefined) ? "" : "Best on this device: "+b+" / "+total;
@@ -1083,6 +1141,13 @@
   }
 
   function endGame(){
+    /* Completion trigger: exactly one generation increment per full game,
+       whichever mode was played, so the next game is a fresh deal. */
+    if(!gameCompleted){
+      gameCompleted=true;
+      store.gen=(store.gen||1)+1;
+      saveStore();
+    }
     var endScores=document.getElementById("end-scores");
     var winner=document.getElementById("winner-line");
     var extra=document.getElementById("end-extra");
@@ -1176,7 +1241,17 @@
     deck=d; players=p;
     /* The starting player alternates per duel game played on this device. */
     starter = players==="duel" ? (store.duel.games % 2) : 0;
+    /* Deal this instance: seeded by (ISO week + generation counter).
+       The same seed always deals the same rounds, so a mid-game return
+       never re-rolls; a completed game bumps the generation (see endGame)
+       and the next start deals fresh. In Duel the dealt rounds alternate
+       between Red and Blue by turn, so each player's draws come from the
+       same generation pool but no round is ever dealt to both players. */
+    currentInstance=instanceInfo();
+    dealRng=mulberry32(currentInstance.seedNum);
+    gameCompleted=false;
     rounds=buildRounds(); idx=0; scores=[0,0]; results=[];
+    dealRng=null;
     currentAssisted=false;
     show("game"); renderRound();
   }

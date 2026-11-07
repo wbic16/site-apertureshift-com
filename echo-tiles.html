@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Echo Tiles</title>
+    <style>
+      :root{
+        --red:#c4281c; --blue:#1b5bd7; --yellow:#f2c500; --green:#2e8b2e;
+        --amber:#f59e0b;
+        --plate:#e8e4da; --plate-dot:rgba(0,0,0,.10);
+        --ink:#1d1d1b; --card:#ffffff; --card-ink:#1d1d1b;
+        --slot-bg:rgba(0,0,0,.06); --slot-line:rgba(0,0,0,.28);
+        --shadow:rgba(0,0,0,.28);
+        --panel-bg:#ffffff;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --plate:#26241f; --plate-dot:rgba(255,255,255,.09);
+          --ink:#f2efe6; --card:#33302a; --card-ink:#f2efe6;
+          --slot-bg:rgba(255,255,255,.07); --slot-line:rgba(255,255,255,.35);
+          --shadow:rgba(0,0,0,.55);
+          --panel-bg:#33302a;
+        }
+      }
+      *{ box-sizing:border-box; }
+      html{ -webkit-text-size-adjust:100%; }
+      body{
+        margin:0; font-family:Verdana, Geneva, Tahoma, sans-serif; color:var(--ink);
+        background-color:var(--plate);
+        background-image:radial-gradient(circle, var(--plate-dot) 22%, transparent 23%);
+        background-size:34px 34px;
+        min-height:100vh;
+      }
+      main{ max-width:44rem; margin:0 auto; padding:1rem 1rem 2.5rem; }
+
+      /* ---------- bricks ---------- */
+      .brick{
+        border-radius:18px; padding:1.1rem 1.25rem 1.25rem; margin:1rem 0; color:#fff;
+        box-shadow:0 5px 0 var(--shadow); position:relative;
+      }
+      .brick::before{
+        content:""; display:block; height:18px; margin:-.3rem 0 .6rem;
+        background-image:radial-gradient(circle, rgba(255,255,255,.55) 42%, rgba(0,0,0,.14) 43%, transparent 62%);
+        background-size:44px 18px; background-repeat:repeat-x;
+      }
+      .brick.white{ background:var(--card); color:var(--card-ink); }
+      .brick.red{ background:var(--red); } .brick.blue{ background:var(--blue); }
+      .brick.green{ background:var(--green); } .brick.yellow{ background:var(--yellow); color:#3a2f00; }
+
+      h1{ font-size:2.1rem; margin:.15rem 0 .4rem; line-height:1.15; }
+      h2{ font-size:1.5rem; margin:.1rem 0 .4rem; line-height:1.2; }
+      p{ line-height:1.55; margin:.4rem 0; }
+      .greeting{ font-size:1.25rem; font-weight:bold; }
+      .facts{ font-weight:bold; margin-top:.7rem; }
+
+      /* K'Nex rod — the one connector accent */
+      .rod{ display:flex; align-items:center; gap:.35rem; margin:.7rem 0 .2rem; }
+      .rod .joint{ width:17px; height:17px; border-radius:50%; background:transparent; border:3px solid var(--slot-line); flex:none; transition:background .25s, border-color .25s; }
+      .rod .joint.done{ background:var(--green); border-color:var(--green); }
+      .rod .joint.now{ border-color:var(--amber); }
+      .rod .bar{ height:6px; background:var(--slot-line); opacity:.5; flex:1; border-radius:3px; min-width:.6rem; }
+
+      /* ---------- big buttons & tiles ---------- */
+      button{ font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+      .bigbtn{
+        display:inline-block; border:none; border-radius:16px; min-height:72px;
+        padding:1rem 2.2rem; font-size:1.5rem; font-weight:bold;
+        background:#fff; color:#1d1d1b; box-shadow:0 5px 0 var(--shadow);
+      }
+      .bigbtn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--shadow); }
+      .brick.red .bigbtn, .brick.blue .bigbtn, .brick.green .bigbtn{ background:#fff; color:#1d1d1b; }
+
+      /* turn-taking toggle */
+      .toggle-row{ display:flex; align-items:center; gap:.9rem; flex-wrap:wrap; margin-top:1rem; }
+      .toggle{
+        border:none; border-radius:999px; min-height:64px; padding:.6rem 1.3rem;
+        font-size:1.15rem; font-weight:bold; background:rgba(0,0,0,.18); color:#fff;
+        display:inline-flex; align-items:center; gap:.7rem;
+      }
+      .brick.white .toggle{ background:rgba(0,0,0,.10); color:var(--card-ink); }
+      .toggle .pill{ width:52px; height:30px; border-radius:999px; background:rgba(255,255,255,.45); position:relative; flex:none; }
+      .toggle .pill::after{ content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:left .2s; }
+      .toggle[aria-pressed="true"] .pill{ background:var(--green); }
+      .toggle[aria-pressed="true"] .pill::after{ left:25px; }
+      .duet-names{ display:none; gap:.5rem; }
+      .toggle[aria-pressed="true"] ~ .duet-names{ display:inline-flex; }
+      .duet-names .chip{ border-radius:10px; padding:.45rem .8rem; font-weight:bold; color:#fff; font-size:1rem; }
+      .chip.red{ background:var(--red); } .chip.blue{ background:var(--blue); }
+
+      /* ---------- game ---------- */
+      .readit{
+        background:var(--card); color:var(--card-ink); border-radius:18px;
+        box-shadow:0 5px 0 var(--shadow); padding:1rem 1.25rem 1.2rem; margin:1rem 0; position:relative;
+      }
+      .readit::before{
+        content:""; display:block; height:18px; margin:-.25rem 0 .5rem;
+        background-image:radial-gradient(circle, rgba(128,128,128,.4) 42%, rgba(0,0,0,.10) 43%, transparent 62%);
+        background-size:44px 18px; background-repeat:repeat-x;
+      }
+      .readit .label{ font-size:1rem; font-weight:bold; letter-spacing:.04em; text-transform:uppercase; opacity:.65; margin:0; }
+      .readit .line{ font-size:2.2rem; font-weight:bold; margin:.25rem 0 0; line-height:1.25; }
+
+      .turnbanner{
+        display:none; border-radius:14px; padding:.8rem 1.1rem; margin:.9rem 0 0;
+        color:#fff; font-size:1.3rem; font-weight:bold; box-shadow:0 4px 0 var(--shadow);
+        align-items:center; gap:.7rem;
+      }
+      .turnbanner.show{ display:flex; }
+      .turnbanner.red{ background:var(--red); } .turnbanner.blue{ background:var(--blue); }
+      .turnbanner .dot{ width:20px; height:20px; border-radius:50%; background:#fff; flex:none; }
+
+      .slots{ display:flex; flex-wrap:wrap; gap:.7rem; margin:1.1rem 0 .2rem; }
+      .slot{
+        min-height:84px; min-width:96px; flex:1 1 96px; border-radius:16px;
+        border:4px dashed var(--slot-line); background:var(--slot-bg);
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        padding:.45rem .4rem; gap:.4rem;
+      }
+      .slot .dots{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; }
+      .slot .dots i{ width:11px; height:11px; border-radius:50%; background:var(--slot-line); display:block; }
+      .slot.filled{ border-style:solid; border-color:transparent; background:transparent; padding:0; }
+      .slot.filled.p-red{ box-shadow:0 0 0 4px var(--red); border-radius:20px; }
+      .slot.filled.p-blue{ box-shadow:0 0 0 4px var(--blue); border-radius:20px; }
+
+      .tray{ display:flex; flex-wrap:wrap; gap:.8rem; margin-top:1.2rem; }
+      .tile{
+        border:none; border-radius:16px; min-height:76px; min-width:104px;
+        padding:.7rem 1.3rem .8rem; font-size:1.65rem; font-weight:bold; color:#fff;
+        box-shadow:0 5px 0 var(--shadow); position:relative; flex:1 1 120px;
+      }
+      .tile::before{
+        content:""; display:block; height:13px; margin:-.15rem 0 .3rem;
+        background-image:radial-gradient(circle, rgba(255,255,255,.55) 42%, rgba(0,0,0,.14) 43%, transparent 62%);
+        background-size:34px 13px; background-repeat:repeat-x;
+      }
+      .tile:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--shadow); }
+      .tile.c-red{ background:var(--red); } .tile.c-blue{ background:var(--blue); }
+      .tile.c-green{ background:var(--green); } .tile.c-yellow{ background:var(--yellow); color:#3a2f00; }
+      .tile.placed{ width:100%; height:100%; min-height:84px; flex:none; cursor:default; }
+      .tile.wrong{ outline:5px solid var(--amber); animation:wiggle .45s ease; }
+      @keyframes wiggle{
+        0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-9px); }
+        40%{ transform:translateX(9px); } 60%{ transform:translateX(-6px); } 80%{ transform:translateX(6px); }
+      }
+      .tile.pop{ animation:pop .3s ease; }
+      @keyframes pop{ 0%{ transform:scale(.82); } 60%{ transform:scale(1.07); } 100%{ transform:scale(1); } }
+
+      .feedback{ min-height:2rem; font-size:1.25rem; font-weight:bold; margin:.9rem 0 0; }
+      .linenum{ font-weight:bold; opacity:.75; margin:0; }
+
+      /* line-complete + end */
+      .bigline{ font-size:2.6rem; font-weight:bold; line-height:1.25; margin:.5rem 0 .8rem; overflow-wrap:break-word; }
+      .confetti{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:40; }
+      .confetti i{ position:absolute; top:-16px; border-radius:50%; display:block; animation:fall linear forwards; }
+      @keyframes fall{ to{ transform:translateY(105vh) rotate(160deg); } }
+
+      /* ---------- footer & panels ---------- */
+      footer{ margin-top:2rem; }
+      .footlinks{ display:flex; flex-wrap:wrap; gap:.6rem; }
+      .footlinks button{
+        border:none; border-radius:12px; min-height:56px; padding:.7rem 1.3rem;
+        font-size:1.05rem; font-weight:bold; background:var(--card); color:var(--card-ink);
+        box-shadow:0 3px 0 var(--shadow);
+      }
+      .panel{
+        background:var(--panel-bg); color:var(--card-ink); border-radius:16px;
+        box-shadow:0 4px 0 var(--shadow); padding:1.1rem 1.25rem; margin-top:1rem;
+      }
+      .panel h3{ margin:.1rem 0 .5rem; font-size:1.25rem; }
+      .fineprint{ margin-top:1rem; font-size:.95rem; opacity:.85; }
+      [hidden]{ display:none !important; }
+
+      @media (prefers-reduced-motion: reduce){
+        .tile.wrong, .tile.pop{ animation:none; }
+        .confetti{ display:none; }
+        .bigbtn:active, .tile:active{ transform:none; }
+      }
+      @media (max-width:420px){
+        .readit .line{ font-size:1.9rem; }
+        .bigline{ font-size:2.2rem; }
+        .tile{ font-size:1.45rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- ============ START ============ -->
+      <section id="screen-start">
+        <div class="brick white">
+          <h1>Echo Tiles</h1>
+          <p class="greeting">"Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help."</p>
+          <p>And by help, we mean: survive the singularity.</p>
+          <div class="rod" aria-hidden="true"><span class="joint"></span><span class="bar"></span><span class="joint"></span><span class="bar"></span><span class="joint"></span></div>
+          <p class="facts">Free forever · Play together · No sign-up · No ads</p>
+        </div>
+
+        <div class="brick green">
+          <h2>Touch the words. Build the line.</h2>
+          <p>Six short lines. Big tiles. Nothing to lose.</p>
+          <button class="bigbtn" id="btn-play" type="button">Play</button>
+          <div class="toggle-row">
+            <button class="toggle" id="toggle-turns" type="button" aria-pressed="false">
+              <span class="pill" aria-hidden="true"></span> Take turns
+            </button>
+            <span class="duet-names" aria-hidden="true"><span class="chip red">Red</span><span class="chip blue">Blue</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ GAME ============ -->
+      <section id="screen-game" hidden>
+        <p class="linenum" id="linenum">Line 1 of 6</p>
+        <div class="rod" id="progress-rod" aria-hidden="true"></div>
+
+        <div class="readit">
+          <p class="label">Read it</p>
+          <p class="line" id="readit-line"></p>
+        </div>
+
+        <div class="turnbanner red" id="turnbanner" role="status">
+          <span class="dot" aria-hidden="true"></span><span id="turnbanner-text">Red's turn</span>
+        </div>
+
+        <div class="slots" id="slots" aria-label="Build the line here"></div>
+        <div class="tray" id="tray" aria-label="Word tiles"></div>
+        <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+      </section>
+
+      <!-- ============ LINE DONE ============ -->
+      <section id="screen-linedone" hidden>
+        <div class="brick yellow">
+          <h2>You built it!</h2>
+          <p class="bigline" id="doneline"></p>
+          <button class="bigbtn" id="btn-next" type="button">Next line</button>
+        </div>
+      </section>
+
+      <!-- ============ END ============ -->
+      <section id="screen-end" hidden>
+        <div class="brick blue">
+          <h2>You built every line!</h2>
+          <p>Every word, in its place. That is how the song goes.</p>
+          <button class="bigbtn" id="btn-replay" type="button">Play again</button>
+        </div>
+      </section>
+
+      <!-- ============ FOOTER ============ -->
+      <footer>
+        <div class="footlinks">
+          <button type="button" data-panel="about">About</button>
+          <button type="button" data-panel="privacy">Privacy</button>
+          <button type="button" data-panel="terms">Terms</button>
+        </div>
+
+        <div class="panel" id="panel-about" hidden>
+          <h3>About — for grown-ups</h3>
+          <p>Echo Tiles is a first-words game for ages 3–5. Its six lines come from <strong>ZAP ZOOM ECHO!</strong>, a song written in simple words only — big ideas don't need big words.</p>
+          <p>The finished line always stays visible at the top, because this game is about touching words in order, not about memory. There are no scores and no timers, and a wrong tile costs nothing — it just wiggles and waits to be tried again.</p>
+          <p>Turn on <strong>Take turns</strong> and two players share one screen: Red and Blue place tiles one at a time and celebrate together.</p>
+          <p>When a player is ready for more, the next road is <strong>Zap Zoom Echo</strong> — the same song, all eleven lines, with stars to earn.</p>
+          <p class="facts" id="instance-line">Instance —</p>
+        </div>
+
+        <div class="panel" id="panel-privacy" hidden>
+          <h3>Privacy</h3>
+          <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap ever leaves this device. Multiplayer means people on the same screen — no online play, no chat, no strangers. The only thing stored, on this device only, is a generation counter that re-deals the extra tiles in rounds 4–6.</p>
+        </div>
+
+        <div class="panel" id="panel-terms" hidden>
+          <h3>Terms</h3>
+          <p>Free to play, forever. No purchases, no ads, nothing to buy. These games are MIT licensed. © Will Bickford · Exocortex</p>
+        </div>
+
+        <p class="fineprint">Roads to the Future · from the Exocortex of 2130</p>
+      </footer>
+    </main>
+
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var LINES = [
+          { words: ["Zap", "zoom", "echo"],        big: "Zap, zoom, echo!" },
+          { words: ["Feel", "the", "fun"],         big: "Feel the fun." },
+          { words: ["Touch", "the", "sky"],        big: "Touch the sky." },
+          { words: ["Love", "with", "care"],       big: "Love with care." },
+          { words: ["Have", "it", "all"],          big: "Have it all." },
+          { words: ["We", "sing", "we", "beep"],   big: "We sing, we beep!" }
+        ];
+        /* The old fixed picks for rounds 4–6. A dealt distractor is never
+           one of these, so the new deal is always different from the old. */
+        var LEGACY_EXTRAS = { 3: "sky", 4: "fun", 5: "echo" };
+        var TILE_COLORS = ["c-red", "c-blue", "c-green", "c-yellow"];
+        var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* ---------- anti-viral instance: dealt distractors ----------
+           Facts never mutate (the six lines above). What is dealt per
+           instance is only the one distractor tile in rounds 4–6, drawn
+           from the other lines' words by a generator seeded with the ISO
+           week plus an on-device generation counter. Completing all six
+           lines advances the generation exactly once, so the next play is
+           a fresh deal, never a rerun of a solved one. */
+        var GEN_KEY = "echo-tiles-generation";
+
+        function isoWeekLabel(date) {
+          var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+          var dayNum = d.getUTCDay() || 7;
+          d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+          var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+          var week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+          return d.getUTCFullYear() + "-W" + (week < 10 ? "0" : "") + week;
+        }
+        var weekLabel = isoWeekLabel(new Date());
+
+        function hashStr(s) {
+          var h = 0x811c9dc5;
+          for (var i = 0; i < s.length; i++) {
+            h ^= s.charCodeAt(i);
+            h = Math.imul(h, 0x01000193);
+          }
+          return h >>> 0;
+        }
+        function mulberry32(a) {
+          return function () {
+            a |= 0; a = (a + 0x6D2B79F5) | 0;
+            var t = Math.imul(a ^ (a >>> 15), 1 | a);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+          };
+        }
+        function seedHex(gen) {
+          var h = hashStr(weekLabel + "|G" + gen) % 65536;
+          return ("000" + h.toString(16).toUpperCase()).slice(-4);
+        }
+
+        function loadGeneration() {
+          try {
+            var n = parseInt(window.localStorage.getItem(GEN_KEY), 10);
+            return (isFinite(n) && n >= 1) ? n : 1;
+          } catch (e) { return 1; }
+        }
+        var generation = loadGeneration(); /* the current counter value */
+        var instanceGen = generation;      /* generation this run is dealt from */
+        var runCounted = false;            /* guard: one increment per full completion */
+
+        function updateInstanceLine() {
+          var el = document.getElementById("instance-line");
+          if (el) el.textContent = "Instance " + weekLabel + " · G" + generation + " · seed " + seedHex(generation);
+        }
+
+        /* Draw the one distractor for a round (index 3–5) from the other
+           lines' words: never a word of the line itself, never the old
+           fixed pick for that round. Deterministic per week + generation. */
+        function dealtExtra(lineIndex) {
+          var own = {}, seen = {}, pool = [];
+          LINES[lineIndex].words.forEach(function (w) { own[w.toLowerCase()] = true; });
+          LINES.forEach(function (other, j) {
+            if (j === lineIndex) return;
+            other.words.forEach(function (w) {
+              var k = w.toLowerCase();
+              if (own[k] || seen[k] || w === LEGACY_EXTRAS[lineIndex]) return;
+              seen[k] = true;
+              pool.push(w);
+            });
+          });
+          var rng = mulberry32(hashStr(weekLabel + "|G" + instanceGen + "|line" + lineIndex));
+          return pool[Math.floor(rng() * pool.length)];
+        }
+
+        /* The single guarded increment site: fired only when the sixth
+           line is completed, at most once per run. */
+        function countCompletion() {
+          if (runCounted) return;
+          runCounted = true;
+          generation++;
+          try { window.localStorage.setItem(GEN_KEY, String(generation)); } catch (e) { /* counter is a bonus, never a blocker */ }
+          updateInstanceLine();
+        }
+
+        var takeTurns = false;
+        var turn = 0; // 0 = Red, 1 = Blue
+        var lineIdx = 0;
+        var placed = 0;
+
+        var $ = function (id) { return document.getElementById(id); };
+        var screens = { start: $("screen-start"), game: $("screen-game"), done: $("screen-linedone"), end: $("screen-end") };
+
+        function show(name) {
+          for (var k in screens) screens[k].hidden = (k !== name);
+          window.scrollTo(0, 0);
+        }
+
+        /* ---------- tiny pop sound (created on first tap) ---------- */
+        var audioCtx = null;
+        function pop(freq) {
+          try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === "suspended") audioCtx.resume();
+            var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = "sine"; o.frequency.value = freq;
+            g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.16);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + 0.17);
+          } catch (e) { /* sound is a bonus, never a blocker */ }
+        }
+
+        /* ---------- confetti: dots only ---------- */
+        function confetti() {
+          if (reducedMotion) return;
+          var box = $("confetti"), colors = ["#c4281c", "#1b5bd7", "#f2c500", "#2e8b2e", "#f59e0b"];
+          for (var i = 0; i < 42; i++) {
+            var d = document.createElement("i");
+            var size = 8 + Math.random() * 9;
+            d.style.width = size + "px"; d.style.height = size + "px";
+            d.style.left = Math.random() * 100 + "vw";
+            d.style.background = colors[i % colors.length];
+            d.style.animationDuration = (1.1 + Math.random() * 1.2) + "s";
+            d.style.animationDelay = (Math.random() * 0.35) + "s";
+            box.appendChild(d);
+          }
+          setTimeout(function () { box.innerHTML = ""; }, 3200);
+        }
+
+        /* ---------- progress rod ---------- */
+        function buildRod() {
+          var rod = $("progress-rod"); rod.innerHTML = "";
+          LINES.forEach(function (_, i) {
+            var j = document.createElement("span");
+            j.className = "joint" + (i < lineIdx ? " done" : i === lineIdx ? " now" : "");
+            rod.appendChild(j);
+            if (i < LINES.length - 1) { var b = document.createElement("span"); b.className = "bar"; rod.appendChild(b); }
+          });
+        }
+
+        function updateBanner() {
+          var banner = $("turnbanner");
+          if (!takeTurns) { banner.className = "turnbanner red"; banner.classList.remove("show"); return; }
+          banner.classList.add("show");
+          banner.classList.toggle("red", turn === 0);
+          banner.classList.toggle("blue", turn === 1);
+          $("turnbanner-text").textContent = (turn === 0 ? "Red" : "Blue") + "'s turn";
+        }
+
+        function shuffle(arr) {
+          var a = arr.slice();
+          for (var i = a.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+          }
+          return a;
+        }
+
+        function startLine() {
+          var line = LINES[lineIdx];
+          placed = 0;
+          buildRod();
+          $("linenum").textContent = "Line " + (lineIdx + 1) + " of " + LINES.length;
+          $("readit-line").textContent = line.words.join(" ");
+          $("feedback").textContent = "";
+          updateBanner();
+
+          /* slots with one dot per letter */
+          var slots = $("slots"); slots.innerHTML = "";
+          line.words.forEach(function (word) {
+            var s = document.createElement("div");
+            s.className = "slot";
+            var dots = document.createElement("span"); dots.className = "dots";
+            for (var i = 0; i < word.length; i++) dots.appendChild(document.createElement("i"));
+            s.appendChild(dots);
+            slots.appendChild(s);
+          });
+
+          /* tray: the line's words, shuffled, plus one dealt extra tile in rounds 4–6 */
+          var pool = line.words.map(function (w, i) { return { word: w, correct: i }; });
+          if (lineIdx >= 3) pool.push({ word: dealtExtra(lineIdx), correct: -1 });
+          var order = shuffle(pool);
+          var same = order.length === pool.length && order.every(function (t, i) { return t.correct === i; });
+          if (same && order.length > 1) { var t0 = order[0]; order[0] = order[1]; order[1] = t0; }
+
+          var tray = $("tray"); tray.innerHTML = "";
+          order.forEach(function (item, k) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "tile " + TILE_COLORS[k % TILE_COLORS.length];
+            b.textContent = item.word;
+            b.setAttribute("aria-label", "Word tile: " + item.word);
+            b.addEventListener("click", function () { tapTile(b, item); });
+            tray.appendChild(b);
+          });
+
+          show("game");
+        }
+
+        function tapTile(btn, item) {
+          var line = LINES[lineIdx];
+          if (item.correct === placed) {
+            /* right word, right place */
+            var slot = $("slots").children[placed];
+            btn.classList.add("placed", "pop");
+            btn.disabled = true;
+            btn.setAttribute("aria-label", item.word + " — placed");
+            slot.classList.add("filled");
+            if (takeTurns) slot.classList.add(turn === 0 ? "p-red" : "p-blue");
+            slot.innerHTML = "";
+            slot.appendChild(btn);
+            pop(520 + placed * 90);
+            placed++;
+            if (takeTurns) turn = 1 - turn;
+            if (placed === line.words.length) {
+              $("feedback").textContent = "";
+              updateBanner();
+              if (lineIdx === LINES.length - 1) countCompletion();
+              confetti();
+              pop(880);
+              setTimeout(function () {
+                $("doneline").textContent = line.big;
+                $("btn-next").textContent = (lineIdx === LINES.length - 1) ? "Finish" : "Next line";
+                show("done");
+              }, reducedMotion ? 60 : 650);
+            } else {
+              $("feedback").textContent = "Yes!";
+              updateBanner();
+            }
+          } else {
+            /* gentle miss: amber glow + wiggle, nothing lost */
+            btn.classList.remove("wrong");
+            void btn.offsetWidth; /* restart the wiggle */
+            btn.classList.add("wrong");
+            $("feedback").textContent = "Try another tile.";
+            pop(190);
+            setTimeout(function () { btn.classList.remove("wrong"); }, 1600);
+          }
+        }
+
+        /* ---------- wiring ---------- */
+        $("toggle-turns").addEventListener("click", function () {
+          takeTurns = !takeTurns;
+          this.setAttribute("aria-pressed", takeTurns ? "true" : "false");
+        });
+        $("btn-play").addEventListener("click", function () { lineIdx = 0; turn = 0; instanceGen = generation; runCounted = false; startLine(); });
+        $("btn-next").addEventListener("click", function () {
+          if (lineIdx === LINES.length - 1) { confetti(); show("end"); }
+          else { lineIdx++; startLine(); }
+        });
+        $("btn-replay").addEventListener("click", function () { lineIdx = 0; turn = 0; instanceGen = generation; runCounted = false; startLine(); });
+
+        updateInstanceLine();
+
+        /* footer panels: one open at a time */
+        var panelBtns = document.querySelectorAll("[data-panel]");
+        panelBtns.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var target = $("panel-" + btn.getAttribute("data-panel"));
+            var wasHidden = target.hidden;
+            ["about", "privacy", "terms"].forEach(function (n) { $("panel-" + n).hidden = true; });
+            target.hidden = !wasHidden;
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

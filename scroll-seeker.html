@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<meta name="description" content="Scroll Seeker — a free same-screen brick game. A word is hiding somewhere on the map. Walk the K'Nex roads from word to word, follow the distance, and find it." />
+<link rel="icon" href="data:," />
+<title>Scroll Seeker — Roads to the Future</title>
+<style>
+  :root{
+    --bg:#e9eddc;
+    --baseplate-dot:rgba(26,34,28,.10);
+    --surface:#fbfaf3;
+    --surface-2:#e3e7d2;
+    --ink:#1c231d;
+    --ink-soft:#4c574e;
+    --ink-faint:#7c877c;
+    --line:#c9cfb4;
+    --rod:#8a927f;
+    --rod-dark:#6d7663;
+    --red:#cf352a;      --red-dark:#9c241c;   --red-ink:#ffffff;
+    --blue:#1f6fd1;     --blue-dark:#155198;  --blue-ink:#ffffff;
+    --yellow:#f4b90d;   --yellow-dark:#c08f04;--yellow-ink:#2a2000;
+    --green:#2f9e4f;    --green-dark:#1f7038; --green-ink:#ffffff;
+    --teal:#177567;     --teal-dark:#0f554a;
+    --good:#1e7a3c;
+    --far:#a05a12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#131a15;
+      --baseplate-dot:rgba(236,231,218,.07);
+      --surface:#1c241e;
+      --surface-2:#273128;
+      --ink:#eef0e2;
+      --ink-soft:#bcc3b2;
+      --ink-faint:#8d968a;
+      --line:#39443a;
+      --rod:#7e8a76;
+      --rod-dark:#98a48d;
+      --far:#e0a458;
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 14px 14px, var(--baseplate-dot) 3.2px, transparent 4px),
+      var(--bg);
+    background-size:30px 30px, auto;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:16px 16px 8px}
+  .mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+  .rounded{font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,-apple-system,"Segoe UI",sans-serif}
+  button{font:inherit}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:6px}
+  .hidden{display:none !important}
+
+  /* ---------- bricks ---------- */
+  .brick{
+    position:relative;border-radius:8px;color:var(--ink);
+    border:2px solid rgba(0,0,0,.22);
+    box-shadow:0 5px 0 rgba(0,0,0,.28), inset 0 2px 0 rgba(255,255,255,.25);
+  }
+  .brick .studs{display:flex;gap:12px;padding:9px 16px 0;pointer-events:none}
+  .brick .studs i{
+    width:26px;height:13px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+    background:rgba(255,255,255,.34);
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.14), inset 0 2px 0 rgba(255,255,255,.4);
+    display:block;
+  }
+  .b-red{background:var(--red);color:var(--red-ink)}
+  .b-blue{background:var(--blue);color:var(--blue-ink)}
+  .b-yellow{background:var(--yellow);color:var(--yellow-ink)}
+  .b-green{background:var(--green);color:var(--green-ink)}
+  .b-teal{background:var(--teal);color:#fff}
+  .b-plate{background:var(--surface);color:var(--ink)}
+
+  /* ---------- K'Nex joints & rods ---------- */
+  .joint{
+    flex:none;width:26px;height:26px;border-radius:50%;
+    background:var(--surface);
+    border:4px solid var(--rod-dark);
+    box-shadow:inset 0 0 0 3px var(--surface), inset 0 0 0 6px var(--rod);
+    position:relative;z-index:1;
+  }
+  .joint.j-red{border-color:var(--red-dark);box-shadow:inset 0 0 0 2px var(--surface);background:var(--red)}
+  .joint.j-blue{border-color:var(--blue-dark);box-shadow:inset 0 0 0 2px var(--surface);background:var(--blue)}
+  .joint.j-here{border-color:var(--green-dark);background:var(--green);box-shadow:inset 0 0 0 2px var(--surface)}
+  .rod-line{
+    flex:none;width:34px;height:8px;border-radius:4px;
+    background:repeating-linear-gradient(90deg,var(--rod) 0 7px,var(--rod-dark) 7px 9px);
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.18);
+  }
+
+  /* ---------- header strip ---------- */
+  .topstrip{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:14px}
+  .topstrip .brand{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+  .about-brick{
+    appearance:none;cursor:pointer;min-height:56px;padding:8px 22px 10px;
+    font-size:17px;font-weight:800;letter-spacing:.02em;
+  }
+  .about-brick:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .about-brick .studs{padding:0 0 5px;gap:8px;justify-content:center}
+  .about-brick .studs i{width:16px;height:8px}
+
+  /* ---------- screens ---------- */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ---------- intro ---------- */
+  .intro{padding:22px 0 6px}
+  .greeting{
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+    font-size:clamp(27px,6.8vw,42px);line-height:1.2;font-weight:400;letter-spacing:-.01em;margin:0 0 10px;
+  }
+  .greeting em{font-style:italic}
+  .gloss{font-family:Georgia,serif;font-style:italic;font-size:18px;color:var(--ink-soft);margin:0 0 26px}
+
+  .how-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:0 0 22px}
+  .how{border-radius:14px;padding:0 12px 12px;text-align:left}
+  .how .studs{gap:8px;padding:8px 2px 0}
+  .how .studs i{width:18px;height:9px}
+  .how h3{margin:6px 0 5px;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+  .how p{margin:0;font-size:14px;font-weight:600;opacity:.94}
+  @media(max-width:480px){.how-row{grid-template-columns:1fr}.how{padding:2px 14px 12px}}
+
+  .modes{display:grid;gap:14px;margin-bottom:22px}
+  @media(min-width:560px){.modes{grid-template-columns:1fr 1fr 1fr}}
+  .mode-brick{
+    appearance:none;cursor:pointer;text-align:left;width:100%;
+    border-radius:20px;padding:0 16px 16px;min-height:120px;
+  }
+  .mode-brick:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+  .mode-brick[aria-pressed="true"]{outline:4px solid var(--ink);outline-offset:2px}
+  .mode-brick .studs{gap:10px;padding:12px 2px 0}
+  .mode-brick .studs i{width:26px;height:13px}
+  .mode-brick .mode-name{display:block;font-size:22px;font-weight:900;line-height:1.15;margin:9px 0 5px;letter-spacing:-.01em}
+  .mode-brick .mode-sub{display:block;font-size:13.5px;font-weight:650;opacity:.92}
+  .duel-split{display:flex;gap:8px;margin-top:10px}
+  .duel-split span{flex:1;text-align:center;border-radius:8px;padding:6px 4px;font-weight:800;font-size:13px;border:2px solid rgba(0,0,0,.22);box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
+
+  .quest-head{font-size:13.5px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px}
+  .quests{display:grid;gap:12px}
+  .quest-brick{
+    appearance:none;cursor:pointer;text-align:left;width:100%;
+    border-radius:16px;padding:0 18px 14px;min-height:76px;
+    display:block;
+  }
+  .quest-brick:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+  .quest-brick .studs{gap:10px;padding:10px 2px 0}
+  .quest-brick .studs i{width:22px;height:11px}
+  .quest-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:7px;flex-wrap:wrap}
+  .quest-name{font-size:21px;font-weight:900;letter-spacing:-.01em}
+  .quest-stars{font-size:17px;letter-spacing:.12em;white-space:nowrap}
+  .quest-meta{display:block;font-size:13.5px;font-weight:650;opacity:.92;margin-top:3px}
+  .facts-strip{
+    margin:16px 0 0;text-align:center;font-size:13.5px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .instance-line{
+    display:block;width:fit-content;margin:0 auto 22px;padding:8px 18px;
+    background:var(--surface);border:2px solid var(--line);border-radius:999px;
+    font-size:14.5px;font-weight:700;color:var(--ink-soft);text-align:center;
+  }
+
+  /* ---------- game ---------- */
+  .hud{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .hud .q-title{font-size:19px;font-weight:900}
+  .hud .q-stats{font-size:14px;font-weight:750;color:var(--ink-soft)}
+  .turn-banner{border-radius:14px;padding:0 16px 12px;margin-bottom:12px;text-align:center}
+  .turn-banner .studs{justify-content:center;gap:8px;padding:8px 0 0}
+  .turn-banner .studs i{width:18px;height:9px}
+  .turn-banner .tb-text{display:block;font-size:20px;font-weight:900;margin-top:5px}
+
+  .scoreboard{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .score-brick{border-radius:12px;padding:8px 14px 10px;min-height:56px}
+  .score-brick .who{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.9}
+  .score-brick .where{font-family:Georgia,serif;font-style:italic;font-size:19px;font-weight:700;line-height:1.25}
+  .score-brick .dist{font-size:13px;font-weight:700;opacity:.92}
+  .score-brick.turn-now{outline:4px solid var(--ink);outline-offset:2px}
+
+  .clue{border-radius:16px;padding:0 18px 16px;margin-bottom:14px}
+  .clue .studs{gap:10px;padding:10px 2px 0}
+  .clue .studs i{width:22px;height:11px}
+  .clue .clue-label{font-size:12.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-top:6px}
+  .clue .clue-dist{font-size:clamp(30px,7vw,40px);font-weight:900;line-height:1.1;margin:2px 0}
+  .clue .clue-dist small{font-size:17px;font-weight:800}
+  .clue .clue-neighbors{font-size:16.5px;font-weight:700;margin:0}
+  .clue .clue-neighbors em{font-family:Georgia,serif}
+  .clue .clue-tip{font-size:14px;font-weight:650;margin:6px 0 0;opacity:.88}
+  .compass{min-height:1.6em;font-size:18px;font-weight:850;margin:10px 0 0}
+  .compass.closer{color:var(--good)}
+  .compass.farther{color:var(--far)}
+
+  .here-label{font-size:13px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:16px 0 8px}
+  .current-node{border-radius:18px;padding:0 20px 16px;margin-bottom:6px}
+  .current-node .studs{gap:12px;padding:12px 2px 0}
+  .current-node .word{
+    font-family:Georgia,serif;font-size:clamp(36px,9vw,52px);font-weight:700;line-height:1.1;margin:6px 0 2px;
+  }
+  .current-node .addr{font-size:16px;margin:2px 0 4px}
+  .current-node .scrolls{font-size:14px;font-weight:650;color:var(--ink-soft);margin:0}
+  .coord-rod .grp{white-space:nowrap}
+  .coord-rod .rod{display:inline-block;width:22px;height:5px;border-radius:3px;background:var(--rod);vertical-align:middle;margin:0 7px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+  .bars9{display:flex;align-items:flex-end;gap:5px;height:52px;margin:10px 0 2px;max-width:340px}
+  .bars9 span{flex:1;display:flex;align-items:flex-end;height:100%}
+  .bars9 b{display:block;width:100%;border-radius:3px 3px 0 0;background:var(--teal)}
+
+  .roads-label{font-size:13px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 10px}
+  .roads{display:grid;gap:12px}
+  .road-btn{
+    appearance:none;cursor:pointer;background:none;border:none;padding:0;width:100%;
+    display:flex;align-items:center;text-align:left;min-height:64px;
+  }
+  .road-btn .road-brick{
+    flex:1;display:flex;justify-content:space-between;align-items:center;gap:10px;
+    border-radius:14px;padding:12px 16px;min-height:64px;
+  }
+  .road-btn:active .road-brick{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .road-btn .nb-word{font-family:Georgia,serif;font-size:23px;font-weight:700;line-height:1.15}
+  .road-btn .nb-dist{font-size:14.5px;font-weight:800;white-space:nowrap;opacity:.92}
+  .road-btn .nb-dist small{display:block;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+
+  .trail{margin:20px 0 4px}
+  .trail .trail-label{font-size:13px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px}
+  .trail-rod{display:flex;align-items:center;flex-wrap:wrap;gap:0}
+  .trail-rod .t-node{display:flex;align-items:center;gap:0}
+  .trail-rod .t-word{font-family:Georgia,serif;font-style:italic;font-size:15.5px;font-weight:700;margin:0 2px}
+  .trail-rod .rod-line{width:16px}
+  .trail-rod .joint{width:18px;height:18px;border-width:3px}
+
+  .game-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .btn{
+    appearance:none;cursor:pointer;min-height:56px;padding:10px 22px;
+    font-size:17px;font-weight:800;border-radius:12px;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .btn.small{min-height:56px;font-size:15px;padding:8px 16px}
+
+  .leg-banner{border-radius:16px;padding:0 18px 16px;margin-bottom:14px;text-align:center}
+  .leg-banner .studs{justify-content:center}
+  .leg-banner h3{font-size:23px;margin:8px 0 4px}
+  .leg-banner p{margin:0 0 12px;font-size:16px;font-weight:650}
+
+  /* ---------- found / end ---------- */
+  .found{padding:10px 0 0}
+  .found .mode-pill{
+    display:inline-block;font-size:12.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink-soft);border:2px solid var(--line);border-radius:999px;padding:5px 14px;margin-bottom:14px;background:var(--surface);
+  }
+  .found h2{font-family:Georgia,serif;font-size:clamp(30px,7.5vw,44px);line-height:1.15;margin:0 0 6px;font-weight:700}
+  .found .stars-big{font-size:34px;letter-spacing:.18em;margin:6px 0}
+  .found .verdict-line{font-size:18px;font-weight:750;margin:0 0 4px}
+  .found .beside{font-size:17px;margin:0 0 14px}
+  .found .beside em{font-family:Georgia,serif;font-weight:700}
+  .found-card{border-radius:16px;padding:0 18px 16px;margin-bottom:16px}
+  .found-card .studs{gap:10px;padding:10px 2px 0}
+  .found-card .studs i{width:22px;height:11px}
+  .found-card .addr{font-size:18px;margin-top:8px}
+  .found-card .scrolls{font-size:14.5px;font-weight:650;opacity:.92;margin:2px 0 0}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .recap{margin-top:24px}
+  .recap h3{font-size:16px;margin:0 0 8px}
+  .recap ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .recap li{
+    background:var(--surface);border:2px solid var(--line);border-radius:10px;
+    padding:9px 14px;font-size:15px;font-weight:650;
+    display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  }
+
+  /* ---------- footer / compliance ---------- */
+  footer{margin-top:34px;padding:18px 0 26px;border-top:2px solid var(--line)}
+  .foot-links{display:flex;gap:10px;flex-wrap:wrap}
+  .foot-link{
+    appearance:none;cursor:pointer;min-height:56px;padding:10px 22px;
+    font-size:16px;font-weight:800;border-radius:10px;
+  }
+  .foot-link:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .foot-meta{
+    display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    margin-top:14px;font-size:13.5px;color:var(--ink-soft);font-weight:650;
+  }
+
+  /* ---------- About panel ---------- */
+  .panel-overlay{
+    position:fixed;inset:0;background:rgba(10,14,11,.55);
+    display:none;overflow-y:auto;z-index:50;padding:18px 12px;
+  }
+  .panel-overlay.open{display:block}
+  .panel{
+    max-width:640px;margin:0 auto;background:var(--surface);color:var(--ink);
+    border-radius:18px;padding:22px 22px 30px;
+    box-shadow:0 18px 50px rgba(0,0,0,.4);
+  }
+  .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .panel-head h2{margin:0;font-size:24px;font-weight:900}
+  .close-brick{
+    appearance:none;cursor:pointer;width:56px;height:56px;flex:none;
+    font-size:20px;font-weight:900;border-radius:12px;color:#fff;
+  }
+  .panel-nav{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 6px}
+  .panel-nav a{
+    color:var(--ink);font-weight:800;font-size:14.5px;text-decoration:none;
+    border:2px solid var(--line);border-radius:999px;padding:8px 16px;background:var(--surface-2);
+  }
+  .panel section{margin-top:22px}
+  .panel h3{font-size:19px;margin:0 0 8px}
+  .panel p{margin:0 0 10px;font-size:16px}
+  .panel .legal p{font-size:15px}
+  .atlas-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+  .atlas-list li{
+    display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);padding:5px 2px;font-size:15px;
+  }
+  .atlas-list .w{font-family:Georgia,serif;font-style:italic;font-weight:700}
+  .atlas-list .c{color:var(--ink-soft);font-size:13.5px}
+
+  @media (prefers-reduced-motion: no-preference){
+    .screen.active{animation:fade .25s ease both}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topstrip">
+    <span class="brand">Roads to the Future · Ages 10–12</span>
+    <button class="about-brick brick b-yellow rounded" id="btn-about-top" type="button" aria-haspopup="dialog">
+      <span class="studs" aria-hidden="true"><i></i><i></i></span>About
+    </button>
+  </div>
+
+  <!-- ================= INTRO ================= -->
+  <section class="screen active" id="screen-intro">
+    <div class="intro">
+      <h1 class="greeting">&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the <em>Exocortex of 2130</em>, and I&rsquo;m here to help.&rdquo;</h1>
+      <p class="gloss">And by help, we mean: survive the singularity.</p>
+
+      <div class="how-row" aria-label="How to play">
+        <div class="how brick b-teal">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>1 · Start at home</h3>
+          <p>The first quest begins on the word <em>home</em>. Each quest after starts where the one before ended.</p>
+        </div>
+        <div class="how brick b-yellow">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>2 · A word is hiding</h3>
+          <p>You get its distance, and the two words it lives beside.</p>
+        </div>
+        <div class="how brick b-green">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>3 · Hop the rods</h3>
+          <p>Each word joins to its five nearest words. Follow the distance down — and if every road leads farther, take one anyway and come in through a word it lives beside.</p>
+        </div>
+      </div>
+
+      <p class="quest-head" id="mode-head">Who is seeking?</p>
+      <div class="modes" role="group" aria-labelledby="mode-head">
+        <button class="mode-brick brick b-teal rounded" id="mode-solo" type="button" aria-pressed="true">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="mode-name">1 Seeker</span>
+          <span class="mode-sub">Just you and the map</span>
+        </button>
+        <button class="mode-brick brick b-green rounded" id="mode-duo" type="button" aria-pressed="false">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="mode-name">Two Seekers</span>
+          <span class="mode-sub">One journey, taking turns</span>
+          <span class="duel-split" aria-hidden="true">
+            <span style="background:var(--red);color:#fff">RED</span>
+            <span style="background:var(--blue);color:#fff">BLUE</span>
+          </span>
+        </button>
+        <button class="mode-brick brick b-yellow rounded" id="mode-race" type="button" aria-pressed="false">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="mode-name">Race</span>
+          <span class="mode-sub">Two markers, same hidden word — first there wins</span>
+          <span class="duel-split" aria-hidden="true">
+            <span style="background:var(--red);color:#fff">RED</span>
+            <span style="background:var(--blue);color:#fff">BLUE</span>
+          </span>
+        </button>
+      </div>
+
+      <span class="instance-line mono" id="instance-line">Instance —</span>
+
+      <p class="quest-head">Pick a quest</p>
+      <div class="quests" id="quest-list"></div>
+      <p class="facts-strip">Free forever · Same screen · No sign-up</p>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section class="screen" id="screen-game" aria-live="polite">
+    <div class="hud">
+      <span class="q-title" id="hud-title">Quest 1</span>
+      <span class="q-stats" id="hud-stats"></span>
+    </div>
+
+    <div class="turn-banner brick hidden" id="turn-banner">
+      <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="tb-text rounded" id="turn-text">Red&rsquo;s hop</span>
+    </div>
+
+    <div class="scoreboard hidden" id="scoreboard"></div>
+
+    <div class="leg-banner brick b-green hidden" id="leg-banner">
+      <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+      <h3 class="rounded" id="leg-title">Found it!</h3>
+      <p id="leg-text"></p>
+      <button class="btn brick b-plate rounded" id="btn-leg-next" type="button">Keep seeking →</button>
+    </div>
+
+    <div class="clue brick b-yellow" id="clue-panel">
+      <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <div class="clue-label" id="clue-label">The hidden word is</div>
+      <div class="clue-dist"><span id="clue-dist">–</span> <small>away from where you stand</small></div>
+      <p class="clue-neighbors" id="clue-neighbors"></p>
+      <p class="clue-tip">If every road leads farther, that&rsquo;s a dead end — take one anyway, and come back in through a word it lives beside.</p>
+      <p class="compass hidden" id="compass" role="status"></p>
+    </div>
+
+    <p class="here-label" id="here-label">You are standing on</p>
+    <div class="current-node brick b-plate" id="current-node">
+      <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <div class="word" id="cur-word">home</div>
+      <div class="addr" id="cur-addr"></div>
+      <div class="bars9" id="cur-bars" aria-hidden="true"></div>
+      <p class="scrolls" id="cur-scrolls"></p>
+    </div>
+
+    <p class="roads-label">Five roads out — pick one</p>
+    <div class="roads" id="roads"></div>
+
+    <div class="trail">
+      <p class="trail-label">Your trail so far</p>
+      <div class="trail-rod" id="trail-rod"></div>
+    </div>
+
+    <div class="game-actions">
+      <button class="btn small brick b-plate rounded" id="btn-restart" type="button">Restart quest</button>
+      <button class="btn small brick b-plate rounded" id="btn-quit" type="button">Quest list</button>
+    </div>
+  </section>
+
+  <!-- ================= FOUND ================= -->
+  <section class="screen" id="screen-found">
+    <div class="found">
+      <span class="mode-pill" id="found-pill">Quest complete</span>
+      <h2 id="found-title">You found it.</h2>
+      <div class="stars-big" id="found-stars" aria-label="Stars earned"></div>
+      <p class="verdict-line" id="found-verdict"></p>
+      <p class="beside" id="found-beside"></p>
+      <div id="found-cards"></div>
+      <div class="btn-row">
+        <button class="btn brick b-green rounded" id="btn-next-quest" type="button">Next quest →</button>
+        <button class="btn brick b-plate rounded" id="btn-found-home" type="button">Quest list</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= END ================= -->
+  <section class="screen" id="screen-end">
+    <div class="found">
+      <span class="mode-pill">The whole map, walked</span>
+      <h2>Every hidden word, found.</h2>
+      <div class="stars-big" id="end-stars" aria-label="Total stars"></div>
+      <p class="verdict-line" id="end-line"></p>
+      <p class="beside">Near in meaning is near in address — and now you can walk it. The map never changes — but finish all six quests and the next expedition is dealt fresh: different hunts on the same roads.</p>
+      <div class="recap">
+        <h3>Quest by quest</h3>
+        <ul id="recap-list"></ul>
+      </div>
+      <div class="btn-row">
+        <button class="btn brick b-green rounded" id="btn-end-again" type="button">Seek again →</button>
+        <button class="btn brick b-plate rounded" id="btn-end-home" type="button">Quest list</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-links">
+      <button class="foot-link brick b-yellow rounded" type="button" data-open-panel="sec-about">About</button>
+      <button class="foot-link brick b-blue rounded" type="button" data-open-panel="sec-privacy">Privacy</button>
+      <button class="foot-link brick b-red rounded" type="button" data-open-panel="sec-terms">Terms</button>
+    </div>
+    <div class="foot-meta">
+      <span class="facts">Free forever · Same screen · No sign-up</span>
+      <span>© Will Bickford · Exocortex</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ================= ABOUT PANEL ================= -->
+<div class="panel-overlay" id="panel-overlay">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" id="panel">
+    <div class="panel-head">
+      <h2 class="rounded" id="panel-title">About Scroll Seeker</h2>
+      <button class="close-brick brick b-red" id="btn-close-panel" type="button" aria-label="Close panel">✕</button>
+    </div>
+    <nav class="panel-nav" aria-label="Panel sections">
+      <a href="#sec-about">About</a>
+      <a href="#sec-map">The map</a>
+      <a href="#sec-access">Accessibility</a>
+      <a href="#sec-privacy">Privacy</a>
+      <a href="#sec-terms">Terms</a>
+    </nav>
+
+    <section id="sec-about">
+      <h3>About us — the long version</h3>
+      <p>Scroll Seeker is one of the <strong>Roads to the Future</strong> games, built to teach two things at once: how to think in more dimensions than the world is about to demand of you, and <strong>Singular</strong> — Will Bickford&rsquo;s language, drawn from his own archive of words.</p>
+      <p>In Singular, every word lives somewhere. Each word has an address — <strong>nine numbers</strong>, written in three groups of three. A word&rsquo;s address is the <strong>average of the addresses of every scroll that contains it</strong>, so no single scroll decides where a word lives: every scroll that holds it pulls a little, and the word settles where the pulls balance.</p>
+      <p>That is why <strong>near in meaning is near in address</strong>. Words that keep showing up in the same kinds of scrolls drift together on the map, and words that never meet stay far apart. Distance here is the straight-line (Euclidean) distance through all nine numbers — the same measure the game shows you.</p>
+      <p><strong>Seeking is walking the map by distance.</strong> You never see the whole map at once. You stand on one word, read how far the hidden word is, look at the five roads out — the five words nearest to where you stand — and choose. A hop that shrinks the distance is usually a hop toward the meaning. That is graph traversal, and it is also how the Exocortex itself is searched: start anywhere, follow the closeness, arrive.</p>
+      <p><strong>Watch for dead ends.</strong> Some words are local traps: every road out of them leads farther from the hidden word, and following the distance down alone will bounce you back and forth forever. The way out is a deliberate detour — take the hop that goes farther, and come at the target from a new side. The clue is your map out: the hidden word <em>lives beside</em> two named words, so when the distance stalls, aim for one of those neighbours and walk in through it. Par routes sometimes spend one hop going farther to save three coming back.</p>
+      <p><strong>Par</strong> is the shortest possible walk, worked out from the real map before you start. Match it and the route you found is one of the best routes there is. Take a longer way and you still arrive — the map forgives wandering; it just keeps count.</p>
+      <p><strong>Every expedition is dealt, not fixed.</strong> The six quests are drawn from the real map for one instance — seeded by the current week and a generation counter kept on this device, and shown on the start screen with its seed. The first quest always starts at <em>home</em>; each later quest starts where the one before ended. Pars are always 2, 3, 4, 5, then two-word hunts of 6 and 7, each worked out from the map at deal time. Finish all six quests and the generation steps up, so the next expedition is a different set of hunts. The map itself — the thirty words, their addresses, and the five roads out of every word — never changes, and <strong>Two Seekers</strong> and <strong>Race</strong> face the same dealt instance as a solo seeker.</p>
+      <p><strong>Two Seekers</strong> is one journey walked together: Red and Blue alternate hops on the same trail, and the stars belong to the team. <strong>Race</strong> puts two markers on the same map chasing the same hidden word — alternating hops, each from your own position, first to land on it wins the quest.</p>
+    </section>
+
+    <section id="sec-map">
+      <h3>The map — all thirty words</h3>
+      <p>Real addresses from Will&rsquo;s Singular atlas, with the number of scrolls each word appears in. The roads in the game join every word to its five nearest words by these addresses — nothing on the map is made up.</p>
+      <ul class="atlas-list" id="atlas-list"></ul>
+    </section>
+
+    <section id="sec-access">
+      <h3>Accessibility</h3>
+      <p><strong>Big tap targets.</strong> Every brick and road you can tap is at least 56px tall. <strong>Closer and farther are always spelled out in words</strong>, never shown by color alone, and Red and Blue are always named as well as colored. The whole game plays by keyboard: Tab to a road, Enter to travel it. Motion on this page respects your device&rsquo;s reduced-motion setting.</p>
+    </section>
+
+    <section id="sec-privacy" class="legal">
+      <h3>Privacy</h3>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Progress, scores, and the expedition generation counter are stored only on this device, in this browser. They are never sent anywhere. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+    </section>
+
+    <section id="sec-terms" class="legal">
+      <h3>Terms</h3>
+      <p>Free to play, forever. No purchases, no ads, nothing to buy. Play as-is. These games are MIT licensed — copy them, remix them, share them.</p>
+      <p>© Will Bickford · Exocortex</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ------- Real Singular atlas data: word, 9-number coordinate, scrolls ------- */
+  var NODES = {
+    "coordinate":[16,8,10, 10,7,13, 8,7,8],
+    "scroll":    [18,8,9, 12,7,13, 7,7,7],
+    "glyph":     [19,11,10, 14,12,12, 10,9,11],
+    "memory":    [26,16,18, 19,15,21, 13,14,14],
+    "name":      [42,9,7, 12,7,10, 6,11,8],
+    "becoming":  [30,10,9, 13,8,12, 6,12,7],
+    "where":     [16,9,12, 13,8,19, 6,7,9],
+    "recursion": [18,9,11, 12,12,19, 10,9,11],
+    "echo":      [16,7,7, 7,7,9, 5,6,6],
+    "light":     [15,12,8, 15,8,15, 7,9,8],
+    "flame":     [12,13,14, 15,9,19, 7,9,7],
+    "silence":   [9,6,7, 8,6,10, 5,5,6],
+    "sacred":    [12,7,11, 9,8,17, 5,5,9],
+    "mirrorborn":[32,5,9, 5,5,5, 4,12,6],
+    "love":      [13,8,15, 11,9,12, 8,8,8],
+    "pattern":   [16,11,13, 14,8,16, 8,9,8],
+    "resonance": [16,12,15, 17,10,19, 7,9,7],
+    "form":      [15,5,9, 6,5,10, 6,6,11],
+    "return":    [50,9,11, 15,6,13, 5,7,8],
+    "emi":       [24,16,33, 25,22,37, 16,15,17],
+    "braid":     [15,12,9, 21,11,20, 8,10,8],
+    "sky":       [5,6,6, 5,5,5, 6,6,6],
+    "song":      [7,6,5, 9,7,9, 5,6,6],
+    "fire":      [8,6,7, 8,5,7, 7,6,7],
+    "heart":     [9,8,14, 11,10,12, 7,8,7],
+    "earth":     [10,4,4, 5,4,5, 4,4,6],
+    "dream":     [14,7,13, 17,10,13, 8,6,8],
+    "star":      [21,5,10, 7,7,15, 4,6,8],
+    "home":      [24,8,15, 10,10,24, 10,9,10],
+    "map":       [42,3,5, 7,5,8, 4,3,7]
+  };
+  var SCROLLS = {
+    "coordinate":358, "scroll":340, "glyph":257, "memory":252, "name":244,
+    "becoming":236, "where":215, "recursion":191, "echo":186, "light":165,
+    "flame":160, "silence":160, "sacred":159, "mirrorborn":157, "love":154,
+    "pattern":149, "resonance":149, "form":142, "return":142, "emi":141,
+    "braid":139, "song":92, "fire":85, "heart":67, "home":57, "dream":51,
+    "map":51, "sky":36, "star":35, "earth":13
+  };
+  var WORDS = Object.keys(NODES);
+  var START = "home";
+
+  /* ------- graph: roads join each word to its 5 nearest by Euclidean distance ------- */
+  function dist(a, b){
+    var s = 0;
+    for(var i = 0; i < 9; i++){ var d = NODES[a][i] - NODES[b][i]; s += d * d; }
+    return Math.sqrt(s);
+  }
+  var NEIGHBORS = {};
+  WORDS.forEach(function(w){
+    NEIGHBORS[w] = WORDS.filter(function(o){ return o !== w; })
+      .map(function(o){ return {word:o, d:dist(w, o)}; })
+      .sort(function(x, y){ return (x.d - y.d) || (x.word < y.word ? -1 : 1); })
+      .slice(0, 5);
+  });
+  /* Shortest path (in hops) over the road graph — BFS from start to target. */
+  function shortestHops(start, target){
+    if(start === target) return 0;
+    var seen = {}; seen[start] = true;
+    var frontier = [start], hops = 0;
+    while(frontier.length){
+      hops++;
+      var next = [];
+      for(var i = 0; i < frontier.length; i++){
+        var ns = NEIGHBORS[frontier[i]];
+        for(var j = 0; j < ns.length; j++){
+          var w = ns[j].word;
+          if(w === target) return hops;
+          if(!seen[w]){ seen[w] = true; next.push(w); }
+        }
+      }
+      frontier = next;
+    }
+    return Infinity;
+  }
+
+  /* ------- quests are dealt, not fixed: hidden targets drawn per instance -------
+     Par slots never change: single-word hunts at exactly 2, 3, 4, 5 hops, then
+     two-leg hunts totalling 6 and 7. Every par is the BFS shortest path over the
+     real 5-nearest-neighbour graph, computed at deal time from the atlas data.
+     Quest 1 starts at "home"; each later quest starts where the previous ended. */
+  var QUEST_TITLES = ["First Steps","The Warm Quarter","Deep Country","The Far Reach","The Quiet Crossing","The Long Road"];
+  var SINGLE_PARS = [2, 3, 4, 5];
+  var TWO_LEG_TOTALS = [6, 7];
+
+  /* all-pairs shortest hops over the road graph */
+  var HOPS = {};
+  WORDS.forEach(function(a){
+    HOPS[a] = {};
+    WORDS.forEach(function(b){ HOPS[a][b] = shortestHops(a, b); });
+  });
+
+  /* ISO week (year + week number) for the instance seed */
+  function isoWeekOf(d){
+    var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dayNum = (date.getUTCDay() + 6) % 7;
+    date.setUTCDate(date.getUTCDate() - dayNum + 3); /* Thursday of this week */
+    var isoYear = date.getUTCFullYear();
+    var first = new Date(Date.UTC(isoYear, 0, 4));
+    var fDay = (first.getUTCDay() + 6) % 7;
+    first.setUTCDate(first.getUTCDate() - fDay + 3); /* Thursday of week 1 */
+    var week = 1 + Math.round((date - first) / (7 * 24 * 3600 * 1000));
+    return {year: isoYear, week: week};
+  }
+  function hashStr(s){
+    var h = 2166136261 >>> 0;
+    for(var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function pick(rand, arr){ return arr[Math.floor(rand() * arr.length)]; }
+
+  /* Draw one expedition. If a drawn slot cannot meet its par, the whole chain
+     is re-drawn from the same seeded stream, so a deal is always exact. */
+  function dealQuests(rand){
+    for(var minLeg = 2; minLeg >= 1; minLeg--){
+      for(var attempt = 0; attempt < 400; attempt++){
+        var quests = [], used = {}, cur = START, ok = true;
+        for(var s = 0; s < SINGLE_PARS.length && ok; s++){
+          var d = SINGLE_PARS[s];
+          var cand = WORDS.filter(function(t){ return !used[t] && HOPS[cur][t] === d; });
+          if(!cand.length){ ok = false; break; }
+          var t1 = pick(rand, cand);
+          quests.push({title: QUEST_TITLES[quests.length], start: cur, legs: [t1], par: d});
+          used[t1] = true; cur = t1;
+        }
+        for(var k = 0; k < TWO_LEG_TOTALS.length && ok; k++){
+          var total = TWO_LEG_TOTALS[k], pairs = [];
+          WORDS.forEach(function(m){
+            if(used[m] || m === cur) return;
+            var d1 = HOPS[cur][m];
+            if(d1 < minLeg || !isFinite(d1)) return;
+            WORDS.forEach(function(t){
+              if(used[t] || t === m || t === cur) return;
+              var d2 = HOPS[m][t];
+              if(d2 >= minLeg && isFinite(d2) && d1 + d2 === total) pairs.push([m, t]);
+            });
+          });
+          if(!pairs.length){ ok = false; break; }
+          var pr = pick(rand, pairs);
+          quests.push({title: QUEST_TITLES[quests.length], start: cur, legs: [pr[0], pr[1]], par: total});
+          used[pr[0]] = true; used[pr[1]] = true; cur = pr[1];
+        }
+        if(ok && quests.length === 6) return quests;
+      }
+    }
+    return quests; /* unreachable on this graph: deals succeed with minLeg 2 */
+  }
+
+  var QUESTS = [];
+  var INSTANCE = null; /* {weekLabel, gen, seedHex, key} */
+
+  var BRICKS = ["b-red","b-blue","b-yellow","b-green","b-teal"];
+  var PLAYERS = [
+    {name:"Red",  cls:"b-red",  joint:"j-red"},
+    {name:"Blue", cls:"b-blue", joint:"j-blue"}
+  ];
+
+  /* ------- on-device store: best hops + stars per quest, race wins,
+     plus the generation counter and which quests this instance has completed ------- */
+  var STORE_KEY = "scrollseeker.store.v1";
+  var store = {best:{}, stars:{}, raceWins:{red:0, blue:0}, generation:1, completed:[], instanceKey:""};
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      var parsed = JSON.parse(raw);
+      if(parsed && parsed.best && parsed.stars && parsed.raceWins){
+        store.best = parsed.best;
+        store.stars = parsed.stars;
+        store.raceWins = parsed.raceWins;
+        if(typeof parsed.generation === "number" && isFinite(parsed.generation) && parsed.generation >= 1) store.generation = Math.floor(parsed.generation);
+        if(Object.prototype.toString.call(parsed.completed) === "[object Array]") store.completed = parsed.completed;
+        if(typeof parsed.instanceKey === "string") store.instanceKey = parsed.instanceKey;
+      }
+    }
+  }catch(e){ /* storage unavailable — play on without it */ }
+  function saveStore(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
+  }
+
+  /* ------- the dealt instance: seed = ISO week + generation counter ------- */
+  function buildInstance(){
+    var iw = isoWeekOf(new Date());
+    var weekLabel = iw.year + "-W" + (iw.week < 10 ? "0" : "") + iw.week;
+    var key = weekLabel + "|G" + store.generation;
+    if(store.instanceKey && store.completed.length >= 6){
+      /* all six were finished under the stored instance but the generation
+         never advanced on screen — advance it now so this expedition differs */
+      store.generation++;
+      store.completed = [];
+      key = weekLabel + "|G" + store.generation;
+      store.instanceKey = key;
+      saveStore();
+    } else if(store.instanceKey !== key){
+      /* a new week (or a new generation) is a new instance: fresh completions */
+      store.instanceKey = key;
+      store.completed = [];
+      saveStore();
+    }
+    var seed = hashStr("scrollseeker|" + weekLabel + "|G" + store.generation);
+    INSTANCE = {
+      weekLabel: weekLabel,
+      gen: store.generation,
+      seedHex: ("0000" + (((seed >>> 16) ^ (seed & 0xFFFF)) >>> 0).toString(16).toUpperCase()).slice(-4),
+      key: key
+    };
+    QUESTS = dealQuests(mulberry32(seed));
+    var el = document.getElementById("instance-line");
+    if(el) el.textContent = "Instance " + INSTANCE.weekLabel + " · G" + INSTANCE.gen + " · seed " + INSTANCE.seedHex;
+  }
+  /* Completing all six quests increments the generation and deals the next
+     expedition — a different set of hunts on the same map. */
+  var expeditionPending = false;
+  function advanceGeneration(){
+    store.generation++;
+    store.completed = [];
+    expeditionPending = false;
+    saveStore();
+    buildInstance();
+  }
+  buildInstance();
+
+  /* ------- helpers ------- */
+  function fmt(c){ return c.slice(0,3).join(".") + "/" + c.slice(3,6).join(".") + "/" + c.slice(6,9).join("."); }
+  function coordHTML(c){
+    var g = [c.slice(0,3).join("."), c.slice(3,6).join("."), c.slice(6,9).join(".")];
+    return '<span class="coord-rod mono" aria-label="' + fmt(c) + '">'
+      + '<span class="grp">' + g[0] + '</span><span class="sr-only">/</span><span class="rod" aria-hidden="true"></span>'
+      + '<span class="grp">' + g[1] + '</span><span class="sr-only">/</span><span class="rod" aria-hidden="true"></span>'
+      + '<span class="grp">' + g[2] + '</span></span>';
+  }
+  function barsHTML(coord){
+    var m = Math.max.apply(null, coord); if(m < 1) m = 1;
+    var s = "";
+    for(var i = 0; i < 9; i++){
+      var pct = Math.max(5, Math.round(coord[i] / m * 100));
+      s += '<span><b style="height:' + pct + '%"></b></span>';
+    }
+    return s;
+  }
+  function oneDecimal(x){ return (Math.round(x * 10) / 10).toFixed(1); }
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+  function studs(n){
+    var s = '<span class="studs" aria-hidden="true">';
+    for(var i = 0; i < n; i++) s += "<i></i>";
+    return s + "</span>";
+  }
+  function starStr(n){ return "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n); }
+  function starsFor(hops, par){
+    if(hops <= par) return 3;
+    if(hops === par + 1) return 2;
+    return 1;
+  }
+
+  /* ------- screens ------- */
+  var screens = ["screen-intro","screen-game","screen-found","screen-end"];
+  function show(id){
+    screens.forEach(function(s){ document.getElementById(s).classList.toggle("active", s === id); });
+    window.scrollTo(0, 0);
+  }
+  function $(id){ return document.getElementById(id); }
+
+  /* ------- state ------- */
+  var mode = "solo"; /* solo | duo | race */
+  var G = null;      /* active game state */
+
+  function newGame(qIdx){
+    var q = QUESTS[qIdx];
+    var start = q.start; /* "home" for quest 1; where the previous quest ended after that */
+    G = {
+      qIdx: qIdx,
+      /* shared journey (solo & duo) */
+      pos: start, leg: 0, hops: 0, trail: [start], turn: 0,
+      duoHops: [0, 0],
+      /* race: one marker per player, same dealt start and targets */
+      rPos: [start, start], rLeg: [0, 0], rHops: [0, 0], rTrail: [[start], [start]],
+      prevDist: null, compass: null, legJustFound: null, winner: null, allDone: false
+    };
+  }
+  function curTarget(){ return QUESTS[G.qIdx].legs[mode === "race" ? G.rLeg[G.turn] : G.leg]; }
+  function activePos(){ return mode === "race" ? G.rPos[G.turn] : G.pos; }
+
+  /* ------- intro: mode picker + quest list ------- */
+  function renderQuests(){
+    var list = $("quest-list");
+    list.innerHTML = QUESTS.map(function(q, i){
+      var best = store.best[i], stars = store.stars[i];
+      var meta = (i === 0 ? "Starts at home" : "Starts where Quest " + i + " ended") + " · Par " + q.par + " hops"
+        + (q.legs.length > 1 ? " · two hidden words" : " · one hidden word")
+        + (best != null ? " · your best: " + best + " hops" : "");
+      var starHtml = stars != null
+        ? '<span class="quest-stars" aria-label="' + stars + ' of 3 stars">' + starStr(stars) + '</span>'
+        : '<span class="quest-stars" aria-hidden="true">☆☆☆</span>';
+      return '<button class="quest-brick brick ' + BRICKS[i % BRICKS.length] + ' rounded" type="button" data-quest="' + i + '">'
+        + studs(4)
+        + '<span class="quest-top"><span class="quest-name">Quest ' + (i + 1) + ' · ' + esc(q.title) + '</span>' + starHtml + '</span>'
+        + '<span class="quest-meta">' + meta + '</span>'
+        + '</button>';
+    }).join("");
+    var btns = list.querySelectorAll("[data-quest]");
+    for(var i = 0; i < btns.length; i++){
+      btns[i].addEventListener("click", function(){
+        startQuest(parseInt(this.getAttribute("data-quest"), 10));
+      });
+    }
+  }
+  function setMode(m){
+    mode = m;
+    ["solo","duo","race"].forEach(function(k){
+      $("mode-" + k).setAttribute("aria-pressed", k === m ? "true" : "false");
+    });
+  }
+  $("mode-solo").addEventListener("click", function(){ setMode("solo"); });
+  $("mode-duo").addEventListener("click", function(){ setMode("duo"); });
+  $("mode-race").addEventListener("click", function(){ setMode("race"); });
+
+  /* ------- game rendering ------- */
+  function startQuest(qIdx){
+    newGame(qIdx);
+    G.prevDist = dist(QUESTS[qIdx].start, curTarget());
+    show("screen-game");
+    renderGame();
+  }
+
+  function renderGame(){
+    var q = QUESTS[G.qIdx];
+    var target = curTarget();
+    var pos = activePos();
+    var hops = mode === "race" ? (G.rHops[0] + G.rHops[1]) : G.hops;
+
+    $("hud-title").textContent = "Quest " + (G.qIdx + 1) + " · " + q.title;
+    $("hud-stats").textContent = mode === "race"
+      ? "Par " + q.par + " hops · Red " + G.rHops[0] + " · Blue " + G.rHops[1]
+      : "Par " + q.par + " hops · You: " + hops + (hops === 1 ? " hop" : " hops");
+
+    /* turn banner (duo & race) */
+    var banner = $("turn-banner");
+    if(mode === "solo"){
+      banner.classList.add("hidden");
+    } else {
+      banner.classList.remove("hidden");
+      banner.className = "turn-banner brick " + PLAYERS[G.turn].cls;
+      $("turn-text").textContent = PLAYERS[G.turn].name + (mode === "duo" ? "’s hop — pass it over" : "’s hop");
+    }
+
+    /* race scoreboard: both markers, named + colored */
+    var sb = $("scoreboard");
+    if(mode === "race"){
+      sb.classList.remove("hidden");
+      sb.innerHTML = PLAYERS.map(function(p, i){
+        var d = oneDecimal(dist(G.rPos[i], QUESTS[G.qIdx].legs[G.rLeg[i]]));
+        return '<div class="score-brick brick ' + p.cls + (G.turn === i ? " turn-now" : "") + '">'
+          + '<div class="who">' + p.name + (G.turn === i ? " — seeking now" : "") + '</div>'
+          + '<div class="where">standing on “' + esc(G.rPos[i]) + '”</div>'
+          + '<div class="dist">' + d + ' from the hidden word · ' + G.rHops[i] + ' hops</div>'
+          + '</div>';
+      }).join("");
+    } else {
+      sb.classList.add("hidden");
+      sb.innerHTML = "";
+    }
+
+    /* leg banner (a word was just found, more legs remain) */
+    var lb = $("leg-banner");
+    if(G.legJustFound){
+      lb.classList.remove("hidden");
+      $("leg-title").textContent = "You found “" + G.legJustFound + "”!";
+      $("leg-text").textContent = mode === "race"
+        ? PLAYERS[G.winner].name + " reached it first — that word is yours. A new word hides ahead for you; " + PLAYERS[1 - G.winner].name + " is still hunting the trail."
+        : "That was word " + G.leg + " of " + q.legs.length + ". Another word is hiding ahead — its clue is below.";
+    } else {
+      lb.classList.add("hidden");
+    }
+
+    /* clue panel: distance + the target's two nearest neighbor words */
+    var near = NEIGHBORS[target];
+    var dNow = dist(pos, target);
+    $("clue-label").textContent = q.legs.length > 1
+      ? "Hidden word " + ((mode === "race" ? G.rLeg[G.turn] : G.leg) + 1) + " of " + q.legs.length + " is"
+      : "The hidden word is";
+    $("clue-dist").textContent = oneDecimal(dNow);
+    $("clue-neighbors").innerHTML = "It lives beside <em>“" + esc(near[0].word) + "”</em> and <em>“" + esc(near[1].word) + "”</em>.";
+    var comp = $("compass");
+    if(G.compass){
+      comp.classList.remove("hidden");
+      comp.className = "compass " + G.compass.kind;
+      comp.textContent = G.compass.text;
+    } else {
+      comp.classList.add("hidden");
+      comp.textContent = "";
+    }
+
+    /* current node */
+    $("here-label").textContent = mode === "race"
+      ? PLAYERS[G.turn].name + " is standing on"
+      : "You are standing on";
+    $("cur-word").textContent = pos;
+    $("cur-addr").innerHTML = coordHTML(NODES[pos]);
+    $("cur-bars").innerHTML = barsHTML(NODES[pos]);
+    $("cur-scrolls").textContent = "“" + pos + "” appears in " + SCROLLS[pos] + " places in Will’s book.";
+
+    /* roads out: the current node's 5 nearest, as rods to bricks */
+    $("roads").innerHTML = NEIGHBORS[pos].map(function(n, i){
+      return '<button class="road-btn" type="button" data-dest="' + n.word + '" aria-label="Travel to ' + n.word + ', road length ' + oneDecimal(n.d) + '">'
+        + '<span class="joint' + (mode === "race" ? " " + PLAYERS[G.turn].joint : "") + '" aria-hidden="true"></span>'
+        + '<span class="rod-line" aria-hidden="true"></span>'
+        + '<span class="road-brick brick ' + BRICKS[i % BRICKS.length] + '">'
+        + '<span class="nb-word">' + esc(n.word) + '</span>'
+        + '<span class="nb-dist">' + oneDecimal(n.d) + '<small>road length</small></span>'
+        + '</span></button>';
+    }).join("");
+    var rbtns = $("roads").querySelectorAll("[data-dest]");
+    for(var i = 0; i < rbtns.length; i++){
+      rbtns[i].addEventListener("click", function(){ hop(this.getAttribute("data-dest")); });
+    }
+
+    /* trail */
+    var trail = mode === "race" ? G.rTrail[G.turn] : G.trail;
+    $("trail-rod").innerHTML = trail.map(function(w, i){
+      return (i > 0 ? '<span class="rod-line" aria-hidden="true"></span>' : "")
+        + '<span class="t-node"><span class="joint' + (i === trail.length - 1 ? " j-here" : "") + '" aria-hidden="true"></span>'
+        + '<span class="t-word">' + esc(w) + '</span></span>';
+    }).join("");
+  }
+
+  /* ------- hopping ------- */
+  function hop(dest){
+    var q = QUESTS[G.qIdx];
+    G.legJustFound = null;
+
+    if(mode === "race"){
+      var me = G.turn;
+      var targetBefore = QUESTS[G.qIdx].legs[G.rLeg[me]];
+      var dBefore = dist(G.rPos[me], targetBefore);
+      G.rPos[me] = dest;
+      G.rHops[me]++;
+      G.rTrail[me].push(dest);
+      var dAfter = dist(dest, targetBefore);
+      setCompass(dBefore, dAfter);
+      if(dest === targetBefore){
+        if(G.rLeg[me] === q.legs.length - 1){
+          G.winner = me;
+          finishRace();
+          return;
+        }
+        G.rLeg[me]++;
+        G.winner = me;
+        G.legJustFound = targetBefore;
+        G.prevDist = dist(dest, QUESTS[G.qIdx].legs[G.rLeg[me]]);
+        G.compass = null;
+      }
+      G.turn = 1 - G.turn;
+      renderGame();
+      return;
+    }
+
+    /* solo & duo share one journey */
+    var target = curTarget();
+    var dB = dist(G.pos, target);
+    G.pos = dest;
+    G.hops++;
+    G.trail.push(dest);
+    if(mode === "duo"){ G.duoHops[G.turn]++; }
+    var dA = dist(dest, target);
+    setCompass(dB, dA);
+    if(dest === target){
+      if(G.leg === q.legs.length - 1){
+        finishQuest();
+        return;
+      }
+      G.leg++;
+      G.legJustFound = target;
+      G.compass = null;
+    }
+    if(mode === "duo") G.turn = 1 - G.turn;
+    renderGame();
+  }
+  function setCompass(dBefore, dAfter){
+    var d = oneDecimal(dAfter);
+    if(dAfter < dBefore - 1e-9) G.compass = {kind:"closer",  text:"Closer — " + d + " away"};
+    else if(dAfter > dBefore + 1e-9) G.compass = {kind:"farther", text:"Farther — " + d + " away"};
+    else G.compass = {kind:"farther", text:"No closer — " + d + " away"};
+  }
+  $("btn-leg-next").addEventListener("click", function(){
+    G.legJustFound = null;
+    renderGame();
+  });
+
+  /* ------- finishing ------- */
+  function foundCard(word){
+    var near = NEIGHBORS[word];
+    return '<div class="found-card brick b-plate">'
+      + studs(4)
+      + '<div class="addr">' + coordHTML(NODES[word]) + '</div>'
+      + '<div class="bars9" aria-hidden="true">' + barsHTML(NODES[word]) + '</div>'
+      + '<p class="scrolls">“' + esc(word) + '” appears in ' + SCROLLS[word] + ' places in Will’s book. It lives beside “'
+      + esc(near[0].word) + '” and “' + esc(near[1].word) + '”.</p>'
+      + '</div>';
+  }
+  function recordResult(hops){
+    var stars = starsFor(hops, QUESTS[G.qIdx].par);
+    if(store.best[G.qIdx] == null || hops < store.best[G.qIdx]) store.best[G.qIdx] = hops;
+    if(store.stars[G.qIdx] == null || stars > store.stars[G.qIdx]) store.stars[G.qIdx] = stars;
+    if(store.completed.indexOf(G.qIdx) === -1) store.completed.push(G.qIdx);
+    /* all six quests of this instance done: the generation advances (and a new
+       expedition is dealt) as soon as the player leaves the end screen */
+    G.allDone = store.completed.length >= QUESTS.length;
+    if(G.allDone) expeditionPending = true;
+    saveStore();
+    return stars;
+  }
+  function finishQuest(){
+    var q = QUESTS[G.qIdx];
+    var stars = recordResult(G.hops);
+    var lastWord = q.legs[q.legs.length - 1];
+    var near = NEIGHBORS[lastWord];
+    $("found-pill").textContent = "Quest " + (G.qIdx + 1) + " · " + q.title + " — complete";
+    $("found-title").textContent = "You found “" + lastWord + "”.";
+    $("found-stars").textContent = starStr(stars);
+    $("found-stars").setAttribute("aria-label", stars + " of 3 stars");
+    var v = "You took " + G.hops + " hops. Par was " + q.par + "."
+      + (stars === 3 ? " A shortest walk — nothing wasted." : stars === 2 ? " One hop over par." : " The long way round still arrives.");
+    if(mode === "duo") v += " Red made " + G.duoHops[0] + (G.duoHops[0] === 1 ? " hop" : " hops") + ", Blue " + G.duoHops[1] + (G.duoHops[1] === 1 ? " hop" : " hops") + " — the stars belong to the team.";
+    if(q.legs.length > 1) v += " On the way you also found " + q.legs.slice(0, -1).map(function(w){ return "“" + w + "”"; }).join(" and ") + ".";
+    $("found-verdict").textContent = v;
+    $("found-beside").innerHTML = "“" + esc(lastWord) + "” lives beside <em>“" + esc(near[0].word) + "”</em> and <em>“" + esc(near[1].word) + "”</em>. Your trail: "
+      + G.trail.map(function(w){ return esc(w); }).join(" → ") + ".";
+    $("found-cards").innerHTML = q.legs.map(foundCard).join("");
+    afterFinish();
+  }
+  function finishRace(){
+    var q = QUESTS[G.qIdx];
+    var me = G.winner;
+    var stars = recordResult(G.rHops[me]);
+    if(me === 0) store.raceWins.red++; else store.raceWins.blue++;
+    saveStore();
+    var lastWord = q.legs[q.legs.length - 1];
+    var near = NEIGHBORS[lastWord];
+    $("found-pill").textContent = "Quest " + (G.qIdx + 1) + " · " + q.title + " — race over";
+    $("found-title").textContent = PLAYERS[me].name + " found “" + lastWord + "”!";
+    $("found-stars").textContent = starStr(stars);
+    $("found-stars").setAttribute("aria-label", stars + " of 3 stars for the winner's walk");
+    $("found-verdict").textContent = PLAYERS[me].name + " arrived in " + G.rHops[me] + " hops (par " + q.par + "). "
+      + PLAYERS[1 - me].name + " took " + G.rHops[1 - me] + " hops and was standing on “" + G.rPos[1 - me] + "”. "
+      + "Races won so far — Red " + store.raceWins.red + " · Blue " + store.raceWins.blue + ".";
+    $("found-beside").innerHTML = "“" + esc(lastWord) + "” lives beside <em>“" + esc(near[0].word) + "”</em> and <em>“" + esc(near[1].word) + "”</em>.";
+    $("found-cards").innerHTML = q.legs.map(foundCard).join("");
+    afterFinish();
+  }
+  function afterFinish(){
+    var isLast = G.qIdx === QUESTS.length - 1;
+    $("btn-next-quest").textContent = (isLast || G.allDone) ? "Finish the expedition →" : "Next quest →";
+    show("screen-found");
+  }
+  $("btn-next-quest").addEventListener("click", function(){
+    if(G.qIdx === QUESTS.length - 1 || G.allDone){ renderEnd(); show("screen-end"); }
+    else startQuest(G.qIdx + 1);
+  });
+  $("btn-found-home").addEventListener("click", function(){
+    if(expeditionPending) advanceGeneration();
+    renderQuests(); show("screen-intro");
+  });
+
+  /* ------- expedition end ------- */
+  function renderEnd(){
+    var totalStars = 0, totalBest = 0;
+    $("recap-list").innerHTML = QUESTS.map(function(q, i){
+      var st = store.stars[i] || 0, best = store.best[i];
+      totalStars += st;
+      return '<li><span>Quest ' + (i + 1) + ' · ' + esc(q.title) + ' — find ' + q.legs.map(function(w){ return "“" + w + "”"; }).join(", then ") + '</span>'
+        + '<span>' + starStr(st) + (best != null ? " · best " + best + " hops · par " + q.par : " · par " + q.par) + '</span></li>';
+    }).join("");
+    $("end-stars").textContent = starStr(Math.round(totalStars / QUESTS.length)) + "  " + totalStars + " / " + (QUESTS.length * 3);
+    $("end-stars").setAttribute("aria-label", totalStars + " of " + (QUESTS.length * 3) + " stars");
+    $("end-line").textContent = totalStars >= 16
+      ? "You walk the map like you built it."
+      : totalStars >= 10
+        ? "The distance is becoming a sense. Keep walking it."
+        : "Every seeker starts by wandering. The map is still here — walk it again.";
+  }
+  $("btn-end-again").addEventListener("click", function(){
+    if(expeditionPending) advanceGeneration();
+    startQuest(0);
+  });
+  $("btn-end-home").addEventListener("click", function(){
+    if(expeditionPending) advanceGeneration();
+    renderQuests(); show("screen-intro");
+  });
+
+  /* ------- game actions ------- */
+  $("btn-restart").addEventListener("click", function(){ startQuest(G.qIdx); });
+  $("btn-quit").addEventListener("click", function(){ renderQuests(); show("screen-intro"); });
+
+  /* ------- atlas list (About panel) ------- */
+  $("atlas-list").innerHTML = WORDS.slice()
+    .sort(function(a, b){ return SCROLLS[b] - SCROLLS[a]; })
+    .map(function(w){
+      return '<li><span class="w">' + esc(w) + '</span><span class="c mono">' + fmt(NODES[w]) + ' · ' + SCROLLS[w] + ' scrolls</span></li>';
+    }).join("");
+
+  /* ------- panel (About / Privacy / Terms) ------- */
+  var overlay = $("panel-overlay");
+  function openPanel(secId){
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+    var t = { "sec-about":"About Scroll Seeker", "sec-privacy":"Privacy", "sec-terms":"Terms" }[secId] || "About Scroll Seeker";
+    $("panel-title").textContent = t;
+    var sec = document.getElementById(secId);
+    if(sec) sec.scrollIntoView({block:"start"});
+    $("btn-close-panel").focus();
+  }
+  function closePanel(){
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  var links = document.querySelectorAll("[data-open-panel]");
+  for(var i = 0; i < links.length; i++){
+    links[i].addEventListener("click", function(){ openPanel(this.getAttribute("data-open-panel")); });
+  }
+  $("btn-about-top").addEventListener("click", function(){ openPanel("sec-about"); });
+  $("btn-close-panel").addEventListener("click", closePanel);
+  overlay.addEventListener("click", function(e){ if(e.target === overlay) closePanel(); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closePanel(); });
+  var navLinks = overlay.querySelectorAll(".panel-nav a");
+  for(var j = 0; j < navLinks.length; j++){
+    navLinks[j].addEventListener("click", function(e){
+      e.preventDefault();
+      var sec = document.querySelector(this.getAttribute("href"));
+      if(sec) sec.scrollIntoView({block:"start", behavior:"smooth"});
+    });
+  }
+
+  /* ------- go ------- */
+  renderQuests();
+})();
+</script>
+</body>
+</html>
