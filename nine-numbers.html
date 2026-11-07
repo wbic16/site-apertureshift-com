@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Nine Numbers</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    /* baseplate */
+    --plate:#dce8d0;
+    --plate-dot:rgba(56,90,44,.16);
+    /* surfaces */
+    --surface:#ffffff;
+    --surface-2:#eef2e9;
+    --ink:#1d2733;
+    --muted:#5d6a76;
+    --faint:#8b97a1;
+    --border:#c3cfbc;
+    --border-strong:#9fb298;
+    /* classic brick colors */
+    --red:#c4281c;        --red-deep:#8f1a10;
+    --blue:#0057a8;       --blue-deep:#003e78;
+    --yellow:#f2c500;     --yellow-deep:#b89100;  --yellow-ink:#33270a;
+    --green:#237841;      --green-deep:#155c2e;
+    --dark-brick:#26313c; --dark-deep:#141e27;
+    --gold:#e8a200;
+    --danger:#b3372c;
+    /* K'Nex */
+    --knex:#7d868f;
+    --knex-deep:#4d545e;
+    --shadow:0 5px 0 rgba(29,39,51,.14), 0 16px 30px rgba(29,39,51,.16);
+    --shadow-sm:0 3px 0 rgba(29,39,51,.12), 0 8px 16px rgba(29,39,51,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --plate:#10160f;
+      --plate-dot:rgba(255,255,255,.055);
+      --surface:#1e2630;
+      --surface-2:#262f3a;
+      --ink:#eef3f6;
+      --muted:#a7b3bd;
+      --faint:#71808c;
+      --border:#39434e;
+      --border-strong:#4d5966;
+      --dark-brick:#39434e; --dark-deep:#232b34;
+      --shadow:0 5px 0 rgba(0,0,0,.4), 0 16px 30px rgba(0,0,0,.45);
+      --shadow-sm:0 3px 0 rgba(0,0,0,.35), 0 8px 16px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background-color:var(--plate);
+    background-image:radial-gradient(circle at 50% 45%, var(--plate-dot) 0 5px, transparent 6.5px);
+    background-size:30px 30px;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.5;
+  }
+  .mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;}
+  button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+  [hidden]{display:none !important;}
+
+  .page{max-width:720px;margin:0 auto;padding:0 16px 8px;}
+
+  /* ---------- Bricks ---------- */
+  .brick{
+    position:relative;border-radius:10px;box-shadow:var(--shadow-sm);
+    --studc:rgba(255,255,255,.38);
+  }
+  .brick::before{
+    content:"";position:absolute;top:5px;left:14px;right:14px;height:11px;pointer-events:none;
+    background-image:radial-gradient(circle at 50% 50%, var(--studc) 0 4.5px, rgba(0,0,0,.10) 5.5px, transparent 7px);
+    background-size:26px 11px;background-repeat:repeat-x;
+  }
+  .brick.light{--studc:rgba(29,39,51,.14);}
+  @media (prefers-color-scheme: dark){ .brick.light{--studc:rgba(255,255,255,.16);} }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    max-width:720px;margin:0 auto;padding:14px 16px 2px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:.01em;}
+  .brand-blocks{display:inline-flex;gap:4px;}
+  .brand-blocks i{width:16px;height:16px;border-radius:4px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);}
+  .brand-blocks .r{background:var(--red);} .brand-blocks .y{background:var(--yellow);} .brand-blocks .b{background:var(--blue);}
+  .about-brick{
+    min-height:48px;padding:20px 20px 8px;border:none;border-radius:10px;
+    background:var(--yellow);color:var(--yellow-ink);
+    font-size:16px;font-weight:800;box-shadow:var(--shadow-sm);
+  }
+  .about-brick:active{transform:translateY(2px);}
+
+  /* ---------- Intro ---------- */
+  #intro{padding:22px 0 6px;}
+  .greeting{
+    font-size:clamp(29px,7vw,44px);line-height:1.16;font-weight:800;
+    letter-spacing:-.01em;margin:8px 0 0;max-width:15em;
+  }
+  .greeting-sub{font-size:clamp(17px,4.4vw,21px);color:var(--muted);margin:14px 0 0;font-weight:700;}
+  .facts{
+    margin:26px 0 0;background:var(--surface);border:1px solid var(--border);
+    padding:24px 14px 12px;text-align:center;
+    font-size:16px;font-weight:800;letter-spacing:.01em;
+  }
+  .facts span{color:var(--faint);font-weight:700;margin:0 4px;}
+  .modes{display:flex;flex-direction:column;gap:14px;margin:14px 0 0;}
+  .mode-brick{
+    width:100%;border:none;text-align:left;color:#fff;
+    min-height:92px;padding:28px 18px 14px;border-radius:14px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:2px;
+  }
+  .mode-brick:active{transform:translateY(2px);}
+  .mode-brick .mode-title{font-size:24px;font-weight:800;line-height:1.15;}
+  .mode-brick .mode-sub{font-size:15px;font-weight:600;opacity:.92;}
+  .m-green{background:var(--green);} .m-red{background:var(--red);} .m-blue{background:var(--blue);}
+  .intro-note{text-align:center;color:var(--muted);font-size:14.5px;font-weight:600;margin:16px 0 0;}
+
+  /* ---------- Game chrome ---------- */
+  #game{padding:16px 0 6px;}
+  .level-kicker{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--red);}
+  @media (prefers-color-scheme: dark){ .level-kicker{color:#ff8a7a;} }
+  .level-title{font-size:30px;line-height:1.12;margin:4px 0 0;font-weight:800;letter-spacing:-.01em;}
+
+  /* K'Nex progress: rods joining round nodes */
+  .progress{display:flex;align-items:center;margin:16px 2px 0;}
+  .pnode{
+    width:21px;height:21px;border-radius:50%;flex:none;z-index:1;
+    border:3px solid var(--knex-deep);background:var(--surface);
+  }
+  .pnode.done{background:var(--green);border-color:var(--green-deep);}
+  .pnode.now{background:var(--yellow);border-color:var(--yellow-deep);box-shadow:0 0 0 3px var(--plate),0 0 0 6px var(--yellow-deep);}
+  .pnode.open{border-radius:6px;}
+  .prod{flex:1;height:5px;background:var(--knex);border-radius:3px;margin:0 -2px;min-width:6px;}
+  .prod.done{background:var(--green);}
+
+  .teach{
+    display:inline-block;margin:16px 0 0;background:var(--yellow);color:var(--yellow-ink);
+    border-radius:10px;padding:22px 16px 10px;font-size:17px;font-weight:800;box-shadow:var(--shadow-sm);
+    position:relative;
+  }
+  .teach::before{
+    content:"";position:absolute;top:5px;left:14px;right:14px;height:11px;pointer-events:none;
+    background-image:radial-gradient(circle at 50% 50%, rgba(255,255,255,.5) 0 4.5px, rgba(0,0,0,.08) 5.5px, transparent 7px);
+    background-size:26px 11px;background-repeat:repeat-x;
+  }
+
+  /* ---------- Score tiles ---------- */
+  .scorebar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0 0;}
+  .stat{
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:12px 6px 10px;text-align:center;box-shadow:var(--shadow-sm);
+  }
+  .stat .num{font-size:24px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;}
+  .stat .lab{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+  .stat.over .num{color:var(--danger);}
+  .racebar{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;margin:14px 0 0;align-items:stretch;}
+  .tally{
+    border:none;border-radius:10px;color:#fff;text-align:center;
+    padding:22px 6px 9px;box-shadow:var(--shadow-sm);position:relative;
+  }
+  .tally::before{
+    content:"";position:absolute;top:5px;left:12px;right:12px;height:11px;pointer-events:none;
+    background-image:radial-gradient(circle at 50% 50%, rgba(255,255,255,.38) 0 4.5px, rgba(0,0,0,.10) 5.5px, transparent 7px);
+    background-size:26px 11px;background-repeat:repeat-x;
+  }
+  .tally.red{background:var(--red);} .tally.blue{background:var(--blue);}
+  .tally .num{font-size:24px;font-weight:800;line-height:1.1;}
+  .tally .lab{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;opacity:.9;margin-top:3px;}
+  .racebar .stat{align-self:stretch;display:flex;flex-direction:column;justify-content:center;}
+
+  /* ---------- Coordinate panels ---------- */
+  .panel{border-radius:12px;padding:26px 15px 13px;border:none;margin:14px 0 0;}
+  .panel .plab{font-size:12px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;gap:8px;opacity:.92;}
+  .panel .coord{font-size:clamp(18px,5.6vw,26px);font-weight:700;letter-spacing:.01em;margin-top:8px;white-space:nowrap;}
+  .panel .coord .grp{border-radius:6px;padding:0 3px;}
+  .panel .coord .grp.matched{background:rgba(255,255,255,.28);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55);}
+  .panel.target .coord .grp.matched{background:rgba(35,120,65,.20);box-shadow:inset 0 0 0 1.5px rgba(21,92,46,.5);}
+  .dist-line{font-size:14px;margin-top:8px;font-weight:600;}
+  .panel.target{background:var(--yellow);color:var(--yellow-ink);--knot-bg:var(--yellow);}
+  .panel.you{color:#fff;}
+  .panel.you .dist-line{opacity:.92;}
+  .p-green{background:var(--green);--knot-bg:var(--green);}
+  .p-red{background:var(--red);--knot-bg:var(--red);}
+  .p-blue{background:var(--blue);--knot-bg:var(--blue);}
+  .p-dark{background:var(--dark-brick);--knot-bg:var(--dark-brick);}
+
+  /* K'Nex joint between coordinate groups */
+  .joint{position:relative;display:inline-block;width:22px;height:14px;vertical-align:middle;margin:0 1px;}
+  .joint::before{content:"";position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--knex);border-radius:2px;}
+  .joint::after{content:"";position:absolute;left:50%;top:50%;width:11px;height:11px;transform:translate(-50%,-50%);border-radius:50%;background:var(--knot-bg,var(--surface));border:3px solid var(--knex-deep);}
+
+  /* ---------- Co-op turn banner ---------- */
+  .turn-banner{
+    margin:14px 0 0;border-radius:12px;color:#fff;text-align:center;
+    padding:26px 12px 13px;font-size:21px;font-weight:800;box-shadow:var(--shadow-sm);
+  }
+  .turn-banner.red{background:var(--red);} .turn-banner.blue{background:var(--blue);}
+
+  /* ---------- Hints ---------- */
+  .board{margin-top:4px;}
+  .hint{
+    margin:12px 0 0;border-radius:10px;padding:12px 15px;font-size:16px;font-weight:700;
+    border:1.5px solid var(--border-strong);background:var(--surface);min-height:54px;
+    display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-sm);
+  }
+  .hint .dot{flex:none;width:13px;height:13px;border-radius:50%;background:var(--faint);}
+  .hint.warmer{border-color:var(--green);background:var(--surface);}
+  .hint.warmer .dot{background:var(--green);}
+  .hint.colder{border-color:var(--red);}
+  .hint.colder .dot{background:var(--red);}
+  .hint.same .dot{background:var(--gold);}
+
+  /* ---------- Shelf bricks & steppers ---------- */
+  .groups{display:flex;flex-direction:column;gap:14px;margin:16px 0 0;}
+  .group{
+    background:var(--surface);border:1.5px solid var(--border);border-radius:12px;
+    padding:26px 14px 16px;box-shadow:var(--shadow-sm);
+  }
+  .group.s1{--studc:var(--red);} .group.s2{--studc:var(--yellow-deep);} .group.s3{--studc:var(--blue);}
+  .group.matched{border-color:var(--green);box-shadow:0 3px 0 rgba(21,92,46,.25),0 8px 16px rgba(29,39,51,.10);}
+  .group.locked{opacity:.5;}
+  .group-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;}
+  .group-name{font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+  .group-state{font-size:13px;font-weight:800;padding:5px 11px;border-radius:999px;border:1.5px solid var(--border-strong);color:var(--muted);white-space:nowrap;}
+  .group.matched .group-state{background:var(--green);border-color:var(--green-deep);color:#fff;}
+  .wheels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .wheel{display:flex;flex-direction:column;align-items:stretch;gap:7px;}
+  .wheel .dimlab{text-align:center;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
+  .stepper{
+    min-height:60px;border-radius:12px;border:none;
+    font-size:30px;font-weight:800;line-height:1;color:#fff;
+    display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none;
+    box-shadow:0 3px 0 rgba(29,39,51,.18);
+  }
+  .stepper.plus{background:var(--green);}
+  .stepper.minus{background:var(--surface-2);color:var(--ink);border:1.5px solid var(--border-strong);box-shadow:var(--shadow-sm);}
+  .stepper:active:not(:disabled){transform:translateY(2px);}
+  .stepper:disabled{opacity:.32;cursor:not-allowed;box-shadow:none;}
+  .wheel .val{
+    text-align:center;font-size:32px;font-weight:800;line-height:1.15;padding:8px 2px;
+    border-radius:10px;background:var(--surface-2);border:1.5px solid var(--border);
+    font-variant-numeric:tabular-nums;
+  }
+  .wheel .val.on-target{background:var(--green);color:#fff;border-color:var(--green-deep);}
+  .wheel .tgt{text-align:center;font-size:13px;color:var(--muted);font-weight:600;}
+  .wheel .tgt b{color:var(--ink);font-size:15px;}
+  .hold-note{text-align:center;color:var(--muted);font-size:14px;font-weight:600;margin:14px 0 0;}
+
+  .game-actions{display:flex;gap:10px;margin:16px 0 0;flex-wrap:wrap;}
+  .btn-ghost{
+    flex:1;min-width:150px;min-height:58px;border-radius:12px;
+    border:1.5px solid var(--border-strong);background:var(--surface);color:var(--ink);
+    font-weight:800;font-size:16px;box-shadow:var(--shadow-sm);
+  }
+  .btn-ghost:active{transform:translateY(2px);}
+
+  /* ---------- Win panel ---------- */
+  #win{
+    margin:18px 0 0;background:var(--surface);border:2.5px solid var(--green);
+    border-radius:14px;padding:26px 18px 20px;text-align:center;box-shadow:var(--shadow);
+  }
+  #win .stars{font-size:42px;letter-spacing:.18em;color:var(--gold);line-height:1;margin:0;}
+  #win .stars .dim{color:var(--border-strong);}
+  #win h2{font-size:27px;margin:12px 0 0;font-weight:800;}
+  #win p{color:var(--muted);margin:8px auto 0;max-width:30em;font-size:16px;font-weight:600;}
+  #win .win-coord{font-size:19px;font-weight:700;margin-top:12px;--knot-bg:var(--surface);}
+  .btn-next{
+    margin-top:18px;width:100%;min-height:66px;border:none;border-radius:12px;
+    background:var(--green);color:#fff;font-size:19px;font-weight:800;
+    padding:24px 14px 10px;box-shadow:var(--shadow-sm);position:relative;
+  }
+  .btn-next::before{
+    content:"";position:absolute;top:5px;left:14px;right:14px;height:11px;pointer-events:none;
+    background-image:radial-gradient(circle at 50% 50%, rgba(255,255,255,.38) 0 4.5px, rgba(0,0,0,.10) 5.5px, transparent 7px);
+    background-size:26px 11px;background-repeat:repeat-x;
+  }
+  .btn-next:active{transform:translateY(2px);}
+
+  /* ---------- Footer ---------- */
+  footer{margin:36px 0 0;padding:20px 0 28px;text-align:center;}
+  .foot-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .foot-brick{
+    min-height:52px;padding:20px 22px 9px;border:none;border-radius:10px;
+    font-size:16px;font-weight:800;box-shadow:var(--shadow-sm);color:#fff;position:relative;
+  }
+  .foot-brick::before{
+    content:"";position:absolute;top:5px;left:12px;right:12px;height:11px;pointer-events:none;
+    background-image:radial-gradient(circle at 50% 50%, rgba(255,255,255,.38) 0 4.5px, rgba(0,0,0,.10) 5.5px, transparent 7px);
+    background-size:26px 11px;background-repeat:repeat-x;
+  }
+  .foot-brick:active{transform:translateY(2px);}
+  .foot-brick.fb-about{background:var(--yellow);color:var(--yellow-ink);}
+  .foot-brick.fb-privacy{background:var(--blue);}
+  .foot-brick.fb-terms{background:var(--red);}
+  .foot-line{color:var(--muted);font-size:14px;font-weight:600;margin-top:18px;}
+  .foot-line.dim{color:var(--faint);font-size:13px;margin-top:4px;}
+
+  /* ---------- Sheet panels (About / Privacy / Terms) ---------- */
+  .sheet-wrap{
+    position:fixed;inset:0;z-index:60;background:rgba(12,16,12,.55);
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .sheet{
+    background:var(--surface);color:var(--ink);width:100%;max-width:640px;
+    max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;
+    padding:22px 20px 30px;box-shadow:var(--shadow);
+  }
+  @media (min-width:640px){
+    .sheet-wrap{align-items:center;padding:22px;}
+    .sheet{border-radius:18px;}
+  }
+  .sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;}
+  .sheet-head h2{font-size:24px;margin:2px 0 0;font-weight:800;}
+  .sheet-close{
+    flex:none;min-width:56px;min-height:56px;border:none;border-radius:12px;
+    background:var(--red);color:#fff;font-size:24px;font-weight:800;line-height:1;
+    box-shadow:var(--shadow-sm);
+  }
+  .sheet-close:active{transform:translateY(2px);}
+  .sheet-body{font-size:16px;margin-top:8px;}
+  .sheet-body p{margin:10px 0;}
+  .sheet-body h3{font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--red);margin:20px 0 6px;font-weight:800;}
+  @media (prefers-color-scheme: dark){ .sheet-body h3{color:#ff8a7a;} }
+  .sheet-body ol,.sheet-body ul{margin:6px 0;padding-left:22px;}
+  .sheet-body li{margin:0 0 8px;}
+
+  @media (prefers-reduced-motion: no-preference){
+    #win{animation:rise .35s ease-out;}
+    @keyframes rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+    .group,.panel .coord .grp{transition:background .2s,border-color .2s;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand" aria-hidden="true">
+    <span class="brand-blocks"><i class="r"></i><i class="y"></i><i class="b"></i></span>
+    <span>Nine Numbers</span>
+  </div>
+  <button class="about-brick brick" id="btn-about-top" type="button" data-sheet="about">About</button>
+</header>
+
+<main class="page">
+
+  <!-- ================= INTRO / MODE SELECT ================= -->
+  <section id="intro" aria-label="Choose how to play">
+    <h1 class="greeting">"Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help."</h1>
+    <p class="greeting-sub">And by help, we mean: survive the singularity.</p>
+
+    <div class="facts brick light">Free forever <span>&middot;</span> Same screen <span>&middot;</span> No sign-up</div>
+
+    <div class="modes">
+      <button class="mode-brick brick m-green" type="button" data-mode="solo">
+        <span class="mode-title">1 Player</span>
+        <span class="mode-sub">Walk the road on your own.</span>
+      </button>
+      <button class="mode-brick brick m-red" type="button" data-mode="race">
+        <span class="mode-title">2 Players &mdash; Race</span>
+        <span class="mode-sub">Same target. First one there wins the road.</span>
+      </button>
+      <button class="mode-brick brick m-blue" type="button" data-mode="coop">
+        <span class="mode-title">2 Players &mdash; Together</span>
+        <span class="mode-sub">One address. Take turns stepping.</span>
+      </button>
+    </div>
+
+    <p class="intro-note">Eight roads, then the Open Road &mdash; endless addresses.</p>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="game" hidden aria-label="Nine Numbers game">
+    <div class="level-kicker" id="level-kicker">Road 1 of 8</div>
+    <h2 class="level-title" id="level-title">First Step</h2>
+    <div class="progress" id="progress" aria-label="Road progress"></div>
+
+    <p class="teach"><span id="teach-text"></span></p>
+
+    <div class="panel target brick">
+      <div class="plab"><span>Target address</span><span aria-hidden="true">&#9673;</span></div>
+      <div class="coord mono" id="target-coord"></div>
+      <div class="dist-line" id="target-note">Reach this address exactly.</div>
+    </div>
+
+    <div class="scorebar" id="scorebar" role="group" aria-label="Score">
+      <div class="stat" id="stat-moves"><div class="num" id="moves-num">0</div><div class="lab">Steps taken</div></div>
+      <div class="stat"><div class="num" id="par-num">0</div><div class="lab">Par &mdash; fewest steps</div></div>
+      <div class="stat"><div class="num" id="away-num">0</div><div class="lab">Steps away</div></div>
+    </div>
+
+    <div class="racebar" id="racebar" hidden role="group" aria-label="Roads won">
+      <div class="tally red"><div class="num" id="race-red">0</div><div class="lab">Red roads won</div></div>
+      <div class="stat"><div class="num" id="race-par">0</div><div class="lab">Par</div></div>
+      <div class="tally blue"><div class="num" id="race-blue">0</div><div class="lab">Blue roads won</div></div>
+    </div>
+
+    <div class="turn-banner brick red" id="turn-banner" hidden><span id="turn-text">Red's step</span></div>
+
+    <div id="boards"></div>
+
+    <p class="hold-note">Tap + or &minus; to step. Press and hold to keep stepping.</p>
+
+    <div id="win" hidden>
+      <p class="stars" id="win-stars" aria-label="Stars earned"></p>
+      <h2 id="win-title">Address reached.</h2>
+      <p id="win-text"></p>
+      <div class="win-coord mono" id="win-coord"></div>
+      <button class="btn-next" id="btn-next" type="button">Next road &rarr;</button>
+    </div>
+
+    <div class="game-actions" id="game-actions">
+      <button class="btn-ghost" id="btn-restart" type="button">Restart this road</button>
+      <button class="btn-ghost" id="btn-intro" type="button">Pick players</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-links">
+      <button class="foot-brick fb-about" type="button" data-sheet="about">About</button>
+      <button class="foot-brick fb-privacy" type="button" data-sheet="privacy">Privacy</button>
+      <button class="foot-brick fb-terms" type="button" data-sheet="terms">Terms</button>
+    </div>
+    <div class="foot-line">Roads to the Future &mdash; Nine Numbers &middot; apertureshift.com</div>
+    <div class="foot-line dim">&copy; Will Bickford &middot; Exocortex</div>
+  </footer>
+</main>
+
+<!-- ================= SHEET PANELS ================= -->
+<div class="sheet-wrap" id="sheet-wrap" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-head">
+      <h2 id="sheet-title">About</h2>
+      <button class="sheet-close" id="sheet-close" type="button" aria-label="Close panel">&times;</button>
+    </div>
+
+    <div class="sheet-body" id="sheet-about">
+      <p>In 2130, every word, memory, and task lives at an <strong>address of nine numbers</strong> &mdash;
+      three groups of three, like <span class="mono"><strong>13.8.15/11.9.12/8.8.8</strong></span>.
+      That system is called <strong>phext</strong>, and it was built the way you play this game:
+      <strong>one dimension at a time</strong>. Learn to walk the nine numbers here, and you can find
+      anything in the Exocortex &mdash; and never lose it.</p>
+
+      <h3>How the road works</h3>
+      <ol>
+        <li>You start at <span class="mono"><strong>1.1.1/1.1.1/1.1.1</strong></span> &mdash; home, the root of everything.</li>
+        <li>A target address appears. Step your numbers <strong>up or down, one number at a time</strong>, until yours matches it exactly. Numbers never go below 1.</li>
+        <li>A shelf <strong>lights up and gets a check mark</strong> when all three of its numbers are right, and each step tells you <strong>warmer</strong> or <strong>colder</strong>.</li>
+        <li>Each road has a <strong>par</strong> &mdash; the fewest steps possible. Match par and you earn three stars. Hold a stepper button down to keep stepping.</li>
+      </ol>
+
+      <h3>Ways to play</h3>
+      <ul>
+        <li><strong>1 Player</strong> &mdash; walk the eight roads on your own, then the endless Open Road.</li>
+        <li><strong>2 Players &mdash; Race</strong> &mdash; two navigators, Red and Blue, race to the same target on the same screen. First to match it wins the road; whoever wins the most roads after eight is crowned.</li>
+        <li><strong>2 Players &mdash; Together</strong> &mdash; one shared address. Red and Blue take turns making one step at a time, and the team scores together against par.</li>
+      </ul>
+
+      <h3>Accessibility</h3>
+      <p>Built with big tap targets. Progress and matches are never shown by color alone &mdash; matched shelves also get a check mark.</p>
+    </div>
+
+    <div class="sheet-body" id="sheet-privacy" hidden>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Scores live only while this page is open. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+    </div>
+
+    <div class="sheet-body" id="sheet-terms" hidden>
+      <p>Free to play, forever. No purchases, no ads, nothing to buy. Play as-is; if something breaks, tell us and we'll fix it. These games are MIT licensed &mdash; copy them, remix them, share them.</p>
+      <p>&copy; Will Bickford &middot; Exocortex</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Level definitions ----------------
+     Target arrays are the nine numbers. Starting point is always home:
+     1.1.1/1.1.1/1.1.1. Par = sum of |target - 1| over all nine. */
+  var LEVELS = [
+    { name:"First Step", unlocked:1,
+      target:[4,1,1, 1,1,1, 1,1,1],
+      teach:"One dimension at a time." },
+    { name:"The First Shelf", unlocked:3,
+      target:[3,5,2, 1,1,1, 1,1,1],
+      teach:"Three numbers make a shelf." },
+    { name:"Two Shelves", unlocked:6,
+      target:[2,4,3, 5,2,6, 1,1,1],
+      teach:"Two shelves deep." },
+    { name:"The Full Address", unlocked:9,
+      target:[4,7,3, 6,2,8, 5,3,6],
+      teach:"Nine numbers. The full address." },
+    { name:"A Word Lives Here", unlocked:9,
+      target:[8,4,9, 3,7,5, 9,6,2],
+      teach:"A word lives here." },
+    { name:"A Memory Lives Here", unlocked:9,
+      target:[11,6,9, 13,4,10, 7,12,5],
+      teach:"A memory lives here." },
+    { name:"Everything Has a Place", unlocked:9,
+      target:[15,8,18, 6,12,9, 16,7,11],
+      teach:"Everything has a place." },
+    { name:"The Far Numbers", unlocked:9,
+      target:[20,14,7, 22,10,17, 9,24,13],
+      teach:"Out where the numbers run far." }
+  ];
+  var OPEN_TEACH = "The road is open.";
+
+  var GROUP_NAMES = ["Shelf 1","Shelf 2","Shelf 3"];
+  var GROUP_SUBS  = ["numbers 1\u20133","numbers 4\u20136","numbers 7\u20139"];
+  var PLAYER_NAMES = ["Red","Blue"];
+  var MAX_VAL = 99;
+
+  /* ---------------- State ---------------- */
+  var state = {
+    mode: "solo",            // "solo" | "race" | "coop"
+    levelIdx: 0,             // 0..7 fixed roads; >=8 = Open Road
+    openRound: 0,
+    target: LEVELS[0].target.slice(),
+    unlocked: LEVELS[0].unlocked,
+    par: 0,
+    players: [],             // [{cur:[9], moves:0}] — race: [Red, Blue]; else one shared board
+    turn: 0,                 // coop: whose step it is (0=Red, 1=Blue)
+    won: false,
+    winner: -1,
+    raceWins: [0,0]
+  };
+
+  /* ---------------- DOM ---------------- */
+  var $ = function(id){ return document.getElementById(id); };
+  var introEl=$("intro"), gameEl=$("game"),
+      kickerEl=$("level-kicker"), titleEl=$("level-title"),
+      progressEl=$("progress"), teachEl=$("teach-text"),
+      scorebarEl=$("scorebar"), racebarEl=$("racebar"),
+      movesEl=$("moves-num"), parEl=$("par-num"), awayEl=$("away-num"),
+      statMoves=$("stat-moves"),
+      raceRedEl=$("race-red"), raceBlueEl=$("race-blue"), raceParEl=$("race-par"),
+      turnBannerEl=$("turn-banner"), turnTextEl=$("turn-text"),
+      targetCoordEl=$("target-coord"), targetNoteEl=$("target-note"),
+      boardsEl=$("boards"),
+      winEl=$("win"), winStarsEl=$("win-stars"), winTitleEl=$("win-title"),
+      winTextEl=$("win-text"), winCoordEl=$("win-coord"),
+      btnNext=$("btn-next");
+
+  /* ---------------- Helpers ---------------- */
+  function home(){ return [1,1,1,1,1,1,1,1,1]; }
+  function newPlayer(){ return { cur: home(), moves: 0 }; }
+  function boardPlayers(){ return state.mode==="race" ? [0,1] : [0]; }
+  function distance(a,b){
+    var d=0; for(var i=0;i<9;i++) d+=Math.abs(a[i]-b[i]); return d;
+  }
+  function groupMatchedFor(cur,g){
+    if(g*3>=state.unlocked && !state.won) return false; /* locked shelves light up only on arrival */
+    for(var i=g*3;i<g*3+3;i++) if(cur[i]!==state.target[i]) return false;
+    return true;
+  }
+  function groupDistanceFor(cur,g){
+    var d=0; for(var i=g*3;i<g*3+3;i++) d+=Math.abs(cur[i]-state.target[i]); return d;
+  }
+  /* Groups joined by a K'Nex rod-and-joint separator. matchCur = the
+     coordinate whose matches light up, or null for no highlighting. */
+  function coordHTML(arr, matchCur){
+    var parts=[];
+    for(var g=0;g<3;g++){
+      var nums=[arr[g*3],arr[g*3+1],arr[g*3+2]].join(".");
+      var cls = matchCur && groupMatchedFor(matchCur,g) ? "grp matched" : "grp";
+      parts.push('<span class="'+cls+'">'+nums+'</span>');
+    }
+    return parts.join('<span class="joint" aria-hidden="true"></span>');
+  }
+  function coordPlain(arr){
+    return arr[0]+"."+arr[1]+"."+arr[2]+"/"+arr[3]+"."+arr[4]+"."+arr[5]+"/"+arr[6]+"."+arr[7]+"."+arr[8];
+  }
+  function randomOpenTarget(){
+    var t=[];
+    for(var i=0;i<9;i++) t.push(1+Math.floor(Math.random()*20)); // 1..20
+    if(distance(t,home())<18){ t[0]=9; t[4]=12; t[8]=7; }
+    return t;
+  }
+  function starsFor(moves,par){
+    if(moves<=par) return 3;
+    if(moves<=Math.ceil(par*1.5)) return 2;
+    return 1;
+  }
+
+  /* ---------------- Build boards ---------------- */
+  function buildBoards(){
+    boardsEl.innerHTML="";
+    boardPlayers().forEach(function(p){
+      var board=document.createElement("div");
+      board.className="board";
+      var panelCls, label;
+      if(state.mode==="race"){ panelCls = p===0 ? "p-red" : "p-blue"; label = PLAYER_NAMES[p]+" navigator"; }
+      else if(state.mode==="coop"){ panelCls = "p-dark"; label = "Team address"; }
+      else { panelCls = "p-green"; label = "You are here"; }
+      board.innerHTML =
+        '<div class="panel you brick '+panelCls+'">'+
+          '<div class="plab"><span>'+label+'</span><span aria-hidden="true">&#9654;</span></div>'+
+          '<div class="coord mono" id="coord-'+p+'"></div>'+
+          '<div class="dist-line" id="note-'+p+'"></div>'+
+        '</div>'+
+        '<div class="hint" id="hint-'+p+'" role="status" aria-live="polite">'+
+          '<span class="dot" aria-hidden="true"></span><span id="hinttext-'+p+'"></span>'+
+        '</div>'+
+        '<div class="groups" id="groups-'+p+'"></div>';
+      boardsEl.appendChild(board);
+      buildGroups(p);
+    });
+  }
+
+  function buildGroups(p){
+    var groupsEl=$("groups-"+p);
+    groupsEl.innerHTML="";
+    for(var g=0; g<3; g++){
+      var card=document.createElement("div");
+      card.className="group s"+(g+1); card.id="group-"+p+"-"+g;
+      var head=document.createElement("div");
+      head.className="group-head";
+      head.innerHTML='<div class="group-name">'+GROUP_NAMES[g]+' <span style="color:var(--muted);font-weight:600;letter-spacing:0;text-transform:none;">&middot; '+GROUP_SUBS[g]+'</span></div>'+
+                     '<div class="group-state" id="gstate-'+p+"-"+g+'"></div>';
+      card.appendChild(head);
+      var wheels=document.createElement("div");
+      wheels.className="wheels";
+      for(var k=0;k<3;k++){
+        (function(idx){
+          var wheel=document.createElement("div");
+          wheel.className="wheel";
+          var lab=document.createElement("div");
+          lab.className="dimlab"; lab.textContent="Number "+(idx+1);
+          var plus=document.createElement("button");
+          plus.type="button"; plus.className="stepper plus"; plus.textContent="+";
+          plus.setAttribute("aria-label","Step number "+(idx+1)+" up");
+          plus.setAttribute("data-player",p); plus.setAttribute("data-idx",idx); plus.setAttribute("data-dir","1");
+          var val=document.createElement("div");
+          val.className="val mono"; val.id="val-"+p+"-"+idx; val.textContent="1";
+          var minus=document.createElement("button");
+          minus.type="button"; minus.className="stepper minus"; minus.textContent="\u2212";
+          minus.setAttribute("aria-label","Step number "+(idx+1)+" down");
+          minus.setAttribute("data-player",p); minus.setAttribute("data-idx",idx); minus.setAttribute("data-dir","-1");
+          var tgt=document.createElement("div");
+          tgt.className="tgt"; tgt.id="tgt-"+p+"-"+idx;
+          wheel.appendChild(lab); wheel.appendChild(plus); wheel.appendChild(val);
+          wheel.appendChild(minus); wheel.appendChild(tgt);
+          wheels.appendChild(wheel);
+          attachStepper(plus); attachStepper(minus);
+        })(g*3+k);
+      }
+      card.appendChild(wheels);
+      groupsEl.appendChild(card);
+    }
+  }
+
+  /* Hold-to-repeat stepping */
+  function attachStepper(btn){
+    var holdTimer=null, repeatTimer=null, pointerHandledAt=0;
+    function clearTimers(){
+      if(holdTimer){clearTimeout(holdTimer); holdTimer=null;}
+      if(repeatTimer){clearInterval(repeatTimer); repeatTimer=null;}
+    }
+    btn.addEventListener("pointerdown", function(e){
+      if(btn.disabled) return;
+      e.preventDefault();
+      pointerHandledAt=Date.now();
+      step(btn);
+      clearTimers();
+      holdTimer=setTimeout(function(){
+        repeatTimer=setInterval(function(){ step(btn); }, 75);
+      }, 380);
+    });
+    ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
+      btn.addEventListener(ev, function(){ pointerHandledAt=Date.now(); clearTimers(); });
+    });
+    btn.addEventListener("click", function(){
+      /* Keyboard activation (Enter/Space) fires click with no pointerdown. */
+      if(Date.now()-pointerHandledAt>400) step(btn);
+    });
+    btn.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+  }
+
+  /* ---------------- Core step ---------------- */
+  function step(btn){
+    if(state.won) return;
+    var p=parseInt(btn.getAttribute("data-player"),10);
+    var idx=parseInt(btn.getAttribute("data-idx"),10);
+    var dir=parseInt(btn.getAttribute("data-dir"),10);
+    if(idx>=state.unlocked) return;
+    var pl=state.players[p];
+    if(!pl) return;
+    var next=pl.cur[idx]+dir;
+    if(next<1 || next>MAX_VAL) return;
+    var before=distance(pl.cur,state.target);
+    pl.cur[idx]=next;
+    pl.moves++;
+    if(state.mode==="coop") state.turn = state.turn===0 ? 1 : 0;
+    var after=distance(pl.cur,state.target);
+    render();
+    if(after===0){ onWin(p); return; }
+    var who = state.mode==="race" ? PLAYER_NAMES[p]+": " : "";
+    if(after<before){ setHint(p,"warmer",who+"Warmer \u2014 "+after+(after===1?" step":" steps")+" to go."); }
+    else if(after>before){ setHint(p,"colder",who+"Colder \u2014 "+after+" steps to go."); }
+    else { setHint(p,"same",who+"Same distance \u2014 "+after+" steps to go."); }
+  }
+
+  function setHint(p,kind,text){
+    var hintEl=$("hint-"+p), txtEl=$("hinttext-"+p);
+    if(!hintEl||!txtEl) return;
+    hintEl.className="hint "+kind;
+    txtEl.textContent=text;
+  }
+
+  /* ---------------- Render ---------------- */
+  function render(){
+    var main = state.players[0];
+    targetCoordEl.innerHTML=coordHTML(state.target, state.mode==="race" ? null : main.cur);
+
+    if(state.mode==="race"){
+      scorebarEl.hidden=true; racebarEl.hidden=false;
+      raceRedEl.textContent=state.raceWins[0];
+      raceBlueEl.textContent=state.raceWins[1];
+      raceParEl.textContent=state.par;
+      targetNoteEl.textContent="Same target for both navigators.";
+    } else {
+      scorebarEl.hidden=false; racebarEl.hidden=true;
+      var d=distance(main.cur,state.target);
+      movesEl.textContent=main.moves;
+      parEl.textContent=state.par;
+      awayEl.textContent=d;
+      statMoves.classList.toggle("over", main.moves>state.par);
+      var matchedCount=0;
+      for(var g0=0;g0<3;g0++) if(groupMatchedFor(main.cur,g0)) matchedCount++;
+      targetNoteEl.textContent = matchedCount===3 ? "Every shelf matches." :
+        matchedCount===0 ? "Reach this address exactly." :
+        matchedCount+" of 3 shelves fully matched.";
+    }
+
+    if(state.mode==="coop"){
+      turnBannerEl.hidden=false;
+      turnBannerEl.className="turn-banner brick "+(state.turn===0?"red":"blue");
+      turnTextEl.textContent = state.won ? "Team arrived!" : PLAYER_NAMES[state.turn]+"'s step";
+    } else {
+      turnBannerEl.hidden=true;
+    }
+
+    boardPlayers().forEach(function(p){
+      var pl=state.players[p];
+      var coordEl=$("coord-"+p), noteEl=$("note-"+p);
+      if(coordEl) coordEl.innerHTML=coordHTML(pl.cur, pl.cur);
+      var dd=distance(pl.cur,state.target);
+      if(noteEl) noteEl.textContent = dd===0 ? "Arrived!" :
+        dd+" step"+(dd===1?"":"s")+" from the target.";
+      for(var i=0;i<9;i++){
+        var valEl=$("val-"+p+"-"+i), tgtEl=$("tgt-"+p+"-"+i);
+        if(valEl){
+          valEl.textContent=pl.cur[i];
+          valEl.classList.toggle("on-target", (i<state.unlocked||state.won) && pl.cur[i]===state.target[i]);
+        }
+        if(tgtEl) tgtEl.innerHTML="target <b>"+state.target[i]+"</b>";
+      }
+      for(var gg=0; gg<3; gg++){
+        var card=$("group-"+p+"-"+gg), st=$("gstate-"+p+"-"+gg);
+        if(!card) continue;
+        var locked = (gg*3)>=state.unlocked;
+        var matched = groupMatchedFor(pl.cur,gg);
+        card.classList.toggle("matched", matched);
+        card.classList.toggle("locked", locked && !matched);
+        if(matched) st.textContent="\u2713 Matched";
+        else if(locked) st.textContent="Locked \u2014 later road";
+        else st.textContent=groupDistanceFor(pl.cur,gg)+" away";
+        var btns=card.querySelectorAll(".stepper");
+        for(var b=0;b<btns.length;b++){
+          var bi=parseInt(btns[b].getAttribute("data-idx"),10);
+          var bd=parseInt(btns[b].getAttribute("data-dir"),10);
+          btns[b].disabled = locked || state.won || (bd<0 && pl.cur[bi]<=1) || (bd>0 && pl.cur[bi]>=MAX_VAL);
+        }
+      }
+    });
+    renderProgress();
+  }
+
+  function renderProgress(){
+    progressEl.innerHTML="";
+    function addNode(cls,title){
+      var n=document.createElement("span");
+      n.className="pnode "+cls; n.title=title;
+      progressEl.appendChild(n);
+    }
+    function addRod(done){
+      var r=document.createElement("span");
+      r.className="prod"+(done?" done":"");
+      progressEl.appendChild(r);
+    }
+    for(var i=0;i<LEVELS.length;i++){
+      addNode(i<state.levelIdx||state.levelIdx>=LEVELS.length ? "done" : i===state.levelIdx ? "now" : "",
+              "Road "+(i+1)+": "+LEVELS[i].name);
+      addRod(i<state.levelIdx);
+    }
+    addNode("open"+(state.levelIdx>=LEVELS.length?" now":""), "The Open Road");
+  }
+
+  /* ---------------- Level flow ---------------- */
+  function resetPlayers(){
+    state.players = state.mode==="race" ? [newPlayer(), newPlayer()] : [newPlayer()];
+    state.turn=0;
+    state.won=false;
+    state.winner=-1;
+  }
+  function modeSuffix(){
+    return state.mode==="race" ? " \u00b7 Race" : state.mode==="coop" ? " \u00b7 Together" : "";
+  }
+  function startLevel(idx){
+    state.levelIdx=idx;
+    resetPlayers();
+    if(idx<LEVELS.length){
+      var L=LEVELS[idx];
+      state.target=L.target.slice();
+      state.unlocked=L.unlocked;
+      kickerEl.textContent="Road "+(idx+1)+" of "+LEVELS.length+modeSuffix();
+      titleEl.textContent=L.name;
+      teachEl.textContent=L.teach;
+      btnNext.textContent = idx===LEVELS.length-1 ? "Open the Open Road \u2192" : "Next road \u2192";
+    } else {
+      state.openRound++;
+      state.target=randomOpenTarget();
+      state.unlocked=9;
+      kickerEl.textContent="The Open Road \u00b7 address "+state.openRound+modeSuffix();
+      titleEl.textContent="Open Road";
+      teachEl.textContent=OPEN_TEACH;
+      btnNext.textContent="Another address \u2192";
+    }
+    state.par=distance(home(),state.target);
+    winEl.hidden=true;
+    $("game-actions").hidden=false;
+    render();
+    boardPlayers().forEach(function(p){
+      if(state.mode==="race")
+        setHint(p,"",PLAYER_NAMES[p]+" starts at home. Par is "+state.par+". First to the target wins.");
+      else if(state.mode==="coop")
+        setHint(p,"","Team starts at home. Par is "+state.par+". Red steps first.");
+      else
+        setHint(p,"","You are home. The target is "+state.par+" steps away \u2014 that\u2019s par.");
+    });
+  }
+
+  function restartLevel(){
+    resetPlayers();
+    state.par=distance(home(),state.target);
+    winEl.hidden=true;
+    $("game-actions").hidden=false;
+    render();
+    boardPlayers().forEach(function(p){
+      setHint(p,"","Back home. The target is "+state.par+" steps away. Walk it again.");
+    });
+  }
+
+  function showStars(n){
+    winStarsEl.hidden=false;
+    var s="";
+    for(var i=0;i<3;i++) s += i<n ? "\u2605" : '<span class="dim">\u2605</span>';
+    winStarsEl.innerHTML=s;
+    winStarsEl.setAttribute("aria-label", n+" of 3 stars");
+  }
+
+  function onWin(p){
+    state.won=true;
+    state.winner=p;
+    var isOpen = state.levelIdx>=LEVELS.length;
+    var isLast = state.levelIdx===LEVELS.length-1;
+    var main = state.players[0];
+
+    if(state.mode==="race"){
+      state.raceWins[p]++;
+      winStarsEl.hidden=true;
+      var tally="Roads won \u2014 Red "+state.raceWins[0]+" \u00b7 Blue "+state.raceWins[1]+".";
+      if(isLast){
+        if(state.raceWins[0]===state.raceWins[1]){
+          winTitleEl.textContent="It\u2019s a tie \u2014 both win!";
+          winTextEl.textContent=PLAYER_NAMES[p]+" took the last road. "+tally+" Red and Blue are crowned together.";
+        } else {
+          var champ = state.raceWins[0]>state.raceWins[1] ? 0 : 1;
+          winTitleEl.textContent=PLAYER_NAMES[champ]+" wins the match!";
+          winTextEl.textContent=PLAYER_NAMES[p]+" took the last road. "+tally+" "+PLAYER_NAMES[champ]+" is crowned.";
+        }
+      } else {
+        winTitleEl.textContent=PLAYER_NAMES[p]+" wins the road!";
+        winTextEl.textContent=PLAYER_NAMES[p]+" reached "+coordPlain(state.target)+" first, in "+state.players[p].moves+" steps. "+tally;
+      }
+      setHint(p,"warmer",PLAYER_NAMES[p]+" arrived first \u2014 all nine numbers match.");
+    } else if(state.mode==="coop"){
+      var stars=starsFor(main.moves,state.par);
+      showStars(stars);
+      winTitleEl.textContent = isOpen ? "Another address found \u2014 together." :
+        isLast ? "All eight roads walked \u2014 together." : "Together \u2014 address reached.";
+      var verdict = main.moves<=state.par ? "At par \u2014 a perfect team walk."
+        : main.moves<=Math.ceil(state.par*1.5) ? "A clean team walk \u2014 close to par."
+        : "You got there together. Par will come.";
+      winTextEl.textContent="Your team reached "+coordPlain(state.target)+" in "+main.moves+
+        " step"+(main.moves===1?"":"s")+" (par "+state.par+"). "+verdict;
+      setHint(0,"warmer","Arrived \u2014 all nine numbers match.");
+    } else {
+      var stars2=starsFor(main.moves,state.par);
+      showStars(stars2);
+      winTitleEl.textContent = isOpen ? "Another address found." : isLast ? "All eight roads walked." : "Address reached.";
+      var verdict2 = main.moves<=state.par ? "At par \u2014 a perfect walk, not one wasted step."
+        : main.moves<=Math.ceil(state.par*1.5) ? "A clean walk \u2014 close to par."
+        : "You got there. The road teaches by walking it; par will come.";
+      winTextEl.textContent="You reached "+coordPlain(state.target)+" in "+main.moves+
+        " step"+(main.moves===1?"":"s")+" (par "+state.par+"). "+verdict2;
+      setHint(0,"warmer","Arrived \u2014 all nine numbers match.");
+    }
+
+    render();
+    winCoordEl.innerHTML=coordHTML(state.target,null);
+    winEl.hidden=false;
+    $("game-actions").hidden=true;
+    winEl.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+
+  /* ---------------- Start / navigation ---------------- */
+  function startGame(mode){
+    state.mode=mode;
+    state.raceWins=[0,0];
+    state.openRound=0;
+    buildBoards();
+    introEl.hidden=true;
+    gameEl.hidden=false;
+    startLevel(0);
+    gameEl.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  var modeBtns=document.querySelectorAll(".mode-brick");
+  for(var m=0;m<modeBtns.length;m++){
+    modeBtns[m].addEventListener("click", function(){
+      startGame(this.getAttribute("data-mode"));
+    });
+  }
+  btnNext.addEventListener("click", function(){
+    startLevel(state.levelIdx+1);
+    gameEl.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  $("btn-restart").addEventListener("click", restartLevel);
+  $("btn-intro").addEventListener("click", function(){
+    gameEl.hidden=true;
+    introEl.hidden=false;
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+
+  /* ---------------- Sheet panels ---------------- */
+  var sheetWrap=$("sheet-wrap"), sheetTitle=$("sheet-title");
+  var SHEETS={
+    about:{ title:"About Nine Numbers", el:"sheet-about" },
+    privacy:{ title:"Privacy", el:"sheet-privacy" },
+    terms:{ title:"Terms", el:"sheet-terms" }
+  };
+  var lastFocus=null;
+  function openSheet(name){
+    var s=SHEETS[name]; if(!s) return;
+    lastFocus=document.activeElement;
+    sheetTitle.textContent=s.title;
+    for(var k in SHEETS) $(SHEETS[k].el).hidden = (k!==name);
+    sheetWrap.hidden=false;
+    $("sheet-close").focus();
+  }
+  function closeSheet(){
+    sheetWrap.hidden=true;
+    if(lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  var sheetBtns=document.querySelectorAll("[data-sheet]");
+  for(var s2=0;s2<sheetBtns.length;s2++){
+    sheetBtns[s2].addEventListener("click", function(){
+      openSheet(this.getAttribute("data-sheet"));
+    });
+  }
+  $("sheet-close").addEventListener("click", closeSheet);
+  sheetWrap.addEventListener("click", function(e){
+    if(e.target===sheetWrap) closeSheet();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="Escape" && !sheetWrap.hidden) closeSheet();
+  });
+})();
+</script>
+</body>
+</html>

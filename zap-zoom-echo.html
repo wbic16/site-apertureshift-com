@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Zap Zoom Echo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        /* classic brick palette leads */
+        --red: #d2261e;
+        --blue: #1b5bd7;
+        --yellow: #ffc531;
+        --green: #2e9e4f;
+        --orange: #f07d18;
+        --sun: #ffc531;
+        --bg: #dfeaf2;
+        --paper: #ffffff;
+        --ink: #1d2433;
+        --ink-soft: #475069;
+        --line: #b9cbda;
+        --slot: #eef4f9;
+        --plate: #c8dcea;
+        --rod: #8a93a3;
+        --shadow: 0 8px 0 rgba(29, 36, 51, 0.10), 0 14px 24px rgba(29, 36, 51, 0.12);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #101a2c;
+          --paper: #1a2740;
+          --ink: #f4f7fc;
+          --ink-soft: #b9c4d8;
+          --line: #33486b;
+          --slot: #131f36;
+          --plate: #16233c;
+          --rod: #aab6c8;
+          --shadow: 0 8px 0 rgba(0, 0, 0, 0.25), 0 14px 24px rgba(0, 0, 0, 0.45);
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        /* Lego baseplate: subtle stud grid */
+        background:
+          radial-gradient(circle at 16px 16px, rgba(29, 36, 51, 0.10) 5px, transparent 6px) 0 0 / 32px 32px,
+          var(--bg);
+        color: var(--ink);
+        font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background:
+            radial-gradient(circle at 16px 16px, rgba(255, 255, 255, 0.07) 5px, transparent 6px) 0 0 / 32px 32px,
+            var(--bg);
+        }
+      }
+      main {
+        flex: 1;
+        width: 100%;
+        max-width: 660px;
+        margin: 0 auto;
+        padding: 14px 16px 24px;
+      }
+
+      /* ---------- header / footer chrome ---------- */
+      .topbar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      footer {
+        text-align: center;
+        padding: 10px 16px 22px;
+      }
+      .foot-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+      .foot-note {
+        font-size: 0.82rem;
+        color: var(--ink-soft);
+        margin: 0;
+      }
+
+      /* ---------- bricks & panels ---------- */
+      /* Duplo: chunky rounded panel with big studs along the top */
+      .panel {
+        position: relative;
+        background: var(--paper);
+        border: 3px solid var(--line);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        padding: 26px 20px 20px;
+        margin-bottom: 20px;
+      }
+      .panel::before {
+        /* stud strip */
+        content: "";
+        position: absolute;
+        top: 8px; left: 22px; right: 22px;
+        height: 12px;
+        background: radial-gradient(circle at 6px 6px, var(--line) 5px, transparent 6px) 0 0 / 34px 12px repeat-x;
+        opacity: 0.9;
+      }
+      /* K'Nex accent: connector rings at panel corners */
+      .panel .knex {
+        position: absolute;
+        width: 16px; height: 16px;
+        border: 4px solid var(--orange);
+        border-radius: 50%;
+        background: var(--paper);
+        pointer-events: none;
+      }
+      .panel .knex.tl { top: -8px; left: -8px; }
+      .panel .knex.tr { top: -8px; right: -8px; }
+      .panel .knex.bl { bottom: -8px; left: -8px; }
+      .panel .knex.br { bottom: -8px; right: -8px; }
+
+      .brick-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 800;
+        color: #fff;
+        border-radius: 10px; /* Lego: small corner radius */
+        border-bottom: 6px solid rgba(0, 0, 0, 0.28);
+        padding: 14px 22px;
+        font-size: 1.05rem;
+        min-height: 56px;
+        transition: transform 0.1s ease, filter 0.1s ease;
+      }
+      .brick-btn:active { transform: translateY(3px); border-bottom-width: 3px; }
+      .b-red { background: var(--red); }
+      .b-blue { background: var(--blue); }
+      .b-green { background: var(--green); }
+      .b-yellow { background: var(--yellow); color: #221a00; }
+      .b-orange { background: var(--orange); }
+      .brick-btn.ghost {
+        background: var(--paper);
+        color: var(--ink);
+        border: 3px solid var(--line);
+        border-bottom: 6px solid var(--line);
+        box-shadow: none;
+      }
+
+      /* ---------- opening ---------- */
+      .opening { padding-top: 3vh; }
+      .title-bricks {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 4px 0 18px;
+      }
+      .title-brick {
+        font-size: clamp(1.5rem, 6vw, 2.1rem);
+        font-weight: 800;
+        color: #fff;
+        border-radius: 10px;
+        border-bottom: 6px solid rgba(0, 0, 0, 0.28);
+        padding: 12px 18px 10px;
+        position: relative;
+      }
+      .title-brick::before {
+        content: "";
+        display: block;
+        height: 9px;
+        margin-bottom: 6px;
+        background: radial-gradient(circle at 5px 4px, rgba(255, 255, 255, 0.55) 4px, transparent 5px) 0 0 / 26px 9px repeat-x;
+      }
+      .title-brick.tb-yellow { color: #221a00; }
+      .greeting {
+        font-size: clamp(1.3rem, 5vw, 1.7rem);
+        line-height: 1.3;
+        font-weight: 800;
+        margin: 0 0 8px;
+      }
+      .greeting-sub {
+        font-size: 1.05rem;
+        color: var(--ink-soft);
+        margin: 0 0 22px;
+        line-height: 1.45;
+      }
+      .greeting-sub strong { color: var(--red); }
+
+      .mode-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      @media (min-width: 520px) {
+        .mode-grid { grid-template-columns: 1fr 1fr; }
+      }
+      .mode-brick {
+        text-align: left;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 20px;
+        min-height: 108px;
+        font-size: 1.3rem;
+        line-height: 1.25;
+        width: 100%;
+      }
+      .mode-brick .mode-sub {
+        font-size: 0.95rem;
+        font-weight: 700;
+        opacity: 0.92;
+      }
+      .mode-brick .mode-faces {
+        display: flex; gap: 6px; margin-bottom: 4px;
+      }
+      .face-dot {
+        width: 22px; height: 22px; border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.85);
+        display: inline-block;
+      }
+      .facts {
+        margin: 16px 2px 0;
+        font-weight: 800;
+        font-size: 1rem;
+        letter-spacing: 0.02em;
+        color: var(--ink);
+        text-align: center;
+      }
+
+      /* ---------- game chrome ---------- */
+      .progress-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--ink);
+        margin: 2px 0 10px;
+      }
+      .stars { font-size: 1.35rem; letter-spacing: 0.12em; color: var(--sun); }
+      .stars .off { color: var(--line); }
+
+      /* K'Nex rod progress: one connector joint per line */
+      .rod-wrap { position: relative; padding: 8px 4px 4px; margin-bottom: 14px; }
+      .rod-line {
+        position: absolute;
+        left: 14px; right: 14px; top: 17px;
+        height: 7px;
+        border-radius: 99px;
+        background: var(--rod);
+      }
+      .rod-fill {
+        position: absolute;
+        left: 14px; top: 17px;
+        height: 7px;
+        border-radius: 99px;
+        background: var(--orange);
+        width: 0%;
+        transition: width 0.45s ease;
+      }
+      .rod-joints {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+      }
+      .joint {
+        width: 20px; height: 20px;
+        border-radius: 50%;
+        border: 5px solid var(--rod);
+        background: var(--paper);
+        flex: 0 0 auto;
+      }
+      .joint.done { border-color: var(--orange); background: var(--yellow); }
+      .joint.now { border-color: var(--orange); }
+
+      /* turn brick (Duet) */
+      .turn-brick {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 10px;
+        border-bottom: 6px solid rgba(0, 0, 0, 0.28);
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.2rem;
+        padding: 12px 18px;
+        min-height: 60px;
+        margin-bottom: 14px;
+      }
+      .turn-brick .face-dot { width: 26px; height: 26px; }
+      .turn-brick.flip { animation: flipIn 0.25s ease; }
+      @keyframes flipIn {
+        0% { transform: rotateX(70deg); opacity: 0.4; }
+        100% { transform: rotateX(0); opacity: 1; }
+      }
+
+      /* ---------- brick plate + slots ---------- */
+      .plate {
+        background: var(--plate);
+        border: 3px solid var(--line);
+        border-radius: 16px;
+        padding: 16px 14px;
+        margin-bottom: 10px;
+        position: relative;
+      }
+      .plate::before {
+        content: "";
+        position: absolute;
+        top: 6px; left: 14px; right: 14px;
+        height: 10px;
+        background: radial-gradient(circle at 5px 5px, rgba(29, 36, 51, 0.14) 4px, transparent 5px) 0 0 / 30px 10px repeat-x;
+      }
+      @media (prefers-color-scheme: dark) {
+        .plate::before {
+          background: radial-gradient(circle at 5px 5px, rgba(255, 255, 255, 0.12) 4px, transparent 5px) 0 0 / 30px 10px repeat-x;
+        }
+      }
+      .slots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        min-height: 64px;
+        padding-top: 12px;
+      }
+      .slot {
+        min-height: 58px;
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: 3px dashed var(--ink-soft);
+        background: var(--slot);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--ink-soft);
+        min-width: 60px;
+      }
+      .slot .dots { letter-spacing: 0.18em; font-size: 0.9rem; opacity: 0.65; }
+      .slot.filled {
+        border-style: solid;
+        border-color: transparent;
+        border-bottom: 5px solid rgba(0, 0, 0, 0.28);
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+        animation: pop 0.18s ease;
+      }
+      .slot.filled.dark-text { color: #221a00; }
+      @keyframes pop {
+        0% { transform: scale(0.85); }
+        100% { transform: scale(1); }
+      }
+      .c0 { background: var(--red); }
+      .c1 { background: var(--blue); }
+      .c2 { background: var(--green); }
+      .c3 { background: var(--yellow); }
+      .c4 { background: var(--orange); }
+      .p-red { background: var(--red); }
+      .p-blue { background: var(--blue); }
+
+      .feedback {
+        min-height: 1.4em;
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: var(--ink-soft);
+        margin: 2px 0 10px;
+      }
+      .feedback.warn { color: var(--red); }
+
+      /* ---------- tray of Duplo word bricks ---------- */
+      .tray {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: var(--paper);
+        border: 3px solid var(--line);
+        border-radius: 24px;
+        padding: 20px 16px 16px;
+        box-shadow: var(--shadow);
+        position: relative;
+      }
+      .tray::before {
+        content: "";
+        position: absolute;
+        top: 7px; left: 20px; right: 20px;
+        height: 11px;
+        background: radial-gradient(circle at 5px 5px, var(--line) 4px, transparent 5px) 0 0 / 32px 11px repeat-x;
+      }
+      .tile {
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 1.28rem;
+        font-weight: 800;
+        color: var(--ink);
+        background: var(--slot);
+        border-bottom: 6px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 20px 12px;
+        min-height: 64px;
+        min-width: 68px;
+        position: relative;
+        transition: transform 0.1s ease, opacity 0.15s ease;
+      }
+      .tile::before {
+        content: "";
+        display: block;
+        height: 8px;
+        margin-bottom: 5px;
+        background: radial-gradient(circle at 4px 4px, rgba(29, 36, 51, 0.18) 3.5px, transparent 4.5px) 0 0 / 22px 8px repeat-x;
+      }
+      .tile:active { transform: scale(0.95); }
+      .tile.used { opacity: 0; pointer-events: none; transform: scale(0.6); }
+      .shake { animation: shake 0.32s ease; }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        50% { transform: translateX(6px); }
+        75% { transform: translateX(-4px); }
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+        align-items: center;
+      }
+      .hint-text { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.04em; }
+      .hint-text .shape { color: var(--blue); }
+      @media (prefers-color-scheme: dark) {
+        .hint-text .shape { color: #7db1ff; }
+      }
+
+      /* ---------- complete / final ---------- */
+      .complete-card { text-align: center; }
+      .complete-line {
+        font-size: clamp(1.5rem, 6vw, 2.1rem);
+        font-weight: 800;
+        line-height: 1.3;
+        margin: 8px 0 12px;
+      }
+      .complete-stars { font-size: 1.9rem; letter-spacing: 0.15em; color: var(--sun); margin-bottom: 6px; }
+      .complete-stars .off { color: var(--line); }
+      .final-line {
+        font-size: clamp(1.7rem, 6.6vw, 2.4rem);
+        font-weight: 800;
+        line-height: 1.25;
+        margin: 8px 0 12px;
+      }
+      .score-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        margin: 14px 0 20px;
+      }
+      .score-brick {
+        border-radius: 10px;
+        border-bottom: 6px solid rgba(0, 0, 0, 0.28);
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.1rem;
+        padding: 14px 20px;
+        min-height: 56px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .score-brick.stars-brick { background: var(--paper); color: var(--ink); border: 3px solid var(--line); border-bottom: 6px solid var(--line); }
+      .burst-note {
+        position: absolute;
+        font-size: 1.5rem;
+        pointer-events: none;
+        animation: floatUp 1.4s ease-out forwards;
+      }
+      @keyframes floatUp {
+        0% { transform: translateY(10px); opacity: 0; }
+        15% { opacity: 1; }
+        100% { transform: translateY(-90px); opacity: 0; }
+      }
+
+      /* ---------- info panels (About / Privacy / Terms) ---------- */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 16, 28, 0.62);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        z-index: 50;
+        padding: 0;
+      }
+      @media (min-width: 640px) {
+        .overlay { align-items: center; padding: 24px; }
+      }
+      .sheet {
+        background: var(--paper);
+        color: var(--ink);
+        width: 100%;
+        max-width: 620px;
+        max-height: 88vh;
+        overflow-y: auto;
+        border-radius: 24px 24px 0 0;
+        border: 3px solid var(--line);
+        padding: 22px 22px 26px;
+        position: relative;
+      }
+      @media (min-width: 640px) {
+        .sheet { border-radius: 24px; }
+      }
+      .sheet h2 { margin: 0 40px 6px 0; font-size: 1.45rem; }
+      .sheet h3 { margin: 20px 0 6px; font-size: 1.08rem; }
+      .sheet p, .sheet li { line-height: 1.55; font-size: 1rem; color: var(--ink); }
+      .sheet ul { margin: 6px 0; padding-left: 22px; }
+      .sheet .muted { color: var(--ink-soft); }
+      .sheet-close {
+        position: absolute;
+        top: 14px; right: 14px;
+        width: 56px; height: 56px;
+        border-radius: 50%;
+        border: none;
+        background: var(--red);
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: 800;
+        cursor: pointer;
+        border-bottom: 5px solid rgba(0, 0, 0, 0.28);
+      }
+      .tab-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+      .tab-btn {
+        border: 3px solid var(--line);
+        background: var(--slot);
+        color: var(--ink);
+        font-family: inherit;
+        font-weight: 800;
+        font-size: 1rem;
+        border-radius: 10px;
+        padding: 12px 18px;
+        min-height: 56px;
+        cursor: pointer;
+      }
+      .tab-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+      [hidden] { display: none !important; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .shake, .slot.filled, .burst-note, .turn-brick.flip { animation: none; }
+        .rod-fill, .brick-btn, .tile { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="topbar">
+        <button class="brick-btn b-green" id="about-top-btn" type="button">About</button>
+      </div>
+
+      <!-- ================= OPENING ================= -->
+      <section id="screen-open" class="opening" aria-label="Welcome">
+        <div class="title-bricks" aria-hidden="true">
+          <span class="title-brick b-red">Zap</span>
+          <span class="title-brick b-blue">Zoom</span>
+          <span class="title-brick tb-yellow b-yellow">Echo</span>
+        </div>
+
+        <h1 class="greeting">&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the Exocortex of 2130, and I&rsquo;m here to help.&rdquo;</h1>
+        <p class="greeting-sub">And by help, we mean: <strong>survive the singularity.</strong></p>
+
+        <div class="mode-grid">
+          <button class="brick-btn b-green mode-brick" id="solo-btn" type="button">
+            <span>1 Player</span>
+            <span class="mode-sub">Build all 11 lines yourself.</span>
+          </button>
+          <button class="brick-btn b-blue mode-brick" id="duet-btn" type="button">
+            <span class="mode-faces" aria-hidden="true">
+              <span class="face-dot" style="background: var(--red);"></span>
+              <span class="face-dot" style="background: var(--blue);"></span>
+            </span>
+            <span>2 Players — Duet</span>
+            <span class="mode-sub">Red and Blue take turns. Stars are shared.</span>
+          </button>
+        </div>
+        <p class="facts">Free forever &middot; Same screen &middot; No sign-up</p>
+      </section>
+
+      <!-- ================= GAME ================= -->
+      <section id="screen-game" hidden aria-label="Game">
+        <div class="progress-meta">
+          <span id="level-label">Line 1 of 11</span>
+          <span class="stars" id="stars" aria-label="Team stars for this line"></span>
+        </div>
+
+        <!-- K'Nex rod: one connector joint per line -->
+        <div class="rod-wrap" role="progressbar" aria-label="Lines completed" aria-valuemin="0" aria-valuemax="11" aria-valuenow="0" id="progress">
+          <div class="rod-line"></div>
+          <div class="rod-fill" id="rod-fill"></div>
+          <div class="rod-joints" id="rod-joints"></div>
+        </div>
+
+        <div id="turn-brick" class="turn-brick p-red" hidden>
+          <span class="face-dot" id="turn-dot" style="background: rgba(255,255,255,0.35);" aria-hidden="true"></span>
+          <span id="turn-text">Red&rsquo;s turn</span>
+        </div>
+
+        <div id="play-area">
+          <div class="plate">
+            <div class="slots" id="slots" aria-label="Words placed so far"></div>
+          </div>
+          <p class="feedback" id="feedback" aria-live="polite"></p>
+          <div class="tray" id="tray" aria-label="Word tiles"></div>
+          <div class="controls">
+            <button class="brick-btn ghost" id="hint-btn" type="button">&#9834; Hear the shape</button>
+            <span class="hint-text" id="hint-text" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div id="complete-area" hidden>
+          <div class="panel complete-card" id="complete-card">
+            <span class="knex tl" aria-hidden="true"></span>
+            <span class="knex tr" aria-hidden="true"></span>
+            <span class="knex bl" aria-hidden="true"></span>
+            <span class="knex br" aria-hidden="true"></span>
+            <div class="complete-stars" id="complete-stars"></div>
+            <p class="complete-line" id="complete-line"></p>
+            <button class="brick-btn b-red" id="next-btn" type="button">Next line</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= FINAL ================= -->
+      <section id="screen-final" hidden aria-label="Finished">
+        <div class="panel complete-card">
+          <span class="knex tl" aria-hidden="true"></span>
+          <span class="knex tr" aria-hidden="true"></span>
+          <span class="knex bl" aria-hidden="true"></span>
+          <span class="knex br" aria-hidden="true"></span>
+          <p class="final-line" id="final-line">You speak Zap Zoom Echo now.</p>
+          <div class="score-row" id="final-scores"></div>
+          <button class="brick-btn b-yellow" id="replay-btn" type="button">Walk the road again</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="foot-links">
+        <button class="brick-btn ghost" type="button" data-open-panel="about">About</button>
+        <button class="brick-btn ghost" type="button" data-open-panel="privacy">Privacy</button>
+        <button class="brick-btn ghost" type="button" data-open-panel="terms">Terms</button>
+      </div>
+      <p class="foot-note">Roads to the Future &mdash; Zap Zoom Echo &middot; &copy; Will Bickford &middot; Exocortex</p>
+    </footer>
+
+    <!-- ================= INFO PANELS ================= -->
+    <div class="overlay" id="overlay" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <button class="sheet-close" id="sheet-close" type="button" aria-label="Close panel">&times;</button>
+        <h2 id="sheet-title">About</h2>
+        <div class="tab-row" role="tablist" aria-label="Information panels">
+          <button class="tab-btn" type="button" data-tab="about">About</button>
+          <button class="tab-btn" type="button" data-tab="privacy">Privacy</button>
+          <button class="tab-btn" type="button" data-tab="terms">Terms</button>
+        </div>
+
+        <div id="panel-about">
+          <p><strong>Here is one road in.</strong> A song built from nothing but simple words &mdash; the kind anyone can say, in any land, on any day.</p>
+          <p>You rebuild it line by line: tap the word tiles, put each line back in its sung order, and learn the words by hand and eye. Eleven lines. That is all of it &mdash; and it is enough to start thinking in more directions than flat words allow.</p>
+          <p>Zap Zoom Echo is one of the Roads to the Future games &mdash; simple games that teach multidimensional thinking and the Singular language, the simple-word way of speaking where big ideas never need big words.</p>
+          <h3>What the lines teach</h3>
+          <ul id="about-notes"></ul>
+          <h3>Accessibility</h3>
+          <p>Big tap targets. Mistakes shake and lose a star &mdash; never color alone. Every line can be finished without sound: the &ldquo;Hear the shape&rdquo; hint shows the next word&rsquo;s shape, then the word itself. Motion effects turn off with your device&rsquo;s reduce-motion setting.</p>
+          <h3>Playing together</h3>
+          <p>Duet mode is built for two people on one screen &mdash; a child and a grown-up, or two kids shoulder to shoulder. Red and Blue alternate every tile, and the stars belong to the team.</p>
+        </div>
+
+        <div id="panel-privacy" hidden>
+          <h3>Privacy</h3>
+          <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Scores live only while this page is open. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+          <p class="muted">There is nothing to delete and nothing to export, because nothing is collected or stored in the first place.</p>
+        </div>
+
+        <div id="panel-terms" hidden>
+          <h3>Terms</h3>
+          <p>Free to play, forever. No purchases, no ads, nothing to buy. Play as-is. These games are MIT licensed &mdash; copy them, remix them, share them.</p>
+          <p>&copy; Will Bickford &middot; Exocortex</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var LINES = [
+          {
+            words: ["Zap", "zoom", "echo"],
+            display: "Zap, zoom, echo!",
+            distractors: [],
+            note: "Three small words, one big wave — that is the hook. You just said it the way it is sung."
+          },
+          {
+            words: ["Feel", "the", "fun", "make", "it", "fly"],
+            display: "Feel the fun, make it fly.",
+            distractors: [],
+            note: "Every word here is a simple word. Big ideas don't need big words."
+          },
+          {
+            words: ["Laugh", "real", "loud", "touch", "the", "sky"],
+            display: "Laugh real loud, touch the sky.",
+            distractors: [],
+            note: null
+          },
+          {
+            words: ["We", "fall", "we", "try", "we", "go"],
+            display: "We fall, we try, we go.",
+            distractors: ["sky"],
+            note: "Fall, try, go. Three small words carry the whole story of getting back up."
+          },
+          {
+            words: ["Jump", "through", "lights", "wear", "big", "feet", "say", "nice", "things"],
+            display: "Jump through lights, wear big feet, say nice things.",
+            distractors: ["care"],
+            note: "The longest line yet — nine words — and still not one hard word in it."
+          },
+          {
+            words: ["Run", "real", "sweet", "fix", "bad", "feels", "hug", "the", "air"],
+            display: "Run real sweet, fix bad feels, hug the air.",
+            distractors: ["hello"],
+            note: null
+          },
+          {
+            words: ["Eat", "some", "stuff", "love", "with", "care"],
+            display: "Eat some stuff, love with care.",
+            distractors: ["fly", "sky"],
+            note: null
+          },
+          {
+            words: ["Hold", "your", "heart", "and", "have", "it", "all"],
+            display: "Hold your heart and have it all.",
+            distractors: ["dream", "fun"],
+            note: "Heart is the biggest word on this line — and it is still a word a small child knows."
+          },
+          {
+            words: ["We", "sing", "we", "beep", "we", "wave", "hello"],
+            display: "We sing, we beep, we wave, hello.",
+            distractors: ["air", "heart"],
+            note: null
+          },
+          {
+            words: ["We", "make", "good", "things", "wherever", "we", "go"],
+            display: "We make good things, wherever we go.",
+            distractors: ["loud", "sweet"],
+            note: null
+          },
+          {
+            words: ["Fast", "like", "fun", "and", "soft", "like", "dream"],
+            display: "Fast like fun, and soft like dream.",
+            distractors: ["hello", "sky"],
+            note: "Last line of the song. You rebuilt the whole thing out of words anyone can say."
+          }
+        ];
+
+        var NOTE_GLYPHS = ["♪", "♫", "♪", "♫"];
+        var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        var PLAYERS = [
+          { key: "red", name: "Red", cls: "p-red" },
+          { key: "blue", name: "Blue", cls: "p-blue" }
+        ];
+
+        var mode = "solo";      // "solo" | "duet"
+        var turn = 0;           // index into PLAYERS (duet)
+        var placedCount = { red: 0, blue: 0 };
+        var level = 0;
+        var tiles = [];
+        var placedIds = [];
+        var placedBy = {};      // tile id -> player key (duet)
+        var lineStars = 3;
+        var totalStars = 0;
+        var hintStage = 0;
+        var finished = false;
+
+        var el = function (id) { return document.getElementById(id); };
+        var screenOpen = el("screen-open"), screenGame = el("screen-game"), screenFinal = el("screen-final");
+        var slotsEl = el("slots"), trayEl = el("tray"), feedbackEl = el("feedback");
+        var starsEl = el("stars"), levelLabel = el("level-label");
+        var progressEl = el("progress"), rodFill = el("rod-fill"), rodJoints = el("rod-joints");
+        var playArea = el("play-area"), completeArea = el("complete-area");
+        var hintText = el("hint-text");
+        var turnBrick = el("turn-brick"), turnText = el("turn-text");
+
+        // Build the K'Nex rod joints: one per line.
+        var jointEls = [];
+        LINES.forEach(function (_, i) {
+          var j = document.createElement("span");
+          j.className = "joint";
+          j.setAttribute("aria-hidden", "true");
+          rodJoints.appendChild(j);
+          jointEls.push(j);
+        });
+
+        // About panel: the teaching notes live here now.
+        var notesList = el("about-notes");
+        LINES.forEach(function (line, i) {
+          var li = document.createElement("li");
+          li.innerHTML = "<strong>Line " + (i + 1) + " — " + line.display + "</strong>" +
+            (line.note ? " " + line.note : " Simple words, sung order — your hands learn it by placing it.");
+          notesList.appendChild(li);
+        });
+
+        function starString(n) {
+          var s = "";
+          for (var i = 0; i < 3; i++) {
+            s += i < n ? "★" : '<span class="off">★</span>';
+          }
+          return s;
+        }
+
+        function shuffle(arr) {
+          var a = arr.slice();
+          for (var i = a.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var t = a[i]; a[i] = a[j]; a[j] = t;
+          }
+          return a;
+        }
+
+        function renderRod() {
+          progressEl.setAttribute("aria-valuenow", String(level + (finished ? 1 : 0)));
+          var doneCount = level + (finished ? 1 : 0);
+          rodFill.style.width = (doneCount / LINES.length * 100) + "%";
+          jointEls.forEach(function (j, i) {
+            j.className = "joint" + (i < doneCount ? " done" : (i === level && !finished ? " now" : ""));
+          });
+        }
+
+        function renderTurn() {
+          if (mode !== "duet") { turnBrick.hidden = true; return; }
+          turnBrick.hidden = false;
+          var p = PLAYERS[turn];
+          turnBrick.className = "turn-brick " + p.cls;
+          turnText.textContent = p.name + "’s turn";
+          if (!reducedMotion) {
+            turnBrick.classList.remove("flip");
+            void turnBrick.offsetWidth;
+            turnBrick.classList.add("flip");
+          }
+        }
+
+        function startGame(selectedMode) {
+          mode = selectedMode;
+          totalStars = 0;
+          placedCount = { red: 0, blue: 0 };
+          turn = 0;
+          screenOpen.hidden = true;
+          screenFinal.hidden = true;
+          screenGame.hidden = false;
+          startLevel(0);
+        }
+
+        function startLevel(idx) {
+          level = idx;
+          lineStars = 3;
+          placedIds = [];
+          placedBy = {};
+          hintStage = 0;
+          finished = false;
+          var line = LINES[idx];
+
+          var pool = line.words.map(function (w, i) {
+            return { id: "t" + i, word: w, isTarget: true, placed: false };
+          });
+          line.distractors.forEach(function (w, i) {
+            pool.push({ id: "d" + i, word: w, isTarget: false, placed: false });
+          });
+          tiles = shuffle(pool);
+          if (tiles.length > 2) {
+            var guard = 0;
+            while (guard < 12 && tiles.filter(function (t) { return t.isTarget; }).map(function (t) { return t.word; }).join(" ") === line.words.join(" ")) {
+              tiles = shuffle(pool);
+              guard++;
+            }
+          }
+
+          playArea.hidden = false;
+          completeArea.hidden = true;
+          levelLabel.textContent = "Line " + (idx + 1) + " of " + LINES.length;
+          hintText.innerHTML = "";
+          setFeedback("", false);
+          renderRod();
+          render();
+        }
+
+        function nextWord() {
+          return LINES[level].words[placedIds.length];
+        }
+
+        function setFeedback(text, warn) {
+          feedbackEl.textContent = text;
+          feedbackEl.className = "feedback" + (warn ? " warn" : "");
+        }
+
+        function slotClassFor(slotIndex, tileId) {
+          if (mode === "duet") {
+            return placedBy[tileId] === "blue" ? "p-blue" : "p-red";
+          }
+          return "c" + (slotIndex % 5);
+        }
+
+        function render() {
+          starsEl.innerHTML = starString(lineStars);
+          renderTurn();
+
+          slotsEl.innerHTML = "";
+          LINES[level].words.forEach(function (word, i) {
+            if (i < placedIds.length) {
+              var tile = tiles.filter(function (t) { return t.id === placedIds[i]; })[0];
+              var b = document.createElement("button");
+              b.type = "button";
+              var cls = slotClassFor(i, tile.id);
+              b.className = "slot filled " + cls + (cls === "c3" ? " dark-text" : "");
+              b.textContent = tile.word;
+              b.setAttribute("aria-label", "Remove " + tile.word + " and the words after it");
+              b.addEventListener("click", function () { unplaceFrom(i); });
+              slotsEl.appendChild(b);
+            } else {
+              var s = document.createElement("div");
+              s.className = "slot";
+              var dots = "";
+              for (var k = 0; k < word.length; k++) dots += "·";
+              s.innerHTML = '<span class="dots">' + dots + "</span>";
+              slotsEl.appendChild(s);
+            }
+          });
+
+          trayEl.innerHTML = "";
+          tiles.forEach(function (t) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "tile" + (t.placed ? " used" : "");
+            b.textContent = t.word;
+            b.disabled = t.placed;
+            b.setAttribute("aria-label", "Word tile: " + t.word);
+            b.addEventListener("click", function () { tapTile(t, b); });
+            trayEl.appendChild(b);
+          });
+        }
+
+        function tapTile(tile, btnEl) {
+          if (finished || tile.placed) return;
+          if (tile.isTarget && tile.word === nextWord()) {
+            tile.placed = true;
+            placedIds.push(tile.id);
+            if (mode === "duet") {
+              var p = PLAYERS[turn];
+              placedBy[tile.id] = p.key;
+              placedCount[p.key]++;
+              turn = (turn + 1) % PLAYERS.length; // flip after every placed tile
+            }
+            hintStage = 0;
+            hintText.innerHTML = "";
+            if (placedIds.length === LINES[level].words.length) {
+              render();
+              completeLevel();
+            } else {
+              setFeedback(randomPraise(), false);
+              render();
+            }
+          } else {
+            if (lineStars > 0) lineStars--;
+            starsEl.innerHTML = starString(lineStars);
+            setFeedback("Not that one.", true);
+            if (!reducedMotion) {
+              btnEl.classList.remove("shake");
+              void btnEl.offsetWidth;
+              btnEl.classList.add("shake");
+              slotsEl.classList.remove("shake");
+              void slotsEl.offsetWidth;
+              slotsEl.classList.add("shake");
+            }
+          }
+        }
+
+        function unplaceFrom(slotIndex) {
+          if (finished) return;
+          var removed = placedIds.splice(slotIndex);
+          removed.forEach(function (id) {
+            tiles.forEach(function (t) { if (t.id === id) t.placed = false; });
+            if (mode === "duet" && placedBy[id]) {
+              placedCount[placedBy[id]]--;
+              delete placedBy[id];
+            }
+          });
+          hintStage = 0;
+          hintText.innerHTML = "";
+          setFeedback("Sent back.", false);
+          render();
+        }
+
+        var PRAISE = ["That's the one.", "Yes.", "Right word.", "Keep going."];
+        function randomPraise() {
+          return PRAISE[Math.floor(Math.random() * PRAISE.length)];
+        }
+
+        function useHint() {
+          if (finished) return;
+          var word = nextWord();
+          if (!word) return;
+          if (hintStage === 0) {
+            hintStage = 1;
+            var shape = word.charAt(0);
+            for (var i = 1; i < word.length; i++) shape += " ·";
+            hintText.innerHTML = 'Next: <span class="shape">' + shape + "</span>";
+          } else if (hintStage === 1) {
+            hintStage = 2;
+            hintText.innerHTML = 'Next: <span class="shape">' + word + "</span>";
+          } else {
+            hintText.innerHTML = 'Next: <span class="shape">' + word + "</span> — in the tray.";
+          }
+        }
+
+        function completeLevel() {
+          finished = true;
+          totalStars += lineStars;
+          setFeedback("", false);
+          renderRod();
+
+          var line = LINES[level];
+          el("complete-stars").innerHTML = starString(lineStars);
+          el("complete-line").textContent = line.display;
+          el("next-btn").textContent = level === LINES.length - 1 ? "Finish the road" : "Next line";
+
+          playArea.hidden = true;
+          turnBrick.hidden = true;
+          completeArea.hidden = false;
+          burst(el("complete-card"));
+          el("next-btn").focus();
+        }
+
+        function burst(container) {
+          if (reducedMotion) return;
+          for (var i = 0; i < 7; i++) {
+            var s = document.createElement("span");
+            s.className = "burst-note";
+            s.style.color = ["#d2261e", "#1b5bd7", "#2e9e4f", "#f07d18"][i % 4];
+            s.textContent = NOTE_GLYPHS[i % NOTE_GLYPHS.length];
+            s.style.left = (8 + Math.random() * 84) + "%";
+            s.style.top = (55 + Math.random() * 25) + "%";
+            s.style.animationDelay = (Math.random() * 0.35) + "s";
+            container.appendChild(s);
+            (function (node) { setTimeout(function () { node.remove(); }, 2200); })(s);
+          }
+        }
+
+        function showFinal() {
+          screenGame.hidden = true;
+          screenFinal.hidden = false;
+          var scores = el("final-scores");
+          scores.innerHTML = "";
+          if (mode === "duet") {
+            el("final-line").textContent = "You speak Zap Zoom Echo now — together.";
+            PLAYERS.forEach(function (p) {
+              var d = document.createElement("span");
+              d.className = "score-brick " + p.cls;
+              d.textContent = p.name + ": " + placedCount[p.key] + " tiles";
+              scores.appendChild(d);
+            });
+          } else {
+            el("final-line").textContent = "You speak Zap Zoom Echo now.";
+          }
+          var starsBrick = document.createElement("span");
+          starsBrick.className = "score-brick stars-brick";
+          starsBrick.textContent = "★ " + totalStars + " of " + (LINES.length * 3) + " team stars";
+          scores.appendChild(starsBrick);
+          burst(document.querySelector("#screen-final .complete-card"));
+          el("replay-btn").focus();
+        }
+
+        el("solo-btn").addEventListener("click", function () { startGame("solo"); });
+        el("duet-btn").addEventListener("click", function () { startGame("duet"); });
+        el("hint-btn").addEventListener("click", useHint);
+
+        el("next-btn").addEventListener("click", function () {
+          if (level === LINES.length - 1) {
+            showFinal();
+          } else {
+            startLevel(level + 1);
+          }
+        });
+
+        el("replay-btn").addEventListener("click", function () {
+          startGame(mode);
+        });
+
+        /* ---------- info panels ---------- */
+        var overlay = el("overlay");
+        var sheetTitle = el("sheet-title");
+        var tabBtns = Array.prototype.slice.call(document.querySelectorAll(".tab-btn"));
+        var TITLES = { about: "About", privacy: "Privacy", terms: "Terms" };
+        var lastFocus = null;
+
+        function openPanel(which) {
+          lastFocus = document.activeElement;
+          overlay.hidden = false;
+          showTab(which);
+          el("sheet-close").focus();
+        }
+        function showTab(which) {
+          ["about", "privacy", "terms"].forEach(function (k) {
+            el("panel-" + k).hidden = k !== which;
+          });
+          tabBtns.forEach(function (b) {
+            var active = b.getAttribute("data-tab") === which;
+            b.classList.toggle("active", active);
+          });
+          sheetTitle.textContent = TITLES[which];
+        }
+        function closePanel() {
+          overlay.hidden = true;
+          if (lastFocus && lastFocus.focus) lastFocus.focus();
+        }
+
+        el("about-top-btn").addEventListener("click", function () { openPanel("about"); });
+        Array.prototype.forEach.call(document.querySelectorAll("[data-open-panel]"), function (b) {
+          b.addEventListener("click", function () { openPanel(b.getAttribute("data-open-panel")); });
+        });
+        tabBtns.forEach(function (b) {
+          b.addEventListener("click", function () { showTab(b.getAttribute("data-tab")); });
+        });
+        el("sheet-close").addEventListener("click", closePanel);
+        overlay.addEventListener("click", function (e) { if (e.target === overlay) closePanel(); });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && !overlay.hidden) closePanel();
+        });
+      })();
+    </script>
+  </body>
+</html>

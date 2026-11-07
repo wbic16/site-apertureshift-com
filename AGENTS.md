@@ -1,7 +1,8 @@
 # AGENTS.md — apertureshift.com
 
 ## What This Is
-Aperture Shift domain site.
+Roads to the Future — free teaching games from the Exocortex of 2130.
+This domain serves only this mission now (Will, 2026-11-07).
 
 ## Rules
 - Pull before touching code: `git pull --rebase origin exo`

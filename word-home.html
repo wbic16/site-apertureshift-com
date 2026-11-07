@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<meta name="description" content="Word Home — a free same-screen brick game. Find where each word lives in Will Bickford's Singular language: placed, at home, or at the far corner." />
+<link rel="icon" href="data:," />
+<title>Word Home — Roads to the Future</title>
+<style>
+  :root{
+    --bg:#e9eddc;
+    --baseplate-dot:rgba(26,34,28,.10);
+    --surface:#fbfaf3;
+    --surface-2:#e3e7d2;
+    --ink:#1c231d;
+    --ink-soft:#4c574e;
+    --ink-faint:#7c877c;
+    --line:#c9cfb4;
+    --rod:#8a927f;
+    --red:#cf352a;      --red-dark:#9c241c;   --red-ink:#ffffff;
+    --blue:#1f6fd1;     --blue-dark:#155198;  --blue-ink:#ffffff;
+    --yellow:#f4b90d;   --yellow-dark:#c08f04;--yellow-ink:#2a2000;
+    --green:#2f9e4f;    --green-dark:#1f7038; --green-ink:#ffffff;
+    --teal:#177567;     --teal-dark:#0f554a;
+    --good:#1e7a3c;
+    --bad:#b3352b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#131a15;
+      --baseplate-dot:rgba(236,231,218,.07);
+      --surface:#1c241e;
+      --surface-2:#273128;
+      --ink:#eef0e2;
+      --ink-soft:#bcc3b2;
+      --ink-faint:#8d968a;
+      --line:#39443a;
+      --rod:#7e8a76;
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 14px 14px, var(--baseplate-dot) 3.2px, transparent 4px),
+      var(--bg);
+    background-size:30px 30px, auto;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:700px;margin:0 auto;padding:16px 16px 8px}
+  .mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+  .rounded{font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,-apple-system,"Segoe UI",sans-serif}
+  button{font:inherit}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:6px}
+
+  /* ---------- bricks ---------- */
+  .brick{
+    position:relative;border-radius:8px;color:var(--ink);
+    border:2px solid rgba(0,0,0,.22);
+    box-shadow:0 5px 0 rgba(0,0,0,.28), inset 0 2px 0 rgba(255,255,255,.25);
+  }
+  .brick .studs{display:flex;gap:12px;padding:9px 16px 0;pointer-events:none}
+  .brick .studs i{
+    width:26px;height:13px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+    background:rgba(255,255,255,.34);
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.14), inset 0 2px 0 rgba(255,255,255,.4);
+    display:block;
+  }
+  .b-red{background:var(--red);color:var(--red-ink)}
+  .b-blue{background:var(--blue);color:var(--blue-ink)}
+  .b-yellow{background:var(--yellow);color:var(--yellow-ink)}
+  .b-green{background:var(--green);color:var(--green-ink)}
+  .b-teal{background:var(--teal);color:#fff}
+  .b-plate{background:var(--surface);color:var(--ink)}
+
+  /* ---------- header strip ---------- */
+  .topstrip{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:14px}
+  .topstrip .brand{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+  .about-brick{
+    appearance:none;cursor:pointer;min-height:56px;padding:8px 22px 10px;
+    font-size:17px;font-weight:800;letter-spacing:.02em;
+  }
+  .about-brick:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .about-brick .studs{padding:0 0 5px;gap:8px;justify-content:center}
+  .about-brick .studs i{width:16px;height:8px}
+
+  /* ---------- screens ---------- */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ---------- intro ---------- */
+  .intro{padding:22px 0 6px}
+  .greeting{
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
+    font-size:clamp(27px,6.8vw,42px);line-height:1.2;font-weight:400;letter-spacing:-.01em;margin:0 0 10px;
+  }
+  .greeting em{font-style:italic}
+  .gloss{font-family:Georgia,serif;font-style:italic;font-size:18px;color:var(--ink-soft);margin:0 0 26px}
+
+  .place-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:0 0 22px}
+  .place{border-radius:14px;padding:0 12px 12px;text-align:left}
+  .place .studs{gap:8px;padding:8px 2px 0}
+  .place .studs i{width:18px;height:9px}
+  .place h3{margin:6px 0 5px;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+  .place .exword{font-family:Georgia,serif;font-style:italic;font-size:16px;display:block;margin-top:5px;opacity:.92}
+  @media(max-width:480px){.place-row{grid-template-columns:1fr}.place{display:flex;align-items:center;gap:12px;padding:6px 14px 10px}.place h3{margin:0}.place .exword{display:inline;margin:0}}
+
+  .modes{display:grid;gap:14px}
+  @media(min-width:560px){.modes{grid-template-columns:1fr 1fr}}
+  .mode-brick{
+    appearance:none;cursor:pointer;text-align:left;width:100%;
+    border-radius:20px;padding:0 20px 20px;min-height:132px;
+  }
+  .mode-brick:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+  .mode-brick .studs{gap:14px;padding:12px 2px 0}
+  .mode-brick .studs i{width:34px;height:16px}
+  .mode-brick .mode-name{display:block;font-size:clamp(26px,6vw,32px);font-weight:900;line-height:1.1;margin:10px 0 6px;letter-spacing:-.01em}
+  .mode-brick .mode-sub{display:block;font-size:14.5px;font-weight:650;opacity:.92}
+  .duel-split{display:flex;gap:8px;margin-top:12px}
+  .duel-split span{flex:1;text-align:center;border-radius:8px;padding:7px 4px;font-weight:800;font-size:14px;border:2px solid rgba(0,0,0,.22);box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
+  .facts-strip{
+    margin:16px 0 0;text-align:center;font-size:13.5px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+  }
+
+  /* ---------- K'Nex coordinate ---------- */
+  .coord-rod{display:inline-flex;align-items:center;flex-wrap:nowrap;white-space:nowrap}
+  .coord-rod .grp{font-weight:700}
+  .coord-rod .rod{width:22px;height:4px;background:var(--rod);border-radius:2px;position:relative;margin:0 9px;flex:none}
+  .coord-rod .rod::after{
+    content:"";position:absolute;left:50%;top:50%;width:13px;height:13px;border-radius:50%;
+    transform:translate(-50%,-50%);background:var(--surface);
+    border:3.5px solid var(--rod);
+  }
+  .coord-rod.small .rod{width:12px;margin:0 6px}
+  .coord-rod.small .rod::after{width:9px;height:9px;border-width:3px}
+
+  /* ---------- game ---------- */
+  .scoreboard{display:flex;gap:10px;padding:12px 0 2px}
+  .score-brick{flex:1;border-radius:14px;padding:0 16px 12px;min-height:76px}
+  .score-brick .studs{gap:8px;padding:8px 0 0}
+  .score-brick .studs i{width:18px;height:9px}
+  .score-brick .who{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:baseline;margin-top:5px}
+  .score-brick .pts{font-size:30px;font-weight:900;line-height:1}
+  .score-brick.turn{outline:4px solid var(--ink);outline-offset:2px}
+  .score-brick .turn-tag{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:rgba(0,0,0,.28);border-radius:99px;padding:3px 9px;color:#fff}
+  .score-brick:not(.turn) .turn-tag{display:none}
+
+  /* K'Nex progress rod */
+  .rod-progress{position:relative;height:6px;background:var(--rod);border-radius:3px;margin:26px 10px 8px}
+  .rod-progress .node{
+    position:absolute;top:50%;width:17px;height:17px;border-radius:50%;
+    transform:translate(-50%,-50%);background:var(--surface);border:4px solid var(--rod);
+  }
+  .rod-progress .node.done{background:var(--green);border-color:var(--green-dark)}
+  .rod-progress .node.done.wrong{background:var(--bad);border-color:var(--bad)}
+  .rod-progress .node.now{border-color:var(--yellow-dark);background:var(--yellow);width:21px;height:21px}
+  .round-line{display:flex;justify-content:space-between;font-size:12.5px;font-weight:750;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint);margin:0 2px}
+
+  .turn-banner{
+    border-radius:16px;padding:0 18px 14px;margin:18px 0 0;text-align:center;
+  }
+  .turn-banner .studs{justify-content:center}
+  .turn-banner .tb-text{display:block;font-size:clamp(22px,5.6vw,28px);font-weight:900;margin-top:6px}
+  .turn-banner.hidden{display:none}
+
+  .mode-pill{
+    display:inline-block;font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+    background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 13px;margin:20px 0 0;color:var(--ink-soft);
+  }
+  .question{font-size:clamp(20px,5vw,25px);line-height:1.25;margin:12px 0 2px;font-weight:800}
+  .target-word{
+    font-family:Georgia,"Iowan Old Style",serif;font-style:italic;
+    font-size:clamp(56px,16vw,88px);line-height:1.05;letter-spacing:-.02em;margin:6px 0 4px;
+  }
+  .target-addr{font-size:17px;color:var(--ink-soft);margin:0 0 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .chip{
+    display:inline-block;font-size:13px;font-weight:800;background:var(--surface-2);color:var(--ink);
+    border-radius:999px;padding:4px 11px;border:1.5px solid var(--line);
+  }
+
+  .options{display:grid;gap:14px;margin:0 0 10px}
+  .opt{
+    appearance:none;text-align:left;cursor:pointer;width:100%;
+    border-radius:8px;padding:0 18px 16px;min-height:78px;
+    display:block;
+  }
+  .opt:active{transform:translateY(3px)}
+  .opt .studs{padding:9px 0 0}
+  .opt .opt-main{display:flex;align-items:center;gap:14px;margin-top:7px}
+  .opt .letter{
+    flex:none;width:36px;height:36px;border-radius:8px;background:rgba(0,0,0,.26);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;
+  }
+  .b-yellow .letter{background:rgba(0,0,0,.32)}
+  .opt .coord-rod{font-size:clamp(16px,4.8vw,21px)}
+  .opt .coord-rod .rod{background:rgba(0,0,0,.38)}
+  .opt .coord-rod .rod::after{border-color:rgba(0,0,0,.38);background:transparent}
+  .opt .cand-word{font-family:Georgia,serif;font-style:italic;font-size:clamp(27px,7vw,34px);line-height:1.1;color:inherit}
+  .opt .badge{
+    margin-left:auto;flex:none;width:38px;height:38px;border-radius:50%;display:none;
+    align-items:center;justify-content:center;font-size:20px;font-weight:900;background:#fff;color:var(--ink);
+    border:2px solid rgba(0,0,0,.3);
+  }
+  .opt:disabled{cursor:default}
+  .opt.picked-correct{outline:5px solid var(--ink);outline-offset:2px}
+  .opt.picked-correct .badge{display:flex}
+  .opt.picked-wrong{outline:5px solid var(--ink);outline-offset:2px;filter:saturate(.55)}
+  .opt.picked-wrong .badge{display:flex}
+  .opt.was-correct{outline:5px dashed var(--ink);outline-offset:3px}
+  .opt.was-correct .badge{display:flex}
+  .opt.dim{opacity:.45}
+
+  .btn{
+    appearance:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    min-height:60px;padding:14px 28px;border-radius:14px;width:100%;
+    font-size:18px;font-weight:850;color:#fff;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  @media(min-width:560px){.btn{width:auto}}
+  .btn-row{display:flex;flex-direction:column;gap:12px}
+  @media(min-width:560px){.btn-row{flex-direction:row}}
+  .btn-plate{background:var(--surface);color:var(--ink)}
+
+  .reveal{display:none;border-radius:14px;background:var(--surface);border:2px solid var(--line);padding:18px;margin:16px 0 18px;box-shadow:0 5px 0 rgba(0,0,0,.14)}
+  .reveal.show{display:block}
+  .reveal .verdict{font-size:21px;font-weight:900;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+  .reveal .verdict .vmark{width:34px;height:34px;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+  .reveal .verdict.good .vmark{background:var(--good)}
+  .reveal .verdict.bad .vmark{background:var(--bad)}
+  .reveal .addr-line{font-size:clamp(17px,5vw,22px);display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0}
+  .dist-table{width:100%;border-collapse:collapse;margin:8px 0 2px;font-size:16px}
+  .dist-table td{padding:8px 2px;border-top:1.5px solid var(--line);color:var(--ink-soft)}
+  .dist-table td:last-child{text-align:right;color:var(--ink);font-weight:800}
+  .dist-table tr.nearest td{color:var(--ink);font-weight:800}
+  .scorer-line{font-size:15.5px;font-weight:800;margin:12px 0 0}
+  .scorer-line .dotp{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:7px;border:1.5px solid rgba(0,0,0,.3)}
+
+  /* ---------- end ---------- */
+  .end{padding:26px 0 6px}
+  .end-bricks{display:flex;gap:12px;margin:8px 0 4px}
+  .end-bricks .score-brick{min-height:104px}
+  .end-bricks .pts{font-size:44px}
+  .score-big{font-family:Georgia,serif;font-size:clamp(60px,17vw,92px);line-height:1;margin:8px 0 2px}
+  .score-big small{font-size:.36em;color:var(--ink-faint)}
+  .winner-line{font-size:clamp(26px,6.6vw,36px);font-weight:900;line-height:1.2;margin:14px 0 4px}
+  .end-line{font-family:Georgia,serif;font-style:italic;font-size:clamp(20px,5.4vw,26px);margin:16px 0 22px;color:var(--ink-soft)}
+  .recap{margin:24px 0 28px}
+  .recap h3{font-size:12.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 8px}
+  .recap ul{list-style:none;margin:0;padding:0}
+  .recap li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 2px;border-top:1.5px solid var(--line);font-size:14.5px}
+  .recap li .w{font-family:Georgia,serif;font-style:italic;font-size:18px}
+  .recap li .c{color:var(--ink-soft);font-size:13px;text-align:right}
+  .recap li .mark{flex:none;font-weight:900;width:26px;height:26px;border-radius:50%;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .recap li .mark.good{background:var(--good)} .recap li .mark.bad{background:var(--bad)}
+  .recap li .who-dot{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px;border:1.5px solid rgba(0,0,0,.3);vertical-align:-1px}
+
+  /* ---------- footer / compliance ---------- */
+  footer{
+    margin:34px 0 26px;padding-top:16px;border-top:2px solid var(--line);
+    font-size:13.5px;color:var(--ink-faint);
+  }
+  .foot-links{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .foot-link{
+    appearance:none;cursor:pointer;min-height:56px;padding:10px 22px;border-radius:8px;
+    font-size:16px;font-weight:800;
+  }
+  .foot-link:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .foot-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .foot-meta .facts{font-weight:700;color:var(--ink-soft)}
+
+  /* ---------- About panel ---------- */
+  .panel-overlay{
+    position:fixed;inset:0;background:rgba(10,14,11,.55);z-index:50;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .panel-overlay.open{display:flex}
+  .panel{
+    background:
+      radial-gradient(circle at 14px 14px, var(--baseplate-dot) 3px, transparent 3.8px),
+      var(--bg);
+    background-size:30px 30px, auto;
+    width:100%;max-width:700px;max-height:92vh;overflow-y:auto;
+    border-radius:22px 22px 0 0;padding:20px 20px 30px;
+    box-shadow:0 -8px 40px rgba(0,0,0,.35);
+  }
+  @media(min-width:560px){.panel-overlay{align-items:center;padding:20px}.panel{border-radius:22px}}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:-20px;background:var(--bg);padding:14px 0 10px;z-index:2}
+  .panel-head h2{margin:0;font-size:24px;font-weight:900}
+  .close-brick{appearance:none;cursor:pointer;min-height:56px;min-width:56px;border-radius:8px;font-size:20px;font-weight:900;color:#fff}
+  .panel-nav{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 8px}
+  .panel-nav a{
+    display:inline-flex;align-items:center;min-height:48px;padding:8px 16px;border-radius:999px;
+    background:var(--surface);border:2px solid var(--line);color:var(--ink);text-decoration:none;font-weight:800;font-size:14.5px;
+  }
+  .panel section{padding:16px 0 6px;border-top:2px solid var(--line)}
+  .panel section h3{margin:0 0 8px;font-size:19px;font-weight:900}
+  .panel section p{margin:0 0 10px;font-size:15.5px;color:var(--ink-soft)}
+  .panel section p strong{color:var(--ink)}
+  .panel .legal p{font-size:15px}
+  .atlas-list{list-style:none;margin:6px 0 0;padding:0}
+  .atlas-list li{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:8px 0;border-top:1.5px solid var(--line);font-size:13.5px}
+  .atlas-list .w{font-family:Georgia,serif;font-style:italic;font-size:17px}
+  .atlas-list .c{color:var(--ink-soft);font-size:12.5px;text-align:right}
+  .bars{display:flex;gap:4px;margin:12px 0 2px;max-width:420px}
+  .bars span{flex:1;text-align:center}
+  .bars i{display:block;height:36px;border-radius:5px 5px 0 0;background:var(--surface-2);position:relative;overflow:hidden}
+  .bars i b{position:absolute;left:0;right:0;bottom:0;background:var(--yellow);display:block;border-top:2px solid var(--yellow-dark)}
+  .bars em{font-style:normal;font-size:12px;color:var(--ink-soft);display:block;margin-top:4px}
+  .bars-cap{font-size:12.5px;color:var(--ink-faint)}
+
+  @media (prefers-reduced-motion: no-preference){
+    .screen.active{animation:fade .25s ease both}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topstrip">
+    <span class="brand">Roads to the Future · Game Two</span>
+    <button class="about-brick brick b-yellow rounded" id="btn-about-top" type="button" aria-haspopup="dialog">
+      <span class="studs" aria-hidden="true"><i></i><i></i></span>About
+    </button>
+  </div>
+
+  <!-- ================= INTRO ================= -->
+  <section class="screen active" id="screen-intro">
+    <div class="intro">
+      <h1 class="greeting">&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the <em>Exocortex of 2130</em>, and I&rsquo;m here to help.&rdquo;</h1>
+      <p class="gloss">And by help, we mean: survive the singularity.</p>
+
+      <div class="place-row" aria-label="The three kinds of address">
+        <div class="place brick b-teal">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>Placed</h3>
+          <span class="coord-rod small mono" data-coord="16,7,7,7,7,9,5,6,6"></span>
+          <span class="exword">&ldquo;echo&rdquo;</span>
+        </div>
+        <div class="place brick b-yellow">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>At home</h3>
+          <span class="coord-rod small mono" data-coord="1,1,1,1,1,1,1,1,1"></span>
+          <span class="exword">&ldquo;a&rsquo;s&rdquo;</span>
+        </div>
+        <div class="place brick b-red">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+          <h3>Far corner</h3>
+          <span class="coord-rod small mono" data-coord="9,9,9,9,9,9,9,9,9"></span>
+          <span class="exword">&ldquo;quixotic&rdquo;</span>
+        </div>
+      </div>
+
+      <div class="modes">
+        <button class="mode-brick brick b-green rounded" id="btn-solo" type="button">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="mode-name">1 Player</span>
+          <span class="mode-sub">10 rounds · your road alone</span>
+        </button>
+        <button class="mode-brick brick b-yellow rounded" id="btn-duel" type="button">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="mode-name">2 Players — Duel</span>
+          <span class="mode-sub">Free forever · Same screen · No sign-up</span>
+          <span class="duel-split" aria-hidden="true">
+            <span style="background:var(--red);color:#fff">RED</span>
+            <span style="background:var(--blue);color:#fff">BLUE</span>
+          </span>
+        </button>
+      </div>
+      <p class="facts-strip">Free forever · Same screen · No sign-up</p>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section class="screen" id="screen-game" aria-live="polite">
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="rod-progress" id="rod-progress" aria-hidden="true"></div>
+    <div class="round-line"><span id="hud-round">Round 1 / 10</span><span>9 numbers · 1 home</span></div>
+
+    <div class="turn-banner brick hidden" id="turn-banner">
+      <span class="studs" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="tb-text rounded" id="turn-text">Red&rsquo;s turn</span>
+    </div>
+
+    <span class="mode-pill" id="mode-pill">Where does it live?</span>
+    <h2 class="question" id="question"></h2>
+    <div class="target-word" id="target-word"></div>
+    <p class="target-addr" id="target-addr"></p>
+
+    <div class="options" id="options"></div>
+
+    <div class="reveal" id="reveal">
+      <p class="verdict" id="verdict"></p>
+      <div id="reveal-body"></div>
+      <p class="scorer-line" id="scorer-line"></p>
+      <div style="margin-top:16px">
+        <button class="btn brick b-green rounded" id="btn-next" type="button">Next round →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= END ================= -->
+  <section class="screen" id="screen-end">
+    <div class="end">
+      <span class="mode-pill">The road, walked</span>
+      <div id="end-scores"></div>
+      <p class="winner-line rounded" id="winner-line"></p>
+      <p class="end-line">Every word has an address. Every address can be reached.</p>
+
+      <div class="btn-row">
+        <button class="btn brick b-green rounded" id="btn-again" type="button">Play again →</button>
+        <button class="btn brick b-plate rounded" id="btn-home" type="button">Change players</button>
+      </div>
+
+      <div class="recap">
+        <h3>Round by round</h3>
+        <ul id="recap-list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-links">
+      <button class="foot-link brick b-yellow rounded" type="button" data-open-panel="sec-about">About</button>
+      <button class="foot-link brick b-blue rounded" type="button" data-open-panel="sec-privacy">Privacy</button>
+      <button class="foot-link brick b-red rounded" type="button" data-open-panel="sec-terms">Terms</button>
+    </div>
+    <div class="foot-meta">
+      <span class="facts">Free forever · Same screen · No sign-up</span>
+      <span>© Will Bickford · Exocortex</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ================= ABOUT PANEL ================= -->
+<div class="panel-overlay" id="panel-overlay">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" id="panel">
+    <div class="panel-head">
+      <h2 class="rounded" id="panel-title">About Word Home</h2>
+      <button class="close-brick brick b-red" id="btn-close-panel" type="button" aria-label="Close panel">✕</button>
+    </div>
+    <nav class="panel-nav" aria-label="Panel sections">
+      <a href="#sec-about">About</a>
+      <a href="#sec-atlas">The atlas</a>
+      <a href="#sec-access">Accessibility</a>
+      <a href="#sec-privacy">Privacy</a>
+      <a href="#sec-terms">Terms</a>
+    </nav>
+
+    <section id="sec-about">
+      <h3>About us — the long version</h3>
+      <p>Word Home is one of the <strong>Roads to the Future</strong> games, built to teach two things at once: how to think in more dimensions than the world is about to demand of you, and <strong>Singular</strong> — Will Bickford&rsquo;s language, drawn from his own archive of words.</p>
+      <p>In Singular, every word lives somewhere. Each word has an address — <strong>nine numbers</strong>, written in three groups of three. A word&rsquo;s address is the <strong>average of the addresses of every scroll that contains it</strong>: words that show up in many scrolls get placed precisely, words known to the archive but not yet placed wait at home — <span class="mono">1.1.1/1.1.1/1.1.1</span> — and words that appear nowhere sit at the far corner, <span class="mono">9.9.9/9.9.9/9.9.9</span>.</p>
+      <p>That averaging is <strong>holographic positioning</strong>: no single scroll decides where a word lives. Every scroll that holds it pulls a little, and the word settles where the pulls balance. It is why closeness on the map is closeness in the text — words that keep showing up in the same kinds of scrolls drift together, and the nearest-neighbor rounds measure that drift as a straight Euclidean distance through all nine numbers.</p>
+      <p>Home isn&rsquo;t nowhere — it&rsquo;s the first address, where every unplaced word starts. The far corner isn&rsquo;t exile either: the moment a scroll uses a word like <em>quixotic</em>, it starts moving toward its true home.</p>
+      <div class="bars" id="about-bars" aria-hidden="true"></div>
+      <p class="bars-cap">One address as heights: <em>echo</em>, 16.7.7/7.7.9/5.6.6 — three groups of three.</p>
+      <p>Two more roads are being built: <strong>Nine Numbers</strong> — moving one dimension at a time — and <strong>Zap Zoom Echo</strong> — the language taught by ear. Planned for apertureshift.com.</p>
+    </section>
+
+    <section id="sec-atlas">
+      <h3>The atlas — all twenty placed words</h3>
+      <p>Real addresses from Will&rsquo;s Singular atlas. A word&rsquo;s coordinate is the average of every scroll holding it — the whole text, folded into one point per word.</p>
+      <ul class="atlas-list" id="atlas-list"></ul>
+    </section>
+
+    <section id="sec-access">
+      <h3>Accessibility</h3>
+      <p><strong>Big tap targets.</strong> Every brick you can tap is at least 56px tall, and the answer bricks are bigger still. <strong>Right and wrong are never shown by color alone</strong> — every answer also carries a ✓ or ✗ mark, correct answers get a solid outline and answers you missed get a dashed one, and the verdict is always spelled out in words. The whole game plays by keyboard: Tab to a brick, Enter to choose it. Motion on this page respects your device&rsquo;s reduced-motion setting.</p>
+    </section>
+
+    <section id="sec-privacy" class="legal">
+      <h3>Privacy</h3>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Scores live only while this page is open. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+    </section>
+
+    <section id="sec-terms" class="legal">
+      <h3>Terms</h3>
+      <p>Free to play, forever. No purchases, no ads, nothing to buy. Play as-is. These games are MIT licensed — copy them, remix them, share them.</p>
+      <p>© Will Bickford · Exocortex</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ------- Real atlas data (word, 9-number coordinate, scrolls) ------- */
+  var ATLAS = [
+    {word:"love",   coord:[13,8,15, 11,9,12, 8,8,8],    scrolls:154},
+    {word:"home",   coord:[24,8,15, 10,10,24, 10,9,10], scrolls:57},
+    {word:"star",   coord:[21,5,10, 7,7,15, 4,6,8],     scrolls:35},
+    {word:"road",   coord:[21,5,7, 4,4,3, 3,4,5],       scrolls:5},
+    {word:"future", coord:[17,8,21, 12,10,13, 11,9,11], scrolls:77},
+    {word:"light",  coord:[15,12,8, 15,8,15, 7,9,8],    scrolls:165},
+    {word:"time",   coord:[27,11,17, 11,11,15, 12,11,14], scrolls:160},
+    {word:"heart",  coord:[9,8,14, 11,10,12, 7,8,7],    scrolls:67},
+    {word:"dream",  coord:[14,7,13, 17,10,13, 8,6,8],   scrolls:51},
+    {word:"map",    coord:[42,3,5, 7,5,8, 4,3,7],       scrolls:51},
+    {word:"echo",   coord:[16,7,7, 7,7,9, 5,6,6],       scrolls:186},
+    {word:"song",   coord:[7,6,5, 9,7,9, 5,6,6],        scrolls:92},
+    {word:"sky",    coord:[5,6,6, 5,5,5, 6,6,6],        scrolls:36},
+    {word:"fire",   coord:[8,6,7, 8,5,7, 7,6,7],        scrolls:85},
+    {word:"water",  coord:[9,4,6, 15,8,6, 11,12,15],    scrolls:9},
+    {word:"earth",  coord:[10,4,4, 5,4,5, 4,4,6],       scrolls:13},
+    {word:"sing",   coord:[5,7,6, 8,7,6, 5,5,6],        scrolls:35},
+    {word:"think",  coord:[15,5,6, 6,6,7, 9,4,7],       scrolls:41},
+    {word:"play",   coord:[15,4,10, 10,8,11, 4,4,7],    scrolls:31},
+    {word:"build",  coord:[40,13,8, 20,9,28, 6,10,9],   scrolls:82}
+  ];
+  var HOME_COORD = [1,1,1,1,1,1,1,1,1];
+  var FAR_COORD  = [9,9,9,9,9,9,9,9,9];
+  var BRICKS = ["b-red","b-blue","b-yellow","b-green"];
+  var PLAYERS = [
+    {name:"Red",  cls:"b-red",  hex:"#cf352a"},
+    {name:"Blue", cls:"b-blue", hex:"#1f6fd1"}
+  ];
+
+  /* ------- helpers ------- */
+  function fmt(c){ return c.slice(0,3).join(".") + "/" + c.slice(3,6).join(".") + "/" + c.slice(6,9).join("."); }
+  function coordHTML(c, small){
+    var g=[c.slice(0,3).join("."), c.slice(3,6).join("."), c.slice(6,9).join(".")];
+    return '<span class="coord-rod mono'+(small?" small":"")+'" aria-label="'+fmt(c)+'">'
+      + '<span class="grp">'+g[0]+'</span><span class="rod" aria-hidden="true"></span>'
+      + '<span class="grp">'+g[1]+'</span><span class="rod" aria-hidden="true"></span>'
+      + '<span class="grp">'+g[2]+'</span></span>';
+  }
+  function dist(a,b){
+    var s=0; for(var i=0;i<9;i++){ var d=a[i]-b[i]; s+=d*d; }
+    return Math.sqrt(s);
+  }
+  function shuffle(arr){
+    var a=arr.slice();
+    for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+  function sameCoord(a,b){ for(var i=0;i<9;i++){ if(a[i]!==b[i]) return false; } return true; }
+  function perturb(coord){
+    var out=coord.slice();
+    var idxs=shuffle([0,1,2,3,4,5,6,7,8]).slice(0, 3 + Math.floor(Math.random()*2));
+    var deltas=[-7,-5,-4,-3,3,4,5,7];
+    for(var k=0;k<idxs.length;k++){
+      var d=deltas[Math.floor(Math.random()*deltas.length)];
+      out[idxs[k]]=Math.max(1, out[idxs[k]]+d);
+    }
+    if(sameCoord(out,coord)) out[0]=out[0]+4;
+    return out;
+  }
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+  function studs(n){
+    var s='<span class="studs" aria-hidden="true">';
+    for(var i=0;i<n;i++) s+="<i></i>";
+    return s+"</span>";
+  }
+
+  /* static coord-rod placeholders (intro placement bricks) */
+  var holders=document.querySelectorAll("[data-coord]");
+  for(var h=0;h<holders.length;h++){
+    var parts=holders[h].getAttribute("data-coord").split(",").map(Number);
+    holders[h].outerHTML = coordHTML(parts, true);
+  }
+
+  /* ------- atlas + bars (About panel) ------- */
+  document.getElementById("atlas-list").innerHTML =
+    ATLAS.slice().sort(function(a,b){return b.scrolls-a.scrolls;}).map(function(e){
+      return '<li><span class="w">'+esc(e.word)+'</span><span class="c mono">'+fmt(e.coord)+' · '+e.scrolls+' scrolls</span></li>';
+    }).join("") +
+    '<li><span class="w">a&rsquo;s</span><span class="c mono">'+fmt(HOME_COORD)+' · at home</span></li>' +
+    '<li><span class="w">quixotic</span><span class="c mono">'+fmt(FAR_COORD)+' · far corner</span></li>' +
+    '<li><span class="w">xylophone</span><span class="c mono">'+fmt(FAR_COORD)+' · far corner</span></li>';
+
+  (function(){
+    var coord=[16,7,7,7,7,9,5,6,6], max=16;
+    document.getElementById("about-bars").innerHTML = coord.map(function(v){
+      var hh=Math.max(8, Math.round(v/max*100));
+      return '<span><i><b style="height:'+hh+'%"></b></i><em class="mono">'+v+'</em></span>';
+    }).join("");
+  })();
+
+  /* ------- panel ------- */
+  var overlay=document.getElementById("panel-overlay");
+  var panel=document.getElementById("panel");
+  function openPanel(sectionId){
+    overlay.classList.add("open");
+    document.body.style.overflow="hidden";
+    if(sectionId){
+      var t=document.getElementById(sectionId);
+      if(t) setTimeout(function(){ t.scrollIntoView({block:"start"}); }, 40);
+    } else { panel.scrollTop=0; }
+    document.getElementById("btn-close-panel").focus();
+  }
+  function closePanel(){
+    overlay.classList.remove("open");
+    document.body.style.overflow="";
+  }
+  document.getElementById("btn-about-top").addEventListener("click", function(){ openPanel("sec-about"); });
+  var footLinks=document.querySelectorAll("[data-open-panel]");
+  for(var f=0;f<footLinks.length;f++){
+    footLinks[f].addEventListener("click", function(){ openPanel(this.getAttribute("data-open-panel")); });
+  }
+  document.getElementById("btn-close-panel").addEventListener("click", closePanel);
+  overlay.addEventListener("click", function(e){ if(e.target===overlay) closePanel(); });
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && overlay.classList.contains("open")) closePanel(); });
+  var navLinks=panel.querySelectorAll(".panel-nav a");
+  for(var n=0;n<navLinks.length;n++){
+    navLinks[n].addEventListener("click", function(e){
+      e.preventDefault();
+      var t=document.querySelector(this.getAttribute("href"));
+      if(t) t.scrollIntoView({block:"start", behavior:"smooth"});
+    });
+  }
+
+  /* ------- round construction (unchanged data & logic) ------- */
+  function whereRound(entry){
+    var d1=perturb(entry.coord), d2=perturb(entry.coord), guard=0;
+    while((sameCoord(d1,d2)||sameCoord(d1,entry.coord)||sameCoord(d2,entry.coord)) && guard++<20){ d2=perturb(entry.coord); }
+    var opts=shuffle([
+      {coord:entry.coord, correct:true},
+      {coord:d1, correct:false},
+      {coord:d2, correct:false}
+    ]);
+    return {type:"where", kind:"placed", word:entry.word, entry:entry, options:opts};
+  }
+  function specialWhere(word, trueCoord, kind, distractors){
+    var opts=shuffle([
+      {coord:trueCoord, correct:true},
+      {coord:distractors[0], correct:false},
+      {coord:distractors[1], correct:false}
+    ]);
+    return {type:"where", kind:kind, word:word, entry:null, trueCoord:trueCoord, options:opts};
+  }
+  function neighborRound(target){
+    var pool=shuffle(ATLAS.filter(function(e){return e.word!==target.word;}));
+    var cands=pool.slice(0,3).map(function(e){
+      return {entry:e, d:dist(target.coord, e.coord)};
+    });
+    var minD=Math.min(cands[0].d, cands[1].d, cands[2].d);
+    var opts=shuffle(cands.map(function(c){ return {entry:c.entry, d:c.d, correct: c.d===minD}; }));
+    return {type:"neighbor", kind:"placed", word:target.word, entry:target, options:opts};
+  }
+  function buildRounds(){
+    var order=shuffle(ATLAS);
+    var p=0;
+    function next(){ return order[p++ % order.length]; }
+    return [
+      whereRound(next()),
+      neighborRound(next()),
+      specialWhere("a\u2019s", HOME_COORD, "home", [FAR_COORD, [4,3,5, 6,4,4, 3,5,4]]),
+      neighborRound(next()),
+      whereRound(next()),
+      neighborRound(next()),
+      specialWhere("quixotic", FAR_COORD, "far", [HOME_COORD, [7,12,8, 9,6,11, 8,8,10]]),
+      whereRound(next()),
+      neighborRound(next()),
+      whereRound(next())
+    ];
+  }
+
+  /* ------- state & elements ------- */
+  var mode="solo", rounds=[], idx=0, scores=[0,0], locked=false, results=[];
+  var screens={intro:document.getElementById("screen-intro"), game:document.getElementById("screen-game"), end:document.getElementById("screen-end")};
+  function show(name){
+    for(var k in screens) screens[k].classList.toggle("active", k===name);
+    window.scrollTo(0,0);
+  }
+  function turnPlayer(){ return mode==="duel" ? idx % 2 : 0; }
+
+  var scoreboard=document.getElementById("scoreboard"),
+      rodProgress=document.getElementById("rod-progress"),
+      hudRound=document.getElementById("hud-round"),
+      banner=document.getElementById("turn-banner"),
+      turnText=document.getElementById("turn-text"),
+      pill=document.getElementById("mode-pill"),
+      qEl=document.getElementById("question"),
+      wordEl=document.getElementById("target-word"),
+      addrEl=document.getElementById("target-addr"),
+      optsEl=document.getElementById("options"),
+      revealEl=document.getElementById("reveal"),
+      verdictEl=document.getElementById("verdict"),
+      revealBody=document.getElementById("reveal-body"),
+      scorerLine=document.getElementById("scorer-line"),
+      nextBtn=document.getElementById("btn-next");
+  var LETTERS=["A","B","C"];
+
+  function renderScoreboard(){
+    if(mode==="duel"){
+      scoreboard.innerHTML = PLAYERS.map(function(p,i){
+        return '<div class="score-brick brick '+p.cls+(turnPlayer()===i?" turn":"")+'">'
+          + studs(3)
+          + '<div class="who"><span>'+p.name+(turnPlayer()===i?' <span class="turn-tag">Turn</span>':"")+'</span><span class="pts">'+scores[i]+'</span></div></div>';
+      }).join("");
+    } else {
+      scoreboard.innerHTML =
+        '<div class="score-brick brick b-green turn">'+studs(3)
+        + '<div class="who"><span>Solo road</span><span class="pts">'+scores[0]+'</span></div></div>'
+        + '<div class="score-brick brick b-plate"><div class="who" style="margin-top:22px"><span style="color:var(--ink-faint)">Rounds left</span><span class="pts">'+(rounds.length-results.length)+'</span></div></div>';
+    }
+  }
+  function renderProgress(){
+    rodProgress.innerHTML = rounds.map(function(r,i){
+      var left = rounds.length===1 ? 50 : (i/(rounds.length-1))*100;
+      var cls="node";
+      if(i<results.length) cls += results[i].correct ? " done" : " done wrong";
+      else if(i===idx) cls += " now";
+      return '<span class="'+cls+'" style="left:'+left+'%"></span>';
+    }).join("");
+    hudRound.textContent="Round "+(idx+1)+" / "+rounds.length;
+  }
+
+  function renderRound(){
+    locked=false;
+    var r=rounds[idx];
+    renderScoreboard();
+    renderProgress();
+    revealEl.classList.remove("show");
+    optsEl.innerHTML="";
+
+    if(mode==="duel"){
+      var p=PLAYERS[turnPlayer()];
+      banner.className="turn-banner brick "+p.cls;
+      turnText.textContent=p.name+"\u2019s turn";
+    } else {
+      banner.className="turn-banner brick hidden";
+    }
+
+    if(r.type==="where"){
+      pill.textContent="Where does it live?";
+      qEl.textContent="Pick its true home:";
+      wordEl.textContent=r.word;
+      addrEl.innerHTML="";
+      r.options.forEach(function(o,i){
+        var b=document.createElement("button");
+        b.type="button"; b.className="opt brick "+BRICKS[i % BRICKS.length];
+        b.innerHTML=studs(4)+'<span class="opt-main"><span class="letter">'+LETTERS[i]+'</span>'
+          + coordHTML(o.coord)
+          + '<span class="badge" aria-hidden="true"></span></span>';
+        b.setAttribute("aria-label", "Address "+fmt(o.coord));
+        b.addEventListener("click", function(){ answerWhere(r, o, b); });
+        optsEl.appendChild(b);
+      });
+    } else {
+      pill.textContent="Nearest neighbor";
+      qEl.textContent="Which word lives nearest?";
+      wordEl.textContent=r.word;
+      addrEl.innerHTML=coordHTML(r.entry.coord)+'<span class="chip">'+r.entry.scrolls+' scrolls</span>';
+      r.options.forEach(function(o,i){
+        var b=document.createElement("button");
+        b.type="button"; b.className="opt brick "+BRICKS[i % BRICKS.length];
+        b.innerHTML=studs(4)+'<span class="opt-main"><span class="letter">'+LETTERS[i]+'</span>'
+          + '<span class="cand-word">'+esc(o.entry.word)+'</span>'
+          + '<span class="badge" aria-hidden="true"></span></span>';
+        b.addEventListener("click", function(){ answerNeighbor(r, o, b); });
+        optsEl.appendChild(b);
+      });
+    }
+  }
+
+  function finishPick(correct, chosenBtn, correctBtn){
+    locked=true;
+    var btns=optsEl.querySelectorAll(".opt");
+    for(var i=0;i<btns.length;i++){
+      btns[i].disabled=true;
+      var badge=btns[i].querySelector(".badge");
+      if(btns[i]===correctBtn && btns[i]===chosenBtn){ btns[i].classList.add("picked-correct"); badge.textContent="✓"; }
+      else if(btns[i]===chosenBtn){ btns[i].classList.add("picked-wrong"); badge.textContent="✗"; }
+      else if(btns[i]===correctBtn){ btns[i].classList.add("was-correct"); badge.textContent="✓"; }
+      else btns[i].classList.add("dim");
+    }
+    var tp=turnPlayer();
+    if(correct) scores[tp]++;
+    results.push({round:rounds[idx], correct:correct, player:tp});
+    renderScoreboard();
+    renderProgress();
+    verdictEl.innerHTML='<span class="vmark" aria-hidden="true">'+(correct?"✓":"✗")+'</span>'+(correct?"Right — you found it":"Not that one");
+    verdictEl.className="verdict "+(correct?"good":"bad");
+    if(mode==="duel"){
+      var p=PLAYERS[tp];
+      scorerLine.innerHTML = correct
+        ? '<span class="dotp" style="background:'+p.hex+'"></span>+1 point — '+p.name
+        : '<span class="dotp" style="background:'+p.hex+'"></span>No point — '+p.name;
+    } else {
+      scorerLine.textContent = correct ? "+1 point" : "No point";
+    }
+    nextBtn.innerHTML = idx===rounds.length-1 ? 'See the end of the road →' : 'Next round →';
+    revealEl.classList.add("show");
+    revealEl.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+
+  function answerWhere(r, chosen, btn){
+    if(locked) return;
+    var btns=optsEl.querySelectorAll(".opt"), correctBtn=null;
+    r.options.forEach(function(o,i){ if(o.correct) correctBtn=btns[i]; });
+    var trueCoord = r.kind==="placed" ? r.entry.coord : r.trueCoord;
+    var label = r.kind==="placed" ? '<span class="chip">'+r.entry.scrolls+' scrolls</span>'
+              : r.kind==="home" ? '<span class="chip">At home</span>'
+              : '<span class="chip">Far corner</span>';
+    revealBody.innerHTML='<p class="addr-line">'+coordHTML(trueCoord)+label+'</p>';
+    finishPick(chosen.correct, btn, correctBtn);
+  }
+
+  function answerNeighbor(r, chosen, btn){
+    if(locked) return;
+    var btns=optsEl.querySelectorAll(".opt"), correctBtn=null;
+    r.options.forEach(function(o,i){ if(o.correct) correctBtn=btns[i]; });
+    var sorted=r.options.slice().sort(function(a,b){return a.d-b.d;});
+    var rows=sorted.map(function(o){
+      return '<tr class="'+(o.correct?"nearest":"")+'"><td>'+(o.correct?"✓ ":"")+esc(r.word)+' → '+esc(o.entry.word)+'</td><td class="mono">'+o.d.toFixed(1)+'</td></tr>';
+    }).join("");
+    revealBody.innerHTML='<table class="dist-table">'+rows+'</table>';
+    finishPick(chosen.correct, btn, correctBtn);
+  }
+
+  function endGame(){
+    var endScores=document.getElementById("end-scores");
+    var winner=document.getElementById("winner-line");
+    if(mode==="duel"){
+      endScores.innerHTML='<div class="end-bricks">'+PLAYERS.map(function(p,i){
+        return '<div class="score-brick brick '+p.cls+'">'+studs(3)
+          + '<div class="who"><span>'+p.name+'</span><span class="pts">'+scores[i]+'</span></div></div>';
+      }).join("")+'</div>';
+      if(scores[0]===scores[1]) winner.textContent="Both navigators win.";
+      else winner.textContent=PLAYERS[scores[0]>scores[1]?0:1].name+" wins the road.";
+    } else {
+      endScores.innerHTML='<div class="score-big"><span>'+scores[0]+'</span><small> / 10</small></div>';
+      winner.textContent = scores[0]===10 ? "A perfect walk." :
+        scores[0]>=8 ? "Strong navigation." :
+        scores[0]>=5 ? "Half the road, honestly walked." :
+        "Every navigator starts at home.";
+    }
+    var recap=document.getElementById("recap-list");
+    recap.innerHTML=results.map(function(res){
+      var r=res.round, right="", label="";
+      if(r.type==="where"){
+        var tc = r.kind==="placed" ? r.entry.coord : r.trueCoord;
+        right=fmt(tc);
+        label = r.kind==="placed" ? r.entry.scrolls+" scrolls" : (r.kind==="home" ? "at home" : "far corner");
+      } else {
+        var near=r.options.filter(function(o){return o.correct;})[0];
+        right="nearest: "+near.entry.word;
+        label="distance "+near.d.toFixed(1);
+      }
+      var who = mode==="duel" ? '<span class="who-dot" style="background:'+PLAYERS[res.player].hex+'"></span>' : "";
+      return '<li><span class="mark '+(res.correct?"good":"bad")+'">'+(res.correct?"✓":"✗")+'</span>'
+           + '<span class="w">'+who+esc(r.word)+'</span>'
+           + '<span class="c mono">'+right+'<br>'+label+'</span></li>';
+    }).join("");
+    show("end");
+  }
+
+  /* ------- wiring ------- */
+  function startGame(m){
+    mode=m;
+    rounds=buildRounds(); idx=0; scores=[0,0]; results=[];
+    show("game"); renderRound();
+  }
+  document.getElementById("btn-solo").addEventListener("click", function(){ startGame("solo"); });
+  document.getElementById("btn-duel").addEventListener("click", function(){ startGame("duel"); });
+  nextBtn.addEventListener("click", function(){
+    idx++;
+    if(idx>=rounds.length) endGame(); else renderRound();
+  });
+  document.getElementById("btn-again").addEventListener("click", function(){ startGame(mode); });
+  document.getElementById("btn-home").addEventListener("click", function(){ show("intro"); });
+})();
+</script>
+</body>
+</html>
