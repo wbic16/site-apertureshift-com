@@ -1,0 +1,45 @@
+# apertureshift.com - host nginx vhost (cutover version).
+# Identical to the long-standing vhost except the 443 block proxies to the
+# rootless podman container on 127.0.0.1:3002 instead of reading the old
+# docroot. The old docroot /sites/web/apertureshift.com stays in place
+# (the port-80 ACME challenge still roots there, and it is the rollback).
+server {
+    listen 80;
+    server_name apertureshift.com www.apertureshift.com;
+
+    location /.well-known/acme-challenge/ {
+        root /sites/web/apertureshift.com;
+    }
+
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name apertureshift.com www.apertureshift.com;
+
+    ssl_certificate /etc/letsencrypt/live/apertureshift.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/apertureshift.com/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    location / {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        expires 5m;
+    }
+}

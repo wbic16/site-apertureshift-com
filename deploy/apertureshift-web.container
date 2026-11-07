@@ -1,0 +1,16 @@
+[Unit]
+Description=Roads to the Future - apertureshift.com static site (nginx, rootless podman)
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=docker.io/library/nginx:alpine
+ContainerName=apertureshift-web
+PublishPort=127.0.0.1:3002:80
+Volume=/home/wbic16/apertureshift-deploy/site:/usr/share/nginx/html:ro
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
