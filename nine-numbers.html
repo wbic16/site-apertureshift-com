@@ -120,6 +120,9 @@
   .mode-brick .mode-title{font-size:24px;font-weight:800;line-height:1.15;}
   .mode-brick .mode-sub{font-size:15px;font-weight:600;opacity:.92;}
   .m-green{background:var(--green);} .m-red{background:var(--red);} .m-blue{background:var(--blue);}
+  .mode-brick.m-yellow{background:var(--yellow);color:var(--yellow-ink);}
+  .mode-brick.m-dark{background:var(--dark-brick);}
+  .little-modes{display:flex;flex-direction:column;gap:14px;}
   .intro-note{text-align:center;color:var(--muted);font-size:14.5px;font-weight:600;margin:16px 0 0;}
 
   /* ---------- Game chrome ---------- */
@@ -153,6 +156,9 @@
 
   /* ---------- Score tiles ---------- */
   .scorebar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0 0;}
+  .scorebar.two{grid-template-columns:1fr 1fr;}
+  .scorebar.four{grid-template-columns:repeat(4,1fr);}
+  .scorebar.four .stat .num{font-size:20px;}
   .stat{
     background:var(--surface);border:1px solid var(--border);border-radius:10px;
     padding:12px 6px 10px;text-align:center;box-shadow:var(--shadow-sm);
@@ -240,6 +246,28 @@
     box-shadow:0 3px 0 rgba(29,39,51,.18);
   }
   .stepper.plus{background:var(--green);}
+  .stepper.exp{font-size:21px;min-height:56px;}
+  .stepper.plus5{background:var(--blue);}
+  .stepper.minus5{background:var(--surface-2);color:var(--ink);border:1.5px solid var(--blue);box-shadow:var(--shadow-sm);}
+
+  /* Race boards: full color frame + pinned name banner; locked shelves collapse */
+  .board.frame{border-radius:18px;padding:12px 12px 18px;margin-top:18px;}
+  .board.frame-red{border:6px solid var(--red);background:rgba(196,40,28,.07);}
+  .board.frame-blue{border:6px solid var(--blue);background:rgba(0,87,168,.07);}
+  .race-banner{
+    position:sticky;top:8px;z-index:6;border-radius:10px;color:#fff;text-align:center;
+    padding:24px 10px 10px;font-size:21px;font-weight:800;letter-spacing:.04em;
+    box-shadow:var(--shadow-sm);
+  }
+  .race-banner::before{
+    content:"";position:absolute;top:5px;left:12px;right:12px;height:11px;pointer-events:none;
+    background-image:radial-gradient(circle at 50% 50%, rgba(255,255,255,.38) 0 4.5px, rgba(0,0,0,.10) 5.5px, transparent 7px);
+    background-size:26px 11px;background-repeat:repeat-x;
+  }
+  .race-banner.red{background:var(--red);} .race-banner.blue{background:var(--blue);}
+  .race-boards .group.locked .wheels{display:none;}
+  .race-boards .group.locked{padding-bottom:14px;}
+  .race-boards .group.locked .group-head{margin-bottom:0;}
   .stepper.minus{background:var(--surface-2);color:var(--ink);border:1.5px solid var(--border-strong);box-shadow:var(--shadow-sm);}
   .stepper:active:not(:disabled){transform:translateY(2px);}
   .stepper:disabled{opacity:.32;cursor:not-allowed;box-shadow:none;}
@@ -358,17 +386,39 @@
     <div class="facts brick light">Free forever <span>&middot;</span> Same screen <span>&middot;</span> No sign-up</div>
 
     <div class="modes">
-      <button class="mode-brick brick m-green" type="button" data-mode="solo">
+      <button class="mode-brick brick m-green" id="btn-resume" type="button" hidden>
+        <span class="mode-title" id="resume-title">Keep going</span>
+        <span class="mode-sub" id="resume-sub">Pick up the road where you left it.</span>
+      </button>
+      <button class="mode-brick brick m-green" type="button" data-mode="solo" data-path="standard">
         <span class="mode-title">1 Player</span>
         <span class="mode-sub">Walk the road on your own.</span>
       </button>
-      <button class="mode-brick brick m-red" type="button" data-mode="race">
+      <button class="mode-brick brick m-red" type="button" data-mode="race" data-path="standard">
         <span class="mode-title">2 Players &mdash; Race</span>
         <span class="mode-sub">Same target. First one there wins the road.</span>
       </button>
-      <button class="mode-brick brick m-blue" type="button" data-mode="coop">
+      <button class="mode-brick brick m-blue" type="button" data-mode="coop" data-path="standard">
         <span class="mode-title">2 Players &mdash; Together</span>
         <span class="mode-sub">One address. Take turns stepping.</span>
+      </button>
+      <button class="mode-brick brick m-yellow" id="btn-little" type="button" aria-expanded="false">
+        <span class="mode-title">Little Road</span>
+        <span class="mode-sub" id="little-sub">Three short roads. Numbers only to 5.</span>
+      </button>
+      <div class="little-modes" id="little-modes" hidden>
+        <button class="mode-brick brick m-yellow" type="button" data-mode="solo" data-path="little">
+          <span class="mode-title">Little Road &mdash; 1 Player</span>
+          <span class="mode-sub">Just you, on the little roads.</span>
+        </button>
+        <button class="mode-brick brick m-yellow" type="button" data-mode="coop" data-path="little">
+          <span class="mode-title">Little Road &mdash; Together</span>
+          <span class="mode-sub">One little address. Take turns stepping.</span>
+        </button>
+      </div>
+      <button class="mode-brick brick m-dark" type="button" data-mode="solo" data-path="express">
+        <span class="mode-title">Express Road</span>
+        <span class="mode-sub">Big +5 steps, a timer, and a run score. For experts.</span>
       </button>
     </div>
 
@@ -391,8 +441,9 @@
 
     <div class="scorebar" id="scorebar" role="group" aria-label="Score">
       <div class="stat" id="stat-moves"><div class="num" id="moves-num">0</div><div class="lab">Steps taken</div></div>
-      <div class="stat"><div class="num" id="par-num">0</div><div class="lab">Par &mdash; fewest steps</div></div>
+      <div class="stat" id="stat-par"><div class="num" id="par-num">0</div><div class="lab">Par &mdash; fewest steps</div></div>
       <div class="stat"><div class="num" id="away-num">0</div><div class="lab">Steps away</div></div>
+      <div class="stat" id="stat-time" hidden><div class="num" id="time-num">0:00</div><div class="lab">Time</div></div>
     </div>
 
     <div class="racebar" id="racebar" hidden role="group" aria-label="Roads won">
@@ -405,7 +456,7 @@
 
     <div id="boards"></div>
 
-    <p class="hold-note">Tap + or &minus; to step. Press and hold to keep stepping.</p>
+    <p class="hold-note" id="hold-note">Tap + or &minus; to step. Hold to keep stepping &mdash; it stops on the target.</p>
 
     <div id="win" hidden>
       <p class="stars" id="win-stars" aria-label="Stars earned"></p>
@@ -452,7 +503,7 @@
         <li>You start at <span class="mono"><strong>1.1.1/1.1.1/1.1.1</strong></span> &mdash; home, the root of everything.</li>
         <li>A target address appears. Step your numbers <strong>up or down, one number at a time</strong>, until yours matches it exactly. Numbers never go below 1.</li>
         <li>A shelf <strong>lights up and gets a check mark</strong> when all three of its numbers are right, and each step tells you <strong>warmer</strong> or <strong>colder</strong>.</li>
-        <li>Each road has a <strong>par</strong> &mdash; the fewest steps possible. Match par and you earn three stars. Hold a stepper button down to keep stepping.</li>
+        <li>Each road has a <strong>par</strong> &mdash; the fewest steps possible. Match par and you earn three stars. Hold a stepper button down to keep stepping &mdash; holding stops right on the target number, never past it.</li>
       </ol>
 
       <h3>Ways to play</h3>
@@ -460,6 +511,8 @@
         <li><strong>1 Player</strong> &mdash; walk the eight roads on your own, then the endless Open Road.</li>
         <li><strong>2 Players &mdash; Race</strong> &mdash; two navigators, Red and Blue, race to the same target on the same screen. First to match it wins the road; whoever wins the most roads after eight is crowned.</li>
         <li><strong>2 Players &mdash; Together</strong> &mdash; one shared address. Red and Blue take turns making one step at a time, and the team scores together against par.</li>
+        <li><strong>Little Road</strong> &mdash; three short roads with numbers only to 5, for first walkers. Play it alone or Together.</li>
+        <li><strong>Express Road</strong> &mdash; the same eight roads with +5 and &minus;5 steppers, a timer, best times kept on this device, and a total run score. Par counts the big steps too.</li>
       </ul>
 
       <h3>Accessibility</h3>
@@ -467,7 +520,7 @@
     </div>
 
     <div class="sheet-body" id="sheet-privacy" hidden>
-      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Scores live only while this page is open. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Progress and scores are stored only on this device, in this browser. They are never sent anywhere. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
     </div>
 
     <div class="sheet-body" id="sheet-terms" hidden>
@@ -492,23 +545,37 @@
       target:[3,5,2, 1,1,1, 1,1,1],
       teach:"Three numbers make a shelf." },
     { name:"Two Shelves", unlocked:6,
-      target:[2,4,3, 5,2,6, 1,1,1],
+      target:[2,4,3, 5,2,4, 1,1,1],
       teach:"Two shelves deep." },
     { name:"The Full Address", unlocked:9,
-      target:[4,7,3, 6,2,8, 5,3,6],
+      target:[3,5,2, 6,3,4, 5,2,3],
       teach:"Nine numbers. The full address." },
     { name:"A Word Lives Here", unlocked:9,
-      target:[8,4,9, 3,7,5, 9,6,2],
+      target:[6,4,5, 3,7,5, 6,3,2],
       teach:"A word lives here." },
     { name:"A Memory Lives Here", unlocked:9,
-      target:[11,6,9, 13,4,10, 7,12,5],
+      target:[7,5,6, 8,4,6, 5,7,3],
       teach:"A memory lives here." },
     { name:"Everything Has a Place", unlocked:9,
-      target:[15,8,18, 6,12,9, 16,7,11],
+      target:[9,6,7, 10,5,6, 6,8,4],
       teach:"Everything has a place." },
     { name:"The Far Numbers", unlocked:9,
-      target:[20,14,7, 22,10,17, 9,24,13],
+      target:[10,7,9, 12,6,8, 7,9,5],
       teach:"Out where the numbers run far." }
+  ];
+  /* Standard pars: 3, 7, 14, 24, 32, 42, 52, 64 — 238 steps for a perfect run. */
+
+  /* Little Road: three short roads, digits never above 5, 19 steps total. */
+  var LITTLE_LEVELS = [
+    { name:"First Little Step", unlocked:1,
+      target:[4,1,1, 1,1,1, 1,1,1],
+      teach:"One number at a time." },
+    { name:"Three Little Numbers", unlocked:3,
+      target:[2,5,3, 1,1,1, 1,1,1],
+      teach:"Three numbers on one shelf." },
+    { name:"The Little Shelf", unlocked:3,
+      target:[5,3,4, 1,1,1, 1,1,1],
+      teach:"Small numbers, all in a row." }
   ];
   var OPEN_TEACH = "The road is open.";
 
@@ -520,6 +587,7 @@
   /* ---------------- State ---------------- */
   var state = {
     mode: "solo",            // "solo" | "race" | "coop"
+    path: "standard",        // "standard" | "little" | "express"
     levelIdx: 0,             // 0..7 fixed roads; >=8 = Open Road
     openRound: 0,
     target: LEVELS[0].target.slice(),
@@ -529,7 +597,10 @@
     turn: 0,                 // coop: whose step it is (0=Red, 1=Blue)
     won: false,
     winner: -1,
-    raceWins: [0,0]
+    raceWins: [0,0],
+    roadStart: 0,
+    timerInt: null,
+    lastElapsed: 0
   };
 
   /* ---------------- DOM ---------------- */
@@ -546,7 +617,9 @@
       boardsEl=$("boards"),
       winEl=$("win"), winStarsEl=$("win-stars"), winTitleEl=$("win-title"),
       winTextEl=$("win-text"), winCoordEl=$("win-coord"),
-      btnNext=$("btn-next");
+      btnNext=$("btn-next"),
+      parTile=$("stat-par"), timeTile=$("stat-time"), timeEl=$("time-num"),
+      holdNoteEl=$("hold-note");
 
   /* ---------------- Helpers ---------------- */
   function home(){ return [1,1,1,1,1,1,1,1,1]; }
@@ -588,18 +661,125 @@
     if(moves<=Math.ceil(par*1.5)) return 2;
     return 1;
   }
+  function activeLevels(){ return state.path==="little" ? LITTLE_LEVELS : LEVELS; }
+  /* Fewest {1,5} steps to cover distance d on one wheel (overshoot allowed). */
+  function coinOpt(d){
+    if(d<=0) return 0;
+    var f=Math.floor(d/5), r=d%5;
+    if(r===0) return f;
+    return Math.min(f+r, f+1+(5-r));
+  }
+  function computePar(){
+    if(state.path==="express"){
+      var s=0;
+      for(var i=0;i<9;i++) s+=coinOpt(state.target[i]-1);
+      return s;
+    }
+    return distance(home(), state.target);
+  }
+  function randomExpressTarget(){
+    var t=[];
+    for(var i=0;i<9;i++) t.push(1+Math.floor(Math.random()*28)); // 1..28
+    if(distance(t,home())<80){ t[0]=24; t[4]=27; t[8]=19; }
+    return t;
+  }
+  function fmtTime(s){
+    var m=Math.floor(s/60), r=s%60;
+    return m+":"+(r<10?"0":"")+r;
+  }
+  function startTimer(){
+    stopTimer();
+    state.roadStart=Date.now();
+    timeEl.textContent="0:00";
+    if(state.path==="express"){
+      state.timerInt=setInterval(function(){
+        timeEl.textContent=fmtTime(Math.floor((Date.now()-state.roadStart)/1000));
+      },500);
+    }
+  }
+  function stopTimer(){
+    if(state.timerInt){ clearInterval(state.timerInt); state.timerInt=null; }
+  }
+  function updateScoreChrome(){
+    var little = state.path==="little";
+    var express = state.path==="express";
+    parTile.hidden = little;
+    timeTile.hidden = !express;
+    scorebarEl.classList.toggle("two", little);
+    scorebarEl.classList.toggle("four", express);
+  }
+  function showStarsEarned(n){
+    winStarsEl.hidden=false;
+    var s="";
+    for(var i=0;i<n;i++) s+="\u2605";
+    winStarsEl.innerHTML=s;
+    winStarsEl.setAttribute("aria-label", n+" star"+(n===1?"":"s")+" \u2014 "+n+" of 3 little roads finished");
+  }
+
+  /* ---------------- On-device progress (this browser only) ---------------- */
+  var SAVE_KEY="nine-numbers-progress-v1";
+  function defaultProgress(){
+    return {
+      standard:{ unlocked:0, stars:{} },
+      express:{ unlocked:0, stars:{}, best:{} },
+      little:{ unlocked:0, done:false },
+      lastPath:"standard"
+    };
+  }
+  function loadProgress(){
+    var d=defaultProgress();
+    try{
+      var raw=localStorage.getItem(SAVE_KEY);
+      if(!raw) return d;
+      var p=JSON.parse(raw);
+      if(!p || typeof p!=="object") return d;
+      ["standard","express","little"].forEach(function(k){
+        if(p[k] && typeof p[k]==="object"){
+          for(var f in d[k]) if(p[k][f]!==undefined) d[k][f]=p[k][f];
+        }
+      });
+      if(typeof p.lastPath==="string") d.lastPath=p.lastPath;
+    }catch(e){}
+    return d;
+  }
+  var progress=loadProgress();
+  function saveProgress(){
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(progress)); }catch(e){}
+  }
+  function recordWin(stars){
+    if(state.mode==="race") return;
+    var P=progress[state.path]; if(!P) return;
+    var levels=activeLevels();
+    if(state.levelIdx<levels.length){
+      if(stars!=null){
+        P.stars=P.stars||{};
+        P.stars[state.levelIdx]=Math.max(P.stars[state.levelIdx]||0, stars);
+      }
+      P.unlocked=Math.max(P.unlocked||0, Math.min(state.levelIdx+1, levels.length));
+      if(state.path==="little" && state.levelIdx===levels.length-1) P.done=true;
+      if(state.path==="express" && state.levelIdx<LEVELS.length){
+        P.best=P.best||{};
+        var b=P.best[state.levelIdx];
+        if(!b || state.lastElapsed<b) P.best[state.levelIdx]=state.lastElapsed;
+      }
+    }
+    progress.lastPath=state.path;
+    saveProgress();
+  }
 
   /* ---------------- Build boards ---------------- */
   function buildBoards(){
     boardsEl.innerHTML="";
+    boardsEl.className = state.mode==="race" ? "race-boards" : "";
     boardPlayers().forEach(function(p){
       var board=document.createElement("div");
-      board.className="board";
+      board.className = state.mode==="race" ? "board frame "+(p===0?"frame-red":"frame-blue") : "board";
       var panelCls, label;
       if(state.mode==="race"){ panelCls = p===0 ? "p-red" : "p-blue"; label = PLAYER_NAMES[p]+" navigator"; }
       else if(state.mode==="coop"){ panelCls = "p-dark"; label = "Team address"; }
       else { panelCls = "p-green"; label = "You are here"; }
       board.innerHTML =
+        (state.mode==="race" ? '<div class="race-banner '+(p===0?"red":"blue")+'">'+PLAYER_NAMES[p]+'</div>' : '')+
         '<div class="panel you brick '+panelCls+'">'+
           '<div class="plab"><span>'+label+'</span><span aria-hidden="true">&#9654;</span></div>'+
           '<div class="coord mono" id="coord-'+p+'"></div>'+
@@ -633,22 +813,18 @@
           wheel.className="wheel";
           var lab=document.createElement("div");
           lab.className="dimlab"; lab.textContent="Number "+(idx+1);
-          var plus=document.createElement("button");
-          plus.type="button"; plus.className="stepper plus"; plus.textContent="+";
-          plus.setAttribute("aria-label","Step number "+(idx+1)+" up");
-          plus.setAttribute("data-player",p); plus.setAttribute("data-idx",idx); plus.setAttribute("data-dir","1");
           var val=document.createElement("div");
           val.className="val mono"; val.id="val-"+p+"-"+idx; val.textContent="1";
-          var minus=document.createElement("button");
-          minus.type="button"; minus.className="stepper minus"; minus.textContent="\u2212";
-          minus.setAttribute("aria-label","Step number "+(idx+1)+" down");
-          minus.setAttribute("data-player",p); minus.setAttribute("data-idx",idx); minus.setAttribute("data-dir","-1");
           var tgt=document.createElement("div");
           tgt.className="tgt"; tgt.id="tgt-"+p+"-"+idx;
-          wheel.appendChild(lab); wheel.appendChild(plus); wheel.appendChild(val);
-          wheel.appendChild(minus); wheel.appendChild(tgt);
+          wheel.appendChild(lab);
+          if(state.path==="express") wheel.appendChild(makeStepper("+5","stepper exp plus5",p,idx,1,5));
+          wheel.appendChild(makeStepper("+","stepper plus",p,idx,1,1));
+          wheel.appendChild(val);
+          wheel.appendChild(makeStepper("\u2212","stepper minus",p,idx,-1,1));
+          if(state.path==="express") wheel.appendChild(makeStepper("\u22125","stepper exp minus5",p,idx,-1,5));
+          wheel.appendChild(tgt);
           wheels.appendChild(wheel);
-          attachStepper(plus); attachStepper(minus);
         })(g*3+k);
       }
       card.appendChild(wheels);
@@ -656,7 +832,18 @@
     }
   }
 
-  /* Hold-to-repeat stepping */
+  /* Steppers. A single tap always steps the full amount (it may pass the
+     target). Holding repeats — and holding stops exactly on the wheel's
+     target value, never past it. */
+  function makeStepper(text, cls, p, idx, dir, amt){
+    var b=document.createElement("button");
+    b.type="button"; b.className=cls; b.textContent=text;
+    b.setAttribute("aria-label","Step number "+(idx+1)+(dir>0?" up":" down")+(amt>1?" by "+amt:""));
+    b.setAttribute("data-player",p); b.setAttribute("data-idx",idx);
+    b.setAttribute("data-dir",dir); b.setAttribute("data-amt",amt);
+    attachStepper(b);
+    return b;
+  }
   function attachStepper(btn){
     var holdTimer=null, repeatTimer=null, pointerHandledAt=0;
     function clearTimers(){
@@ -667,10 +854,10 @@
       if(btn.disabled) return;
       e.preventDefault();
       pointerHandledAt=Date.now();
-      step(btn);
+      stepFromBtn(btn,false,null);
       clearTimers();
       holdTimer=setTimeout(function(){
-        repeatTimer=setInterval(function(){ step(btn); }, 75);
+        repeatTimer=setInterval(function(){ stepFromBtn(btn,true,clearTimers); }, 75);
       }, 380);
     });
     ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
@@ -678,22 +865,38 @@
     });
     btn.addEventListener("click", function(){
       /* Keyboard activation (Enter/Space) fires click with no pointerdown. */
-      if(Date.now()-pointerHandledAt>400) step(btn);
+      if(Date.now()-pointerHandledAt>400) stepFromBtn(btn,false,null);
     });
     btn.addEventListener("contextmenu", function(e){ e.preventDefault(); });
   }
 
   /* ---------------- Core step ---------------- */
-  function step(btn){
-    if(state.won) return;
+  function stepFromBtn(btn, isRepeat, stopFn){
+    if(state.won){ if(stopFn) stopFn(); return; }
     var p=parseInt(btn.getAttribute("data-player"),10);
     var idx=parseInt(btn.getAttribute("data-idx"),10);
     var dir=parseInt(btn.getAttribute("data-dir"),10);
+    var amt=parseInt(btn.getAttribute("data-amt")||"1",10);
     if(idx>=state.unlocked) return;
     var pl=state.players[p];
     if(!pl) return;
-    var next=pl.cur[idx]+dir;
-    if(next<1 || next>MAX_VAL) return;
+    var cur=pl.cur[idx], tgt=state.target[idx];
+    if(isRepeat && cur===tgt){ if(stopFn) stopFn(); return; }
+    var next=cur+dir*amt;
+    if(isRepeat){
+      /* Holding lands exactly on the target and stops there. */
+      if(dir>0 && cur<tgt && next>=tgt) next=tgt;
+      else if(dir<0 && cur>tgt && next<=tgt) next=tgt;
+    }
+    if(next<1) next=1;
+    if(next>MAX_VAL) next=MAX_VAL;
+    if(next===cur){ if(isRepeat && stopFn) stopFn(); return; }
+    applyStep(p, idx, next);
+    if(isRepeat && stopFn && (state.won || pl.cur[idx]===tgt)) stopFn();
+  }
+
+  function applyStep(p, idx, next){
+    var pl=state.players[p];
     var before=distance(pl.cur,state.target);
     pl.cur[idx]=next;
     pl.moves++;
@@ -701,6 +904,11 @@
     var after=distance(pl.cur,state.target);
     render();
     if(after===0){ onWin(p); return; }
+    if(state.path==="little"){
+      if(after<before) setHint(p,"warmer","Warmer!");
+      else setHint(p,"same","Try another step");
+      return;
+    }
     var who = state.mode==="race" ? PLAYER_NAMES[p]+": " : "";
     if(after<before){ setHint(p,"warmer",who+"Warmer \u2014 "+after+(after===1?" step":" steps")+" to go."); }
     else if(after>before){ setHint(p,"colder",who+"Colder \u2014 "+after+" steps to go."); }
@@ -795,12 +1003,14 @@
       r.className="prod"+(done?" done":"");
       progressEl.appendChild(r);
     }
-    for(var i=0;i<LEVELS.length;i++){
-      addNode(i<state.levelIdx||state.levelIdx>=LEVELS.length ? "done" : i===state.levelIdx ? "now" : "",
-              "Road "+(i+1)+": "+LEVELS[i].name);
+    var levels=activeLevels();
+    for(var i=0;i<levels.length;i++){
+      addNode(i<state.levelIdx||state.levelIdx>=levels.length ? "done" : i===state.levelIdx ? "now" : "",
+              (state.path==="little" ? "Little Road " : "Road ")+(i+1)+": "+levels[i].name);
       addRod(i<state.levelIdx);
     }
-    addNode("open"+(state.levelIdx>=LEVELS.length?" now":""), "The Open Road");
+    if(state.path!=="little")
+      addNode("open"+(state.levelIdx>=levels.length?" now":""), "The Open Road");
   }
 
   /* ---------------- Level flow ---------------- */
@@ -816,30 +1026,45 @@
   function startLevel(idx){
     state.levelIdx=idx;
     resetPlayers();
-    if(idx<LEVELS.length){
-      var L=LEVELS[idx];
+    var levels=activeLevels();
+    if(idx<levels.length){
+      var L=levels[idx];
       state.target=L.target.slice();
       state.unlocked=L.unlocked;
-      kickerEl.textContent="Road "+(idx+1)+" of "+LEVELS.length+modeSuffix();
       titleEl.textContent=L.name;
       teachEl.textContent=L.teach;
-      btnNext.textContent = idx===LEVELS.length-1 ? "Open the Open Road \u2192" : "Next road \u2192";
+      if(state.path==="little"){
+        kickerEl.textContent="Little Road "+(idx+1)+" of "+levels.length+modeSuffix();
+        btnNext.textContent = idx===levels.length-1 ? "Walk the Little Road again \u2192" : "Next little road \u2192";
+      } else {
+        kickerEl.textContent="Road "+(idx+1)+" of "+LEVELS.length+(state.path==="express" ? " \u00b7 Express" : "")+modeSuffix();
+        btnNext.textContent = idx===LEVELS.length-1 ? "Open the Open Road \u2192" : "Next road \u2192";
+      }
     } else {
       state.openRound++;
-      state.target=randomOpenTarget();
+      state.target = state.path==="express" ? randomExpressTarget() : randomOpenTarget();
       state.unlocked=9;
-      kickerEl.textContent="The Open Road \u00b7 address "+state.openRound+modeSuffix();
+      kickerEl.textContent="The Open Road \u00b7 address "+state.openRound+(state.path==="express" ? " \u00b7 Express" : "")+modeSuffix();
       titleEl.textContent="Open Road";
       teachEl.textContent=OPEN_TEACH;
       btnNext.textContent="Another address \u2192";
     }
-    state.par=distance(home(),state.target);
+    state.par=computePar();
     winEl.hidden=true;
     $("game-actions").hidden=false;
+    updateScoreChrome();
+    holdNoteEl.textContent = state.path==="express"
+      ? "Tap to step. +5 and \u22125 take big steps. Hold to keep stepping \u2014 it stops on the target."
+      : "Tap + or \u2212 to step. Hold to keep stepping \u2014 it stops on the target.";
     render();
+    startTimer();
     boardPlayers().forEach(function(p){
       if(state.mode==="race")
         setHint(p,"",PLAYER_NAMES[p]+" starts at home. Par is "+state.par+". First to the target wins.");
+      else if(state.path==="little")
+        setHint(p,"", state.mode==="coop"
+          ? "Team starts at home. Red steps first \u2014 match the yellow numbers."
+          : "You are home. Match the yellow numbers, one at a time.");
       else if(state.mode==="coop")
         setHint(p,"","Team starts at home. Par is "+state.par+". Red steps first.");
       else
@@ -849,10 +1074,11 @@
 
   function restartLevel(){
     resetPlayers();
-    state.par=distance(home(),state.target);
+    state.par=computePar();
     winEl.hidden=true;
     $("game-actions").hidden=false;
     render();
+    startTimer();
     boardPlayers().forEach(function(p){
       setHint(p,"","Back home. The target is "+state.par+" steps away. Walk it again.");
     });
@@ -873,7 +1099,22 @@
     var isLast = state.levelIdx===LEVELS.length-1;
     var main = state.players[0];
 
-    if(state.mode==="race"){
+    if(state.path==="express"){
+      state.lastElapsed=Math.floor((Date.now()-state.roadStart)/1000);
+      stopTimer();
+    }
+
+    if(state.path==="little"){
+      showStarsEarned(state.levelIdx+1);
+      var lastLittle = state.levelIdx===LITTLE_LEVELS.length-1;
+      winTitleEl.textContent = lastLittle ? "Little Road finished!" : "You found it!";
+      winTextEl.textContent = lastLittle
+        ? "Three little roads, all walked. Every number found its place."
+        : "You matched "+coordPlain(state.target)+". "+(state.levelIdx+1)+" of 3 little roads walked.";
+      setHint(0,"warmer","You found it \u2014 all the numbers match.");
+      recordWin(null);
+    }
+    else if(state.mode==="race"){
       state.raceWins[p]++;
       winStarsEl.hidden=true;
       var tally="Roads won \u2014 Red "+state.raceWins[0]+" \u00b7 Blue "+state.raceWins[1]+".";
@@ -901,6 +1142,7 @@
         : "You got there together. Par will come.";
       winTextEl.textContent="Your team reached "+coordPlain(state.target)+" in "+main.moves+
         " step"+(main.moves===1?"":"s")+" (par "+state.par+"). "+verdict;
+      recordWin(stars);
       setHint(0,"warmer","Arrived \u2014 all nine numbers match.");
     } else {
       var stars2=starsFor(main.moves,state.par);
@@ -911,6 +1153,17 @@
         : "You got there. The road teaches by walking it; par will come.";
       winTextEl.textContent="You reached "+coordPlain(state.target)+" in "+main.moves+
         " step"+(main.moves===1?"":"s")+" (par "+state.par+"). "+verdict2;
+      recordWin(stars2);
+      if(state.path==="express"){
+        var timeNote=" Time "+fmtTime(state.lastElapsed)+".";
+        if(!isOpen && progress.express.best[state.levelIdx]) timeNote+=" Best "+fmtTime(progress.express.best[state.levelIdx])+".";
+        if(isLast){
+          var totalStars=0;
+          for(var ti=0;ti<LEVELS.length;ti++) totalStars+=progress.express.stars[ti]||0;
+          timeNote+=" Run score: "+totalStars+" of 24 stars.";
+        }
+        winTextEl.textContent+=timeNote;
+      }
       setHint(0,"warmer","Arrived \u2014 all nine numbers match.");
     }
 
@@ -922,32 +1175,90 @@
   }
 
   /* ---------------- Start / navigation ---------------- */
-  function startGame(mode){
+  function startGame(mode, path, startIdx){
+    stopTimer();
     state.mode=mode;
+    state.path=path||"standard";
     state.raceWins=[0,0];
     state.openRound=0;
     buildBoards();
     introEl.hidden=true;
     gameEl.hidden=false;
-    startLevel(0);
+    startLevel(startIdx||0);
     gameEl.scrollIntoView({behavior:"smooth",block:"start"});
   }
-  var modeBtns=document.querySelectorAll(".mode-brick");
+  var modeBtns=document.querySelectorAll(".mode-brick[data-mode]");
   for(var m=0;m<modeBtns.length;m++){
     modeBtns[m].addEventListener("click", function(){
-      startGame(this.getAttribute("data-mode"));
+      startGame(this.getAttribute("data-mode"), this.getAttribute("data-path")||"standard", 0);
     });
   }
+  var littleModesEl=$("little-modes");
+  $("btn-little").addEventListener("click", function(){
+    var opening=littleModesEl.hidden;
+    littleModesEl.hidden=!opening;
+    this.setAttribute("aria-expanded", opening?"true":"false");
+  });
+
+  /* Resume brick: shown when on-device progress exists. */
+  var resumeCfg=null;
+  function cfgFor(p){
+    var P=progress[p]; if(!P) return null;
+    if(p==="little"){
+      if(P.done || !(P.unlocked>0)) return null;
+      return { path:p, mode:"solo", idx:P.unlocked,
+        label:"Keep going \u2014 Little Road "+(P.unlocked+1),
+        sub:"Pick up the little roads where you left them." };
+    }
+    var u=P.unlocked||0;
+    if(u<=0) return null;
+    if(u>=LEVELS.length)
+      return { path:p, mode:"solo", idx:LEVELS.length,
+        label:"Keep going \u2014 the Open Road",
+        sub:"All eight roads walked. Endless addresses wait." };
+    return { path:p, mode:"solo", idx:u,
+      label:"Keep going \u2014 Road "+(u+1)+(p==="express" ? " \u00b7 Express" : ""),
+      sub:"Pick up the road where you left it." };
+  }
+  function refreshIntro(){
+    resumeCfg=null;
+    var order=["standard","express","little"];
+    var lp=progress.lastPath;
+    if(lp && order.indexOf(lp)>=0){
+      resumeCfg=cfgFor(lp);
+      order.splice(order.indexOf(lp),1);
+    }
+    for(var i=0;i<order.length && !resumeCfg;i++) resumeCfg=cfgFor(order[i]);
+    var rb=$("btn-resume");
+    if(resumeCfg){
+      rb.hidden=false;
+      $("resume-title").textContent=resumeCfg.label;
+      $("resume-sub").textContent=resumeCfg.sub;
+    } else {
+      rb.hidden=true;
+    }
+    if(progress.little && progress.little.done)
+      $("little-sub").textContent="Finished \u2713 \u2014 walk it again, alone or together.";
+  }
+  $("btn-resume").addEventListener("click", function(){
+    if(resumeCfg) startGame(resumeCfg.mode, resumeCfg.path, resumeCfg.idx);
+  });
+
   btnNext.addEventListener("click", function(){
-    startLevel(state.levelIdx+1);
+    var n=state.levelIdx+1;
+    if(state.path==="little" && n>=LITTLE_LEVELS.length) n=0;
+    startLevel(n);
     gameEl.scrollIntoView({behavior:"smooth",block:"start"});
   });
   $("btn-restart").addEventListener("click", restartLevel);
   $("btn-intro").addEventListener("click", function(){
+    stopTimer();
     gameEl.hidden=true;
     introEl.hidden=false;
+    refreshIntro();
     window.scrollTo({top:0,behavior:"smooth"});
   });
+  refreshIntro();
 
   /* ---------------- Sheet panels ---------------- */
   var sheetWrap=$("sheet-wrap"), sheetTitle=$("sheet-title");

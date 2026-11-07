@@ -18,6 +18,8 @@
     --ink-faint:#7c877c;
     --line:#c9cfb4;
     --rod:#8a927f;
+    --grey-node:#a3a8a0;
+    --grey-node-dark:#7e857c;
     --red:#cf352a;      --red-dark:#9c241c;   --red-ink:#ffffff;
     --blue:#1f6fd1;     --blue-dark:#155198;  --blue-ink:#ffffff;
     --yellow:#f4b90d;   --yellow-dark:#c08f04;--yellow-ink:#2a2000;
@@ -120,6 +122,7 @@
   .mode-brick .studs i{width:34px;height:16px}
   .mode-brick .mode-name{display:block;font-size:clamp(26px,6vw,32px);font-weight:900;line-height:1.1;margin:10px 0 6px;letter-spacing:-.01em}
   .mode-brick .mode-sub{display:block;font-size:14.5px;font-weight:650;opacity:.92}
+  .mode-brick .best-line{display:block;font-size:13px;font-weight:800;opacity:.85;margin-top:9px;min-height:1.2em}
   .duel-split{display:flex;gap:8px;margin-top:12px}
   .duel-split span{flex:1;text-align:center;border-radius:8px;padding:7px 4px;font-weight:800;font-size:14px;border:2px solid rgba(0,0,0,.22);box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
   .facts-strip{
@@ -138,6 +141,22 @@
   .coord-rod.small .rod{width:12px;margin:0 6px}
   .coord-rod.small .rod::after{width:9px;height:9px;border-width:3px}
 
+  /* ---------- address bars (the evidence, on screen) ---------- */
+  .bars9{display:flex;gap:4px;align-items:stretch;height:46px}
+  .bars9 span{
+    flex:1;display:flex;align-items:flex-end;border-radius:4px 4px 2px 2px;overflow:hidden;
+    background:rgba(0,0,0,.20);
+  }
+  .bars9 span:nth-child(3),.bars9 span:nth-child(6){margin-right:8px}
+  .bars9 span b{display:block;width:100%;background:rgba(255,255,255,.88);border-top:2px solid rgba(0,0,0,.35)}
+  .bars9.large{height:68px;gap:5px}
+  .bars9.plain span{background:var(--surface-2)}
+  .bars9.plain span b{background:var(--yellow);border-top-color:var(--yellow-dark)}
+  .opt .bars9{margin:10px 2px 4px}
+  .opt-digits{margin:2px 0 0 50px}
+  .opt-digits .coord-rod{font-size:14.5px;color:inherit;opacity:.92}
+  #target-bars{max-width:460px;margin:2px 0 10px}
+
   /* ---------- game ---------- */
   .scoreboard{display:flex;gap:10px;padding:12px 0 2px}
   .score-brick{flex:1;border-radius:14px;padding:0 16px 12px;min-height:76px}
@@ -149,14 +168,14 @@
   .score-brick .turn-tag{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:rgba(0,0,0,.28);border-radius:99px;padding:3px 9px;color:#fff}
   .score-brick:not(.turn) .turn-tag{display:none}
 
-  /* K'Nex progress rod */
+  /* K'Nex progress rod — wrong rounds stay neutral grey, never red */
   .rod-progress{position:relative;height:6px;background:var(--rod);border-radius:3px;margin:26px 10px 8px}
   .rod-progress .node{
     position:absolute;top:50%;width:17px;height:17px;border-radius:50%;
     transform:translate(-50%,-50%);background:var(--surface);border:4px solid var(--rod);
   }
   .rod-progress .node.done{background:var(--green);border-color:var(--green-dark)}
-  .rod-progress .node.done.wrong{background:var(--bad);border-color:var(--bad)}
+  .rod-progress .node.done.wrong{background:var(--grey-node);border-color:var(--grey-node-dark)}
   .rod-progress .node.now{border-color:var(--yellow-dark);background:var(--yellow);width:21px;height:21px}
   .round-line{display:flex;justify-content:space-between;font-size:12.5px;font-weight:750;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint);margin:0 2px}
 
@@ -171,16 +190,22 @@
     display:inline-block;font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
     background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 13px;margin:20px 0 0;color:var(--ink-soft);
   }
+  .teach-line{
+    font-size:17px;font-weight:700;line-height:1.4;margin:14px 0 0;
+    background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:12px 16px;
+  }
+  .teach-line.hidden{display:none}
   .question{font-size:clamp(20px,5vw,25px);line-height:1.25;margin:12px 0 2px;font-weight:800}
   .target-word{
-    font-family:Georgia,"Iowan Old Style",serif;font-style:italic;
-    font-size:clamp(56px,16vw,88px);line-height:1.05;letter-spacing:-.02em;margin:6px 0 4px;
+    font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,-apple-system,"Segoe UI",sans-serif;
+    font-size:clamp(56px,16vw,88px);line-height:1.05;letter-spacing:-.01em;margin:6px 0 4px;font-weight:900;
   }
   .target-addr{font-size:17px;color:var(--ink-soft);margin:0 0 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .chip{
     display:inline-block;font-size:13px;font-weight:800;background:var(--surface-2);color:var(--ink);
     border-radius:999px;padding:4px 11px;border:1.5px solid var(--line);
   }
+  .chip.assist{background:var(--grey-node);color:#fff;border-color:var(--grey-node-dark)}
 
   .options{display:grid;gap:14px;margin:0 0 10px}
   .opt{
@@ -199,7 +224,10 @@
   .opt .coord-rod{font-size:clamp(16px,4.8vw,21px)}
   .opt .coord-rod .rod{background:rgba(0,0,0,.38)}
   .opt .coord-rod .rod::after{border-color:rgba(0,0,0,.38);background:transparent}
-  .opt .cand-word{font-family:Georgia,serif;font-style:italic;font-size:clamp(27px,7vw,34px);line-height:1.1;color:inherit}
+  .opt .cand-word{
+    font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,-apple-system,"Segoe UI",sans-serif;
+    font-size:clamp(27px,7vw,34px);line-height:1.1;color:inherit;font-weight:900;
+  }
   .opt .badge{
     margin-left:auto;flex:none;width:38px;height:38px;border-radius:50%;display:none;
     align-items:center;justify-content:center;font-size:20px;font-weight:900;background:#fff;color:var(--ink);
@@ -231,10 +259,17 @@
   .reveal .verdict .vmark{width:34px;height:34px;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
   .reveal .verdict.good .vmark{background:var(--good)}
   .reveal .verdict.bad .vmark{background:var(--bad)}
+  .reveal .verdict.assisted .vmark{background:var(--grey-node-dark)}
   .reveal .addr-line{font-size:clamp(17px,5vw,22px);display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0}
+  .reveal .bars9{max-width:440px;margin:12px 0 2px}
+  .feature-line{
+    font-size:16.5px;font-weight:650;line-height:1.45;background:var(--surface-2);
+    border-radius:10px;padding:12px 14px;margin:12px 0 0;
+  }
   .dist-table{width:100%;border-collapse:collapse;margin:8px 0 2px;font-size:16px}
   .dist-table td{padding:8px 2px;border-top:1.5px solid var(--line);color:var(--ink-soft)}
   .dist-table td:last-child{text-align:right;color:var(--ink);font-weight:800}
+  .dist-table td.dc{font-size:12.5px;text-align:right}
   .dist-table tr.nearest td{color:var(--ink);font-weight:800}
   .scorer-line{font-size:15.5px;font-weight:800;margin:12px 0 0}
   .scorer-line .dotp{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:7px;border:1.5px solid rgba(0,0,0,.3)}
@@ -247,7 +282,17 @@
   .score-big{font-family:Georgia,serif;font-size:clamp(60px,17vw,92px);line-height:1;margin:8px 0 2px}
   .score-big small{font-size:.36em;color:var(--ink-faint)}
   .winner-line{font-size:clamp(26px,6.6vw,36px);font-weight:900;line-height:1.2;margin:14px 0 4px}
+  .end-extra{font-size:16.5px;font-weight:700;color:var(--ink-soft);margin:4px 0 0}
   .end-line{font-family:Georgia,serif;font-style:italic;font-size:clamp(20px,5.4vw,26px);margin:16px 0 22px;color:var(--ink-soft)}
+  .missed{margin:22px 0 6px}
+  .missed h3{font-size:12.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 6px}
+  .missed-item{padding:12px 2px;border-top:1.5px solid var(--line)}
+  .missed-item .mw{
+    font-family:"Arial Rounded MT Bold","SF Pro Rounded",ui-rounded,-apple-system,"Segoe UI",sans-serif;
+    font-size:24px;font-weight:900;display:block;margin-bottom:6px;
+  }
+  .missed-item .bars9{max-width:440px}
+  .missed-item .mc{color:var(--ink-soft);font-size:13.5px;display:block;margin-top:5px}
   .recap{margin:24px 0 28px}
   .recap h3{font-size:12.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 8px}
   .recap ul{list-style:none;margin:0;padding:0}
@@ -256,6 +301,7 @@
   .recap li .c{color:var(--ink-soft);font-size:13px;text-align:right}
   .recap li .mark{flex:none;font-weight:900;width:26px;height:26px;border-radius:50%;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
   .recap li .mark.good{background:var(--good)} .recap li .mark.bad{background:var(--bad)}
+  .recap li .mark.assist{background:var(--grey-node-dark);font-size:12px}
   .recap li .who-dot{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px;border:1.5px solid rgba(0,0,0,.3);vertical-align:-1px}
 
   /* ---------- footer / compliance ---------- */
@@ -356,10 +402,17 @@
       </div>
 
       <div class="modes">
+        <button class="mode-brick brick b-teal rounded" id="btn-little" type="button">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="mode-name">Little Atlas</span>
+          <span class="mode-sub">6 rounds · 2 choices · big bars</span>
+          <span class="best-line" id="best-little"></span>
+        </button>
         <button class="mode-brick brick b-green rounded" id="btn-solo" type="button">
           <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
           <span class="mode-name">1 Player</span>
-          <span class="mode-sub">10 rounds · your road alone</span>
+          <span class="mode-sub">10 rounds · learn the landmark words</span>
+          <span class="best-line" id="best-standard"></span>
         </button>
         <button class="mode-brick brick b-yellow rounded" id="btn-duel" type="button">
           <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
@@ -369,6 +422,13 @@
             <span style="background:var(--red);color:#fff">RED</span>
             <span style="background:var(--blue);color:#fff">BLUE</span>
           </span>
+          <span class="best-line" id="duel-tally"></span>
+        </button>
+        <button class="mode-brick brick b-blue rounded" id="btn-master" type="button">
+          <span class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="mode-name">Atlas Master</span>
+          <span class="mode-sub">10 rounds · only real addresses — no fakes</span>
+          <span class="best-line" id="best-master"></span>
         </button>
       </div>
       <p class="facts-strip">Free forever · Same screen · No sign-up</p>
@@ -388,8 +448,10 @@
     </div>
 
     <span class="mode-pill" id="mode-pill">Where does it live?</span>
+    <p class="teach-line hidden" id="teach-line"></p>
     <h2 class="question" id="question"></h2>
     <div class="target-word" id="target-word"></div>
+    <div id="target-bars"></div>
     <p class="target-addr" id="target-addr"></p>
 
     <div class="options" id="options"></div>
@@ -410,11 +472,17 @@
       <span class="mode-pill">The road, walked</span>
       <div id="end-scores"></div>
       <p class="winner-line rounded" id="winner-line"></p>
+      <p class="end-extra" id="end-extra"></p>
       <p class="end-line">Every word has an address. Every address can be reached.</p>
 
       <div class="btn-row">
         <button class="btn brick b-green rounded" id="btn-again" type="button">Play again →</button>
         <button class="btn brick b-plate rounded" id="btn-home" type="button">Change players</button>
+      </div>
+
+      <div class="missed" id="missed-wrap" style="display:none">
+        <h3>Look again — these homes are worth knowing</h3>
+        <div id="missed-list"></div>
       </div>
 
       <div class="recap">
@@ -476,7 +544,7 @@
 
     <section id="sec-privacy" class="legal">
       <h3>Privacy</h3>
-      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Scores live only while this page is open. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+      <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Progress and scores are stored only on this device, in this browser. They are never sent anywhere. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
     </section>
 
     <section id="sec-terms" class="legal">
@@ -491,7 +559,7 @@
 (function(){
   "use strict";
 
-  /* ------- Real atlas data (word, 9-number coordinate, scrolls) ------- */
+  /* ------- Real atlas data (word, 9-number coordinate, scrolls) — unchanged ------- */
   var ATLAS = [
     {word:"love",   coord:[13,8,15, 11,9,12, 8,8,8],    scrolls:154},
     {word:"home",   coord:[24,8,15, 10,10,24, 10,9,10], scrolls:57},
@@ -516,11 +584,31 @@
   ];
   var HOME_COORD = [1,1,1,1,1,1,1,1,1];
   var FAR_COORD  = [9,9,9,9,9,9,9,9,9];
+  /* Landmark cast: the standard deck's where-rounds draw only from these,
+     so the same addresses can actually be learned across games. */
+  var LANDMARK = ["sky","fire","song","sing","earth","road","echo","home"];
+  /* Little Atlas cast: small, low, far-apart homes. */
+  var LITTLE = ["sky","fire","song","sing","earth","road"];
   var BRICKS = ["b-red","b-blue","b-yellow","b-green"];
   var PLAYERS = [
     {name:"Red",  cls:"b-red",  hex:"#cf352a"},
     {name:"Blue", cls:"b-blue", hex:"#1f6fd1"}
   ];
+  var ORD = ["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth"];
+
+  /* ------- on-device store: best score per deck + duel tallies ------- */
+  var STORE_KEY = "wordhome.store.v1";
+  var store = {best:{little:null, standard:null, master:null}, duel:{red:0, blue:0, ties:0, games:0}};
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      var parsed = JSON.parse(raw);
+      if(parsed && parsed.best && parsed.duel) store = parsed;
+    }
+  }catch(e){ /* storage unavailable — play on without it */ }
+  function saveStore(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
+  }
 
   /* ------- helpers ------- */
   function fmt(c){ return c.slice(0,3).join(".") + "/" + c.slice(3,6).join(".") + "/" + c.slice(6,9).join("."); }
@@ -530,6 +618,22 @@
       + '<span class="grp">'+g[0]+'</span><span class="rod" aria-hidden="true"></span>'
       + '<span class="grp">'+g[1]+'</span><span class="rod" aria-hidden="true"></span>'
       + '<span class="grp">'+g[2]+'</span></span>';
+  }
+  /* Nine vertical bars, height proportional to value, one shared scale per round. */
+  function barsHTML(coord, maxV, cls){
+    var m = maxV || Math.max.apply(null, coord);
+    if(m < 1) m = 1;
+    var s = '<div class="bars9 '+(cls||"")+'" aria-hidden="true">';
+    for(var i=0;i<9;i++){
+      var pct = Math.max(5, Math.round(coord[i]/m*100));
+      s += '<span><b style="height:'+pct+'%"></b></span>';
+    }
+    return s + '</div>';
+  }
+  function maxCoordVal(coords){
+    var m=1;
+    coords.forEach(function(c){ c.forEach(function(v){ if(v>m) m=v; }); });
+    return m;
   }
   function dist(a,b){
     var s=0; for(var i=0;i<9;i++){ var d=a[i]-b[i]; s+=d*d; }
@@ -552,12 +656,24 @@
     if(sameCoord(out,coord)) out[0]=out[0]+4;
     return out;
   }
+  function byWord(w){
+    for(var i=0;i<ATLAS.length;i++) if(ATLAS[i].word===w) return ATLAS[i];
+    return null;
+  }
   function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
   function studs(n){
     var s='<span class="studs" aria-hidden="true">';
     for(var i=0;i<n;i++) s+="<i></i>";
     return s+"</span>";
   }
+  function sizeWord(v){
+    if(v>=30) return "giant";
+    if(v>=18) return "big";
+    if(v<=4) return "tiny";
+    if(v<=7) return "small";
+    return "tall";
+  }
+  function placesLabel(entry){ return entry.scrolls + " places in Will\u2019s book"; }
 
   /* static coord-rod placeholders (intro placement bricks) */
   var holders=document.querySelectorAll("[data-coord]");
@@ -583,10 +699,22 @@
     }).join("");
   })();
 
+  /* ------- state (declared early: the panel hook reads it) ------- */
+  var deck="standard", players="solo", rounds=[], idx=0, scores=[0,0], locked=false, results=[];
+  var starter=0, currentAssisted=false;
+
   /* ------- panel ------- */
   var overlay=document.getElementById("panel-overlay");
   var panel=document.getElementById("panel");
   function openPanel(sectionId){
+    /* Assisted marking: peeking at the atlas mid-round is honest, but it
+       costs the point. Master: any round. Standard deck: where-rounds. */
+    if(screens.game.classList.contains("active") && rounds.length && !locked){
+      var r=rounds[idx];
+      if(deck==="master" || (deck==="standard" && r && r.type==="where")){
+        currentAssisted=true;
+      }
+    }
     overlay.classList.add("open");
     document.body.style.overflow="hidden";
     if(sectionId){
@@ -616,60 +744,142 @@
     });
   }
 
-  /* ------- round construction (unchanged data & logic) ------- */
-  function whereRound(entry){
-    var d1=perturb(entry.coord), d2=perturb(entry.coord), guard=0;
-    while((sameCoord(d1,d2)||sameCoord(d1,entry.coord)||sameCoord(d2,entry.coord)) && guard++<20){ d2=perturb(entry.coord); }
-    var opts=shuffle([
-      {coord:entry.coord, correct:true},
-      {coord:d1, correct:false},
-      {coord:d2, correct:false}
-    ]);
-    return {type:"where", kind:"placed", word:entry.word, entry:entry, options:opts};
+  /* ------- round construction ------- */
+  function specialRound(word, trueCoord, kind){
+    var others, sources=[null,null];
+    if(deck==="little"){
+      var o = kind==="home" ? byWord("sky") : byWord("earth");
+      others=[o.coord]; sources=[o.word];
+    } else if(deck==="master"){
+      /* Master specials: the other choices are real atlas homes too. */
+      var pool=shuffle(ATLAS).slice(0,2);
+      others=pool.map(function(e){return e.coord;});
+      sources=pool.map(function(e){return e.word;});
+    } else {
+      others = kind==="home" ? [FAR_COORD, [4,3,5, 6,4,4, 3,5,4]]
+                             : [HOME_COORD, [7,12,8, 9,6,11, 8,8,10]];
+    }
+    var opts=[{coord:trueCoord, correct:true, sourceWord:null}];
+    others.forEach(function(c,i){ opts.push({coord:c, correct:false, sourceWord:sources[i]||null}); });
+    return {
+      type:"where", kind:kind, word:word, entry:null, trueCoord:trueCoord,
+      options:shuffle(opts),
+      teach: kind==="home"
+        ? "Some words rest at home — the very first address, all ones."
+        : "Some words are not in Will\u2019s book yet — they wait at the far corner, all nines."
+    };
   }
-  function specialWhere(word, trueCoord, kind, distractors){
-    var opts=shuffle([
-      {coord:trueCoord, correct:true},
-      {coord:distractors[0], correct:false},
-      {coord:distractors[1], correct:false}
-    ]);
-    return {type:"where", kind:kind, word:word, entry:null, trueCoord:trueCoord, options:opts};
+  function whereRound(entry){
+    var opts=[{coord:entry.coord, correct:true, sourceWord:null}];
+    if(deck==="master"){
+      /* Distractors are OTHER REAL atlas homes — never perturbations of the
+         truth, so there is no center answer to sniff out. */
+      var pool=shuffle(ATLAS.filter(function(e){return e.word!==entry.word;})).slice(0,2);
+      pool.forEach(function(e){ opts.push({coord:e.coord, correct:false, sourceWord:e.word}); });
+    } else if(deck==="little"){
+      /* One other choice: the little-set home farthest from the truth. */
+      var best=null, bd=-1;
+      LITTLE.forEach(function(w){
+        if(w===entry.word) return;
+        var e=byWord(w), d=dist(entry.coord, e.coord);
+        if(d>bd){ bd=d; best=e; }
+      });
+      opts.push({coord:best.coord, correct:false, sourceWord:best.word});
+    } else {
+      opts.push({coord:perturb(entry.coord), correct:false, sourceWord:null});
+      var d2=perturb(entry.coord), guard=0;
+      while(sameCoord(d2,opts[1].coord) && guard++<20){ d2=perturb(entry.coord); }
+      opts.push({coord:d2, correct:false, sourceWord:null});
+    }
+    return {type:"where", kind:"placed", word:entry.word, entry:entry, options:shuffle(opts)};
   }
   function neighborRound(target){
-    var pool=shuffle(ATLAS.filter(function(e){return e.word!==target.word;}));
-    var cands=pool.slice(0,3).map(function(e){
-      return {entry:e, d:dist(target.coord, e.coord)};
-    });
+    var cands;
+    if(deck==="master"){
+      /* The three closest real homes — the tightest margins the data offers. */
+      cands = ATLAS.filter(function(e){return e.word!==target.word;})
+        .map(function(e){ return {entry:e, d:dist(target.coord, e.coord)}; })
+        .sort(function(a,b){return a.d-b.d;})
+        .slice(0,3);
+    } else {
+      var pool=shuffle(ATLAS.filter(function(e){return e.word!==target.word;}));
+      cands=pool.slice(0,3).map(function(e){
+        return {entry:e, d:dist(target.coord, e.coord)};
+      });
+    }
     var minD=Math.min(cands[0].d, cands[1].d, cands[2].d);
     var opts=shuffle(cands.map(function(c){ return {entry:c.entry, d:c.d, correct: c.d===minD}; }));
     return {type:"neighbor", kind:"placed", word:target.word, entry:target, options:opts};
   }
   function buildRounds(){
-    var order=shuffle(ATLAS);
-    var p=0;
-    function next(){ return order[p++ % order.length]; }
-    return [
-      whereRound(next()),
-      neighborRound(next()),
-      specialWhere("a\u2019s", HOME_COORD, "home", [FAR_COORD, [4,3,5, 6,4,4, 3,5,4]]),
-      neighborRound(next()),
-      whereRound(next()),
-      neighborRound(next()),
-      specialWhere("quixotic", FAR_COORD, "far", [HOME_COORD, [7,12,8, 9,6,11, 8,8,10]]),
-      whereRound(next()),
-      neighborRound(next()),
-      whereRound(next())
-    ];
+    var specials=[specialRound("a\u2019s", HOME_COORD, "home"), specialRound("quixotic", FAR_COORD, "far")];
+    if(deck==="little"){
+      var littleWheres=shuffle(LITTLE.map(byWord)).slice(0,4).map(function(e){ return whereRound(e); });
+      return specials.concat(littleWheres);
+    }
+    var whereEntries = deck==="master"
+      ? shuffle(ATLAS).slice(0,4)
+      : shuffle(LANDMARK.map(byWord)).slice(0,4);
+    var whereWords = whereEntries.map(function(e){return e.word;});
+    var wheres = whereEntries.map(function(e){ return whereRound(e); });
+    var nPool = ATLAS.filter(function(e){ return whereWords.indexOf(e.word)===-1; });
+    var neighbors = shuffle(nPool).slice(0,4).map(function(e){ return neighborRound(e); });
+    var rest = shuffle(wheres.concat(neighbors));
+    /* Every game — Duel included — opens with the two special homes as
+       rounds 1 and 2: they are the teaching rounds, so they teach first.
+       Duel fairness comes from the starting player instead: starter
+       alternates per game (see startGame), and turn = (starter + idx) % 2,
+       so in one game Red takes round 1 (a's) and Blue round 2 (quixotic),
+       and next game they swap. Neither player gets both specials, and
+       neither gets the same special every game. The remaining 8 rounds
+       stay fully shuffled. */
+    return specials.concat(rest);
   }
 
-  /* ------- state & elements ------- */
-  var mode="solo", rounds=[], idx=0, scores=[0,0], locked=false, results=[];
+  /* ------- reveals that teach: one discriminating feature, in plain words ------- */
+  function featureWhere(r, chosen){
+    if(r.kind==="home") return "a\u2019s rests at home — every number is 1. Home is the very first address of all.";
+    if(r.kind==="far") return "quixotic waits at the far corner — every number is 9, as far as an address can go.";
+    var truth=r.entry.coord, word=r.word;
+    if(chosen.correct){
+      var maxI=0;
+      truth.forEach(function(v,i){ if(v>truth[maxI]) maxI=i; });
+      var maxV=truth[maxI];
+      if(maxV<=7) return word+" is all small numbers — its biggest number is only "+maxV+". Small bars, close to home.";
+      if(maxI===0) return word+" starts with a "+sizeWord(maxV)+" "+maxV+" — the biggest first number here. Look for that one tall first bar.";
+      return word+" has a "+sizeWord(maxV)+" "+maxV+" for its "+ORD[maxI]+" number — look for that tall bar.";
+    }
+    var bi=0, bd=-1;
+    truth.forEach(function(v,i){
+      var d=Math.abs(v-chosen.coord[i]);
+      if(d>bd){ bd=d; bi=i; }
+    });
+    var s="Look at the "+ORD[bi]+" number: "+word+" has "+truth[bi]+" there, but the one you picked has "+chosen.coord[bi]+". The bars give it away.";
+    if(chosen.sourceWord) s+=" The address you picked is "+chosen.sourceWord+"\u2019s real home.";
+    return s;
+  }
+  function featureNeighbor(r, chosen){
+    var near=null;
+    r.options.forEach(function(o){ if(o.correct) near=o; });
+    if(chosen.correct){
+      return near.entry.word+" is only about "+Math.round(near.d)+" steps away — its bars match "+r.word+"\u2019s bars most closely.";
+    }
+    return "You picked "+chosen.entry.word+" — about "+Math.round(chosen.d)+" steps away. "
+      + near.entry.word+" is closer: only about "+Math.round(near.d)+" steps away. Compare the bar shapes.";
+  }
+
+  /* ------- elements ------- */
   var screens={intro:document.getElementById("screen-intro"), game:document.getElementById("screen-game"), end:document.getElementById("screen-end")};
   function show(name){
     for(var k in screens) screens[k].classList.toggle("active", k===name);
     window.scrollTo(0,0);
   }
-  function turnPlayer(){ return mode==="duel" ? idx % 2 : 0; }
+  function turnPlayer(){ return players==="duel" ? (starter + idx) % 2 : 0; }
+  function knownCount(){
+    var c=0;
+    results.forEach(function(r){ if(r.scored) c++; });
+    return c;
+  }
 
   var scoreboard=document.getElementById("scoreboard"),
       rodProgress=document.getElementById("rod-progress"),
@@ -677,8 +887,10 @@
       banner=document.getElementById("turn-banner"),
       turnText=document.getElementById("turn-text"),
       pill=document.getElementById("mode-pill"),
+      teachEl=document.getElementById("teach-line"),
       qEl=document.getElementById("question"),
       wordEl=document.getElementById("target-word"),
+      targetBars=document.getElementById("target-bars"),
       addrEl=document.getElementById("target-addr"),
       optsEl=document.getElementById("options"),
       revealEl=document.getElementById("reveal"),
@@ -688,17 +900,36 @@
       nextBtn=document.getElementById("btn-next");
   var LETTERS=["A","B","C"];
 
+  function renderStore(){
+    function bestText(d, total){
+      var b=store.best[d];
+      return (b===null || b===undefined) ? "" : "Best on this device: "+b+" / "+total;
+    }
+    document.getElementById("best-little").textContent=bestText("little", 6);
+    document.getElementById("best-standard").textContent=bestText("standard", 10);
+    document.getElementById("best-master").textContent=bestText("master", 10);
+    var d=store.duel;
+    document.getElementById("duel-tally").textContent = d.games>0
+      ? "Roads won — Red "+d.red+" · Blue "+d.blue+(d.ties?" · Tied "+d.ties:"")
+      : "";
+  }
+
   function renderScoreboard(){
-    if(mode==="duel"){
+    if(players==="duel"){
       scoreboard.innerHTML = PLAYERS.map(function(p,i){
         return '<div class="score-brick brick '+p.cls+(turnPlayer()===i?" turn":"")+'">'
           + studs(3)
           + '<div class="who"><span>'+p.name+(turnPlayer()===i?' <span class="turn-tag">Turn</span>':"")+'</span><span class="pts">'+scores[i]+'</span></div></div>';
       }).join("");
+    } else if(deck==="little"){
+      scoreboard.innerHTML =
+        '<div class="score-brick brick b-teal turn">'+studs(3)
+        + '<div class="who"><span>Words you know</span><span class="pts">'+knownCount()+'</span></div></div>'
+        + '<div class="score-brick brick b-plate"><div class="who" style="margin-top:22px"><span style="color:var(--ink-faint)">Rounds left</span><span class="pts">'+(rounds.length-results.length)+'</span></div></div>';
     } else {
       scoreboard.innerHTML =
-        '<div class="score-brick brick b-green turn">'+studs(3)
-        + '<div class="who"><span>Solo road</span><span class="pts">'+scores[0]+'</span></div></div>'
+        '<div class="score-brick brick '+(deck==="master"?"b-blue":"b-green")+' turn">'+studs(3)
+        + '<div class="who"><span>'+(deck==="master"?"Atlas Master":"Solo road")+'</span><span class="pts">'+scores[0]+'</span></div></div>'
         + '<div class="score-brick brick b-plate"><div class="who" style="margin-top:22px"><span style="color:var(--ink-faint)">Rounds left</span><span class="pts">'+(rounds.length-results.length)+'</span></div></div>';
     }
   }
@@ -706,7 +937,7 @@
     rodProgress.innerHTML = rounds.map(function(r,i){
       var left = rounds.length===1 ? 50 : (i/(rounds.length-1))*100;
       var cls="node";
-      if(i<results.length) cls += results[i].correct ? " done" : " done wrong";
+      if(i<results.length) cls += results[i].answeredCorrect ? " done" : " done wrong";
       else if(i===idx) cls += " now";
       return '<span class="'+cls+'" style="left:'+left+'%"></span>';
     }).join("");
@@ -715,13 +946,15 @@
 
   function renderRound(){
     locked=false;
+    currentAssisted=false;
     var r=rounds[idx];
     renderScoreboard();
     renderProgress();
     revealEl.classList.remove("show");
     optsEl.innerHTML="";
+    targetBars.innerHTML="";
 
-    if(mode==="duel"){
+    if(players==="duel"){
       var p=PLAYERS[turnPlayer()];
       banner.className="turn-banner brick "+p.cls;
       turnText.textContent=p.name+"\u2019s turn";
@@ -729,39 +962,57 @@
       banner.className="turn-banner brick hidden";
     }
 
+    if(r.teach){
+      pill.textContent="A home to learn";
+      teachEl.textContent=r.teach;
+      teachEl.classList.remove("hidden");
+    } else {
+      teachEl.classList.add("hidden");
+      teachEl.textContent="";
+    }
+
     if(r.type==="where"){
-      pill.textContent="Where does it live?";
+      if(!r.teach) pill.textContent = deck==="master" ? "Where does it live? · Real homes only" : "Where does it live?";
       qEl.textContent="Pick its true home:";
       wordEl.textContent=r.word;
       addrEl.innerHTML="";
+      var maxV=maxCoordVal(r.options.map(function(o){return o.coord;}));
       r.options.forEach(function(o,i){
         var b=document.createElement("button");
         b.type="button"; b.className="opt brick "+BRICKS[i % BRICKS.length];
-        b.innerHTML=studs(4)+'<span class="opt-main"><span class="letter">'+LETTERS[i]+'</span>'
-          + coordHTML(o.coord)
+        b.innerHTML=studs(4)
+          + barsHTML(o.coord, maxV, deck==="little" ? "large" : "")
+          + '<span class="opt-main"><span class="letter">'+LETTERS[i]+'</span>'
+          + coordHTML(o.coord, deck==="little")
           + '<span class="badge" aria-hidden="true"></span></span>';
         b.setAttribute("aria-label", "Address "+fmt(o.coord));
         b.addEventListener("click", function(){ answerWhere(r, o, b); });
         optsEl.appendChild(b);
       });
     } else {
-      pill.textContent="Nearest neighbor";
+      pill.textContent = deck==="master" ? "Nearest neighbor · Closest three" : "Nearest neighbor";
       qEl.textContent="Which word lives nearest?";
       wordEl.textContent=r.word;
-      addrEl.innerHTML=coordHTML(r.entry.coord)+'<span class="chip">'+r.entry.scrolls+' scrolls</span>';
+      var allCoords=[r.entry.coord].concat(r.options.map(function(o){return o.entry.coord;}));
+      var maxN=maxCoordVal(allCoords);
+      targetBars.innerHTML=barsHTML(r.entry.coord, maxN, "plain");
+      addrEl.innerHTML=coordHTML(r.entry.coord)+'<span class="chip">'+placesLabel(r.entry)+'</span>';
       r.options.forEach(function(o,i){
         var b=document.createElement("button");
         b.type="button"; b.className="opt brick "+BRICKS[i % BRICKS.length];
         b.innerHTML=studs(4)+'<span class="opt-main"><span class="letter">'+LETTERS[i]+'</span>'
           + '<span class="cand-word">'+esc(o.entry.word)+'</span>'
-          + '<span class="badge" aria-hidden="true"></span></span>';
+          + '<span class="badge" aria-hidden="true"></span></span>'
+          + barsHTML(o.entry.coord, maxN, "")
+          + '<div class="opt-digits">'+coordHTML(o.entry.coord, true)+'</div>';
+        b.setAttribute("aria-label", o.entry.word+", address "+fmt(o.entry.coord));
         b.addEventListener("click", function(){ answerNeighbor(r, o, b); });
         optsEl.appendChild(b);
       });
     }
   }
 
-  function finishPick(correct, chosenBtn, correctBtn){
+  function finishPick(answeredCorrect, chosenBtn, correctBtn, feature){
     locked=true;
     var btns=optsEl.querySelectorAll(".opt");
     for(var i=0;i<btns.length;i++){
@@ -773,19 +1024,31 @@
       else btns[i].classList.add("dim");
     }
     var tp=turnPlayer();
-    if(correct) scores[tp]++;
-    results.push({round:rounds[idx], correct:correct, player:tp});
+    var scored = answeredCorrect && !currentAssisted;
+    if(scored) scores[tp]++;
+    results.push({round:rounds[idx], answeredCorrect:answeredCorrect, scored:scored, assisted:currentAssisted, player:tp});
     renderScoreboard();
     renderProgress();
-    verdictEl.innerHTML='<span class="vmark" aria-hidden="true">'+(correct?"✓":"✗")+'</span>'+(correct?"Right — you found it":"Not that one");
-    verdictEl.className="verdict "+(correct?"good":"bad");
-    if(mode==="duel"){
+    if(currentAssisted){
+      verdictEl.innerHTML='<span class="vmark" aria-hidden="true">i</span>'+(answeredCorrect?"You found it — with the atlas open":"Not that one");
+      verdictEl.className="verdict assisted";
+    } else {
+      verdictEl.innerHTML='<span class="vmark" aria-hidden="true">'+(answeredCorrect?"✓":"✗")+'</span>'+(answeredCorrect?"Right — you found it":"Not that one");
+      verdictEl.className="verdict "+(answeredCorrect?"good":"bad");
+    }
+    var featureHTML = feature ? '<p class="feature-line">'+esc(feature)+'</p>' : "";
+    revealBody.innerHTML += featureHTML;
+    if(currentAssisted){
+      scorerLine.textContent="Looked it up — no point this round.";
+    } else if(players==="duel"){
       var p=PLAYERS[tp];
-      scorerLine.innerHTML = correct
+      scorerLine.innerHTML = scored
         ? '<span class="dotp" style="background:'+p.hex+'"></span>+1 point — '+p.name
         : '<span class="dotp" style="background:'+p.hex+'"></span>No point — '+p.name;
+    } else if(deck==="little"){
+      scorerLine.textContent = scored ? "You know this word now." : "Now you know where it lives.";
     } else {
-      scorerLine.textContent = correct ? "+1 point" : "No point";
+      scorerLine.textContent = scored ? "+1 point" : "No point";
     }
     nextBtn.innerHTML = idx===rounds.length-1 ? 'See the end of the road →' : 'Next round →';
     revealEl.classList.add("show");
@@ -797,11 +1060,13 @@
     var btns=optsEl.querySelectorAll(".opt"), correctBtn=null;
     r.options.forEach(function(o,i){ if(o.correct) correctBtn=btns[i]; });
     var trueCoord = r.kind==="placed" ? r.entry.coord : r.trueCoord;
-    var label = r.kind==="placed" ? '<span class="chip">'+r.entry.scrolls+' scrolls</span>'
+    var label = r.kind==="placed" ? '<span class="chip">'+placesLabel(r.entry)+'</span>'
               : r.kind==="home" ? '<span class="chip">At home</span>'
               : '<span class="chip">Far corner</span>';
-    revealBody.innerHTML='<p class="addr-line">'+coordHTML(trueCoord)+label+'</p>';
-    finishPick(chosen.correct, btn, correctBtn);
+    var maxV=maxCoordVal(r.options.map(function(o){return o.coord;}));
+    revealBody.innerHTML='<p class="addr-line">'+coordHTML(trueCoord)+label+'</p>'
+      + barsHTML(trueCoord, maxV, "plain");
+    finishPick(chosen.correct, btn, correctBtn, featureWhere(r, chosen));
   }
 
   function answerNeighbor(r, chosen, btn){
@@ -810,63 +1075,122 @@
     r.options.forEach(function(o,i){ if(o.correct) correctBtn=btns[i]; });
     var sorted=r.options.slice().sort(function(a,b){return a.d-b.d;});
     var rows=sorted.map(function(o){
-      return '<tr class="'+(o.correct?"nearest":"")+'"><td>'+(o.correct?"✓ ":"")+esc(r.word)+' → '+esc(o.entry.word)+'</td><td class="mono">'+o.d.toFixed(1)+'</td></tr>';
+      return '<tr class="'+(o.correct?"nearest":"")+'"><td>'+(o.correct?"✓ ":"")+esc(r.word)+' → '+esc(o.entry.word)+'</td>'
+        + '<td class="dc mono">'+fmt(o.entry.coord)+'</td><td class="mono">'+o.d.toFixed(1)+'</td></tr>';
     }).join("");
     revealBody.innerHTML='<table class="dist-table">'+rows+'</table>';
-    finishPick(chosen.correct, btn, correctBtn);
+    finishPick(chosen.correct, btn, correctBtn, featureNeighbor(r, chosen));
   }
 
   function endGame(){
     var endScores=document.getElementById("end-scores");
     var winner=document.getElementById("winner-line");
-    if(mode==="duel"){
+    var extra=document.getElementById("end-extra");
+    var missedWrap=document.getElementById("missed-wrap");
+    var missedList=document.getElementById("missed-list");
+    missedWrap.style.display="none";
+    missedList.innerHTML="";
+    extra.textContent="";
+
+    if(players==="duel"){
       endScores.innerHTML='<div class="end-bricks">'+PLAYERS.map(function(p,i){
         return '<div class="score-brick brick '+p.cls+'">'+studs(3)
           + '<div class="who"><span>'+p.name+'</span><span class="pts">'+scores[i]+'</span></div></div>';
       }).join("")+'</div>';
-      if(scores[0]===scores[1]) winner.textContent="Both navigators win.";
-      else winner.textContent=PLAYERS[scores[0]>scores[1]?0:1].name+" wins the road.";
+      if(scores[0]===scores[1]){ winner.textContent="Both navigators win."; store.duel.ties++; }
+      else {
+        winner.textContent=PLAYERS[scores[0]>scores[1]?0:1].name+" wins the road.";
+        if(scores[0]>scores[1]) store.duel.red++; else store.duel.blue++;
+      }
+      store.duel.games++;
+      saveStore();
+      extra.textContent="Roads won on this device — Red "+store.duel.red+" · Blue "+store.duel.blue
+        + (store.duel.ties ? " · Tied "+store.duel.ties : "")
+        + ". Who starts swaps every game, so the road stays fair.";
+    } else if(deck==="little"){
+      var known=knownCount();
+      endScores.innerHTML='<div class="score-big"><span>'+known+'</span><small> words you know now</small></div>';
+      winner.textContent = known===rounds.length ? "You found every home." :
+        known>=4 ? "You know most of these words now." :
+        "Every word you met lives somewhere — now you have seen its home.";
+      var prevLittle=store.best.little;
+      if(prevLittle===null || known>prevLittle){ store.best.little=known; saveStore(); }
+      extra.textContent = (prevLittle!==null && known>prevLittle) ? "Your best walk yet on this device."
+        : (prevLittle!==null ? "Best on this device: "+prevLittle+" words." : "");
+      var missed=results.filter(function(r){ return !r.answeredCorrect; });
+      if(missed.length){
+        missedWrap.style.display="block";
+        missedList.innerHTML=missed.map(function(res){
+          var r=res.round;
+          var tc = r.kind==="placed" ? r.entry.coord : r.trueCoord;
+          return '<div class="missed-item"><span class="mw">'+esc(r.word)+'</span>'
+            + barsHTML(tc, Math.max.apply(null, tc), "plain large")
+            + '<span class="mc mono">'+fmt(tc)+'</span></div>';
+        }).join("");
+      }
     } else {
-      endScores.innerHTML='<div class="score-big"><span>'+scores[0]+'</span><small> / 10</small></div>';
-      winner.textContent = scores[0]===10 ? "A perfect walk." :
+      endScores.innerHTML='<div class="score-big"><span>'+scores[0]+'</span><small> / '+rounds.length+'</small></div>';
+      winner.textContent = scores[0]===rounds.length ? "A perfect walk." :
         scores[0]>=8 ? "Strong navigation." :
         scores[0]>=5 ? "Half the road, honestly walked." :
         "Every navigator starts at home.";
+      var prev=store.best[deck];
+      var isBest = (prev===null || scores[0]>prev);
+      if(isBest){ store.best[deck]=scores[0]; saveStore(); }
+      extra.textContent = prev===null ? "First walk saved on this device."
+        : isBest ? "New best on this device: "+scores[0]+" / "+rounds.length+"."
+        : "Best on this device: "+prev+" / "+rounds.length+".";
+      if(deck==="master"){
+        var assistedCount=results.filter(function(r){return r.assisted;}).length;
+        if(assistedCount) extra.textContent+=" "+assistedCount+(assistedCount===1?" round was":" rounds were")+" looked up — no points for those.";
+      }
     }
+    renderStore();
+
     var recap=document.getElementById("recap-list");
     recap.innerHTML=results.map(function(res){
       var r=res.round, right="", label="";
       if(r.type==="where"){
         var tc = r.kind==="placed" ? r.entry.coord : r.trueCoord;
         right=fmt(tc);
-        label = r.kind==="placed" ? r.entry.scrolls+" scrolls" : (r.kind==="home" ? "at home" : "far corner");
+        label = r.kind==="placed" ? placesLabel(r.entry) : (r.kind==="home" ? "at home" : "far corner");
       } else {
         var near=r.options.filter(function(o){return o.correct;})[0];
         right="nearest: "+near.entry.word;
         label="distance "+near.d.toFixed(1);
       }
-      var who = mode==="duel" ? '<span class="who-dot" style="background:'+PLAYERS[res.player].hex+'"></span>' : "";
-      return '<li><span class="mark '+(res.correct?"good":"bad")+'">'+(res.correct?"✓":"✗")+'</span>'
-           + '<span class="w">'+who+esc(r.word)+'</span>'
+      var who = players==="duel" ? '<span class="who-dot" style="background:'+PLAYERS[res.player].hex+'"></span>' : "";
+      var mark = res.assisted
+        ? '<span class="mark assist">i</span>'
+        : '<span class="mark '+(res.answeredCorrect?"good":"bad")+'">'+(res.answeredCorrect?"✓":"✗")+'</span>';
+      var assistChip = res.assisted ? ' <span class="chip assist">looked it up — no point</span>' : "";
+      return '<li>'+mark
+           + '<span class="w">'+who+esc(r.word)+assistChip+'</span>'
            + '<span class="c mono">'+right+'<br>'+label+'</span></li>';
     }).join("");
     show("end");
   }
 
   /* ------- wiring ------- */
-  function startGame(m){
-    mode=m;
+  function startGame(d, p){
+    deck=d; players=p;
+    /* The starting player alternates per duel game played on this device. */
+    starter = players==="duel" ? (store.duel.games % 2) : 0;
     rounds=buildRounds(); idx=0; scores=[0,0]; results=[];
+    currentAssisted=false;
     show("game"); renderRound();
   }
-  document.getElementById("btn-solo").addEventListener("click", function(){ startGame("solo"); });
-  document.getElementById("btn-duel").addEventListener("click", function(){ startGame("duel"); });
+  document.getElementById("btn-little").addEventListener("click", function(){ startGame("little", "solo"); });
+  document.getElementById("btn-solo").addEventListener("click", function(){ startGame("standard", "solo"); });
+  document.getElementById("btn-duel").addEventListener("click", function(){ startGame("standard", "duel"); });
+  document.getElementById("btn-master").addEventListener("click", function(){ startGame("master", "solo"); });
   nextBtn.addEventListener("click", function(){
     idx++;
     if(idx>=rounds.length) endGame(); else renderRound();
   });
-  document.getElementById("btn-again").addEventListener("click", function(){ startGame(mode); });
+  document.getElementById("btn-again").addEventListener("click", function(){ startGame(deck, players); });
   document.getElementById("btn-home").addEventListener("click", function(){ show("intro"); });
+  renderStore();
 })();
 </script>
 </body>

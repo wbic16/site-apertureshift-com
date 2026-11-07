@@ -9,7 +9,6 @@
     <style>
       :root {
         color-scheme: light dark;
-        /* classic brick palette leads */
         --red: #d2261e;
         --blue: #1b5bd7;
         --yellow: #ffc531;
@@ -42,7 +41,6 @@
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; }
       body {
-        /* Lego baseplate: subtle stud grid */
         background:
           radial-gradient(circle at 16px 16px, rgba(29, 36, 51, 0.10) 5px, transparent 6px) 0 0 / 32px 32px,
           var(--bg);
@@ -67,8 +65,6 @@
         margin: 0 auto;
         padding: 14px 16px 24px;
       }
-
-      /* ---------- header / footer chrome ---------- */
       .topbar {
         display: flex;
         justify-content: flex-end;
@@ -91,9 +87,6 @@
         color: var(--ink-soft);
         margin: 0;
       }
-
-      /* ---------- bricks & panels ---------- */
-      /* Duplo: chunky rounded panel with big studs along the top */
       .panel {
         position: relative;
         background: var(--paper);
@@ -104,7 +97,6 @@
         margin-bottom: 20px;
       }
       .panel::before {
-        /* stud strip */
         content: "";
         position: absolute;
         top: 8px; left: 22px; right: 22px;
@@ -112,7 +104,6 @@
         background: radial-gradient(circle at 6px 6px, var(--line) 5px, transparent 6px) 0 0 / 34px 12px repeat-x;
         opacity: 0.9;
       }
-      /* K'Nex accent: connector rings at panel corners */
       .panel .knex {
         position: absolute;
         width: 16px; height: 16px;
@@ -125,7 +116,6 @@
       .panel .knex.tr { top: -8px; right: -8px; }
       .panel .knex.bl { bottom: -8px; left: -8px; }
       .panel .knex.br { bottom: -8px; right: -8px; }
-
       .brick-btn {
         display: inline-flex;
         align-items: center;
@@ -136,7 +126,7 @@
         font-family: inherit;
         font-weight: 800;
         color: #fff;
-        border-radius: 10px; /* Lego: small corner radius */
+        border-radius: 10px;
         border-bottom: 6px solid rgba(0, 0, 0, 0.28);
         padding: 14px 22px;
         font-size: 1.05rem;
@@ -144,6 +134,8 @@
         transition: transform 0.1s ease, filter 0.1s ease;
       }
       .brick-btn:active { transform: translateY(3px); border-bottom-width: 3px; }
+      .brick-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+      .brick-btn[disabled]:active { transform: none; border-bottom-width: 6px; }
       .b-red { background: var(--red); }
       .b-blue { background: var(--blue); }
       .b-green { background: var(--green); }
@@ -156,8 +148,6 @@
         border-bottom: 6px solid var(--line);
         box-shadow: none;
       }
-
-      /* ---------- opening ---------- */
       .opening { padding-top: 3vh; }
       .title-bricks {
         display: flex;
@@ -196,6 +186,37 @@
       }
       .greeting-sub strong { color: var(--red); }
 
+      /* path selector */
+      .path-label {
+        font-weight: 800;
+        font-size: 1.05rem;
+        margin: 0 2px 10px;
+      }
+      .path-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      @media (min-width: 560px) {
+        .path-grid { grid-template-columns: 1fr 1fr 1fr; }
+      }
+      .path-brick {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        gap: 4px;
+        padding: 16px 18px;
+        min-height: 96px;
+        font-size: 1.2rem;
+        line-height: 1.25;
+        width: 100%;
+      }
+      .path-brick .mode-sub { font-size: 0.9rem; font-weight: 700; opacity: 0.92; }
+      .path-brick.selected {
+        outline: 4px solid var(--ink);
+        outline-offset: 2px;
+      }
       .mode-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -228,6 +249,11 @@
         border: 3px solid rgba(255, 255, 255, 0.85);
         display: inline-block;
       }
+      .resume-wrap { margin-top: 16px; text-align: center; }
+      .resume-wrap .brick-btn { width: 100%; font-size: 1.2rem; }
+      @media (min-width: 520px) {
+        .resume-wrap .brick-btn { width: auto; }
+      }
       .facts {
         margin: 16px 2px 0;
         font-weight: 800;
@@ -236,12 +262,11 @@
         color: var(--ink);
         text-align: center;
       }
-
-      /* ---------- game chrome ---------- */
       .progress-meta {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 10px;
         font-size: 1rem;
         font-weight: 800;
         color: var(--ink);
@@ -249,8 +274,7 @@
       }
       .stars { font-size: 1.35rem; letter-spacing: 0.12em; color: var(--sun); }
       .stars .off { color: var(--line); }
-
-      /* K'Nex rod progress: one connector joint per line */
+      .timer-chip { font-variant-numeric: tabular-nums; color: var(--orange); }
       .rod-wrap { position: relative; padding: 8px 4px 4px; margin-bottom: 14px; }
       .rod-line {
         position: absolute;
@@ -282,8 +306,6 @@
       }
       .joint.done { border-color: var(--orange); background: var(--yellow); }
       .joint.now { border-color: var(--orange); }
-
-      /* turn brick (Duet) */
       .turn-brick {
         display: flex;
         align-items: center;
@@ -304,7 +326,35 @@
         100% { transform: rotateX(0); opacity: 1; }
       }
 
-      /* ---------- brick plate + slots ---------- */
+      /* Read-it card: the full line, shown until the first tile lands */
+      .read-card {
+        background: var(--yellow);
+        color: #221a00;
+        border-radius: 16px;
+        border-bottom: 6px solid rgba(0, 0, 0, 0.28);
+        padding: 16px 18px 14px;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+      .read-tag {
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      .read-line {
+        font-size: clamp(1.4rem, 5.6vw, 2rem);
+        font-weight: 800;
+        line-height: 1.25;
+        margin-top: 4px;
+      }
+      .read-then {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-top: 6px;
+        opacity: 0.8;
+      }
       .plate {
         background: var(--plate);
         border: 3px solid var(--line);
@@ -352,10 +402,10 @@
         border-color: transparent;
         border-bottom: 5px solid rgba(0, 0, 0, 0.28);
         color: #fff;
-        cursor: pointer;
         font-family: inherit;
-        animation: pop 0.18s ease;
       }
+      .slot.filled.top { cursor: pointer; animation: pop 0.18s ease; }
+      .slot.filled.locked { cursor: default; }
       .slot.filled.dark-text { color: #221a00; }
       @keyframes pop {
         0% { transform: scale(0.85); }
@@ -368,7 +418,6 @@
       .c4 { background: var(--orange); }
       .p-red { background: var(--red); }
       .p-blue { background: var(--blue); }
-
       .feedback {
         min-height: 1.4em;
         font-size: 0.98rem;
@@ -377,8 +426,6 @@
         margin: 2px 0 10px;
       }
       .feedback.warn { color: var(--red); }
-
-      /* ---------- tray of Duplo word bricks ---------- */
       .tray {
         display: flex;
         flex-wrap: wrap;
@@ -422,6 +469,11 @@
       }
       .tile:active { transform: scale(0.95); }
       .tile.used { opacity: 0; pointer-events: none; transform: scale(0.6); }
+      .tile.glow {
+        background: var(--yellow);
+        color: #221a00;
+        box-shadow: 0 0 0 4px var(--orange), 0 0 24px var(--yellow);
+      }
       .shake { animation: shake 0.32s ease; }
       @keyframes shake {
         0%, 100% { transform: translateX(0); }
@@ -429,7 +481,6 @@
         50% { transform: translateX(6px); }
         75% { transform: translateX(-4px); }
       }
-
       .controls {
         display: flex;
         flex-wrap: wrap;
@@ -442,8 +493,6 @@
       @media (prefers-color-scheme: dark) {
         .hint-text .shape { color: #7db1ff; }
       }
-
-      /* ---------- complete / final ---------- */
       .complete-card { text-align: center; }
       .complete-line {
         font-size: clamp(1.5rem, 6vw, 2.1rem);
@@ -453,6 +502,12 @@
       }
       .complete-stars { font-size: 1.9rem; letter-spacing: 0.15em; color: var(--sun); margin-bottom: 6px; }
       .complete-stars .off { color: var(--line); }
+      .badge-note {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--orange);
+        margin: 0 0 10px;
+      }
       .final-line {
         font-size: clamp(1.7rem, 6.6vw, 2.4rem);
         font-weight: 800;
@@ -479,6 +534,8 @@
         gap: 8px;
       }
       .score-brick.stars-brick { background: var(--paper); color: var(--ink); border: 3px solid var(--line); border-bottom: 6px solid var(--line); }
+      .score-brick.time-brick { background: var(--orange); }
+      .score-brick.badge-brick { background: var(--green); }
       .burst-note {
         position: absolute;
         font-size: 1.5rem;
@@ -490,8 +547,6 @@
         15% { opacity: 1; }
         100% { transform: translateY(-90px); opacity: 0; }
       }
-
-      /* ---------- info panels (About / Privacy / Terms) ---------- */
       .overlay {
         position: fixed;
         inset: 0;
@@ -553,7 +608,6 @@
       }
       .tab-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
       [hidden] { display: none !important; }
-
       @media (prefers-reduced-motion: reduce) {
         .shake, .slot.filled, .burst-note, .turn-brick.flip { animation: none; }
         .rod-fill, .brick-btn, .tile { transition: none; }
@@ -577,10 +631,26 @@
         <h1 class="greeting">&ldquo;Hi, I&rsquo;m Will Bickford. I&rsquo;m from the Exocortex of 2130, and I&rsquo;m here to help.&rdquo;</h1>
         <p class="greeting-sub">And by help, we mean: <strong>survive the singularity.</strong></p>
 
+        <p class="path-label" id="path-label">Pick a road:</p>
+        <div class="path-grid" role="group" aria-labelledby="path-label">
+          <button class="brick-btn b-orange path-brick" type="button" data-path="little" aria-pressed="false">
+            <span>Little Lines</span>
+            <span class="mode-sub">5 short lines. Wrong taps never cost a star.</span>
+          </button>
+          <button class="brick-btn b-green path-brick selected" type="button" data-path="standard" aria-pressed="true">
+            <span>The Song</span>
+            <span class="mode-sub">All 11 lines, in sung order.</span>
+          </button>
+          <button class="brick-btn b-red path-brick" type="button" data-path="encore" aria-pressed="false">
+            <span>Encore</span>
+            <span class="mode-sub">No dots. Wild tiles. Timer and badges.</span>
+          </button>
+        </div>
+
         <div class="mode-grid">
           <button class="brick-btn b-green mode-brick" id="solo-btn" type="button">
             <span>1 Player</span>
-            <span class="mode-sub">Build all 11 lines yourself.</span>
+            <span class="mode-sub">Build the lines yourself.</span>
           </button>
           <button class="brick-btn b-blue mode-brick" id="duet-btn" type="button">
             <span class="mode-faces" aria-hidden="true">
@@ -591,6 +661,11 @@
             <span class="mode-sub">Red and Blue take turns. Stars are shared.</span>
           </button>
         </div>
+
+        <div class="resume-wrap" id="resume-wrap" hidden>
+          <button class="brick-btn b-blue" id="resume-btn" type="button">Keep singing</button>
+        </div>
+
         <p class="facts">Free forever &middot; Same screen &middot; No sign-up</p>
       </section>
 
@@ -598,10 +673,10 @@
       <section id="screen-game" hidden aria-label="Game">
         <div class="progress-meta">
           <span id="level-label">Line 1 of 11</span>
+          <span class="timer-chip" id="timer-chip" hidden>0:00</span>
           <span class="stars" id="stars" aria-label="Team stars for this line"></span>
         </div>
 
-        <!-- K'Nex rod: one connector joint per line -->
         <div class="rod-wrap" role="progressbar" aria-label="Lines completed" aria-valuemin="0" aria-valuemax="11" aria-valuenow="0" id="progress">
           <div class="rod-line"></div>
           <div class="rod-fill" id="rod-fill"></div>
@@ -614,13 +689,20 @@
         </div>
 
         <div id="play-area">
+          <div class="read-card" id="read-card">
+            <div class="read-tag">Read it</div>
+            <div class="read-line" id="read-line"></div>
+            <div class="read-then">Then build it, word by word.</div>
+          </div>
           <div class="plate">
             <div class="slots" id="slots" aria-label="Words placed so far"></div>
           </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
           <div class="tray" id="tray" aria-label="Word tiles"></div>
           <div class="controls">
-            <button class="brick-btn ghost" id="hint-btn" type="button">&#9834; Hear the shape</button>
+            <button class="brick-btn ghost" id="hint-btn" type="button">&#9834; Hear the shape — free</button>
+            <button class="brick-btn ghost" id="undo-btn" type="button" disabled>Undo last</button>
+            <button class="brick-btn ghost" id="restart-btn" type="button">Start line over</button>
             <span class="hint-text" id="hint-text" aria-live="polite"></span>
           </div>
         </div>
@@ -632,6 +714,7 @@
             <span class="knex bl" aria-hidden="true"></span>
             <span class="knex br" aria-hidden="true"></span>
             <div class="complete-stars" id="complete-stars"></div>
+            <p class="badge-note" id="badge-note" hidden>No-hint badge earned!</p>
             <p class="complete-line" id="complete-line"></p>
             <button class="brick-btn b-red" id="next-btn" type="button">Next line</button>
           </div>
@@ -674,20 +757,26 @@
 
         <div id="panel-about">
           <p><strong>Here is one road in.</strong> A song built from nothing but simple words &mdash; the kind anyone can say, in any land, on any day.</p>
-          <p>You rebuild it line by line: tap the word tiles, put each line back in its sung order, and learn the words by hand and eye. Eleven lines. That is all of it &mdash; and it is enough to start thinking in more directions than flat words allow.</p>
+          <p>You rebuild it line by line: read the line first, then tap the word tiles and put each line back in its sung order. Eleven lines. That is all of it &mdash; and it is enough to start thinking in more directions than flat words allow.</p>
           <p>Zap Zoom Echo is one of the Roads to the Future games &mdash; simple games that teach multidimensional thinking and the Singular language, the simple-word way of speaking where big ideas never need big words.</p>
+          <h3>Three roads</h3>
+          <ul>
+            <li><strong>Little Lines</strong> &mdash; five short lines for the youngest builders. A wrong tap just glows and asks for a second try; it never costs a star.</li>
+            <li><strong>The Song</strong> &mdash; all 11 lines in sung order. Hearing the shape (the first letter) is free; hearing the whole next word costs the line its third star.</li>
+            <li><strong>Encore</strong> &mdash; the expert setlist: no letter dots in the empty slots, extra tiles from every line of the song, a timer, and a no-hint badge for each line finished without hints.</li>
+          </ul>
           <h3>What the lines teach</h3>
           <ul id="about-notes"></ul>
           <h3>Accessibility</h3>
-          <p>Big tap targets. Mistakes shake and lose a star &mdash; never color alone. Every line can be finished without sound: the &ldquo;Hear the shape&rdquo; hint shows the next word&rsquo;s shape, then the word itself. Motion effects turn off with your device&rsquo;s reduce-motion setting.</p>
+          <p>Big tap targets. Every line first appears in full as a &ldquo;Read it&rdquo; card, so nobody has to guess an order they could not have known. Mistakes shake and lose a star &mdash; never color alone. Every line can be finished without sound: the &ldquo;Hear the shape&rdquo; hint shows the next word&rsquo;s shape, then the word itself. Motion effects turn off with your device&rsquo;s reduce-motion setting.</p>
           <h3>Playing together</h3>
-          <p>Duet mode is built for two people on one screen &mdash; a child and a grown-up, or two kids shoulder to shoulder. Red and Blue alternate every tile, and the stars belong to the team.</p>
+          <p>Duet mode is built for two people on one screen &mdash; a child and a grown-up, or two kids shoulder to shoulder. Red and Blue alternate every tile, and the stars belong to the team. Only the last word placed can be taken back, and only by the player who placed it &mdash; earlier words are locked, so a partner&rsquo;s work is never wiped away. &ldquo;Start line over&rdquo; clears the whole line when a bigger fix is needed.</p>
         </div>
 
         <div id="panel-privacy" hidden>
           <h3>Privacy</h3>
-          <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Scores live only while this page is open. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
-          <p class="muted">There is nothing to delete and nothing to export, because nothing is collected or stored in the first place.</p>
+          <p>No accounts. No sign-up. No cookies, no analytics, no tracking. Nothing you tap or type ever leaves this device. Progress and scores are stored only on this device, in this browser. They are never sent anywhere. Multiplayer is same-screen only: no online play, no chat, no strangers.</p>
+          <p class="muted">Clear your browser&rsquo;s site data and the saved progress is gone &mdash; it lives nowhere else.</p>
         </div>
 
         <div id="panel-terms" hidden>
@@ -771,6 +860,13 @@
           }
         ];
 
+        /* Paths: which lines, in which order, under which rules. */
+        var PATHS = {
+          little:   { name: "Little Lines", seq: [0, 3, 6, 1, 7], encore: false, little: true },
+          standard: { name: "The Song",     seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], encore: false, little: false },
+          encore:   { name: "Encore",       seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], encore: true, little: false }
+        };
+
         var NOTE_GLYPHS = ["♪", "♫", "♪", "♫"];
         var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -779,17 +875,48 @@
           { key: "blue", name: "Blue", cls: "p-blue" }
         ];
 
+        /* ---------- on-device persistence (this browser only) ---------- */
+        var SKEY = "zap-zoom-echo-v2";
+        var store = { paths: {}, encoreBest: { total: null, lines: {} }, last: null };
+        try {
+          var raw = window.localStorage.getItem(SKEY);
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === "object") {
+              if (parsed.paths) store.paths = parsed.paths;
+              if (parsed.encoreBest) store.encoreBest = parsed.encoreBest;
+              if (parsed.last) store.last = parsed.last;
+            }
+          }
+        } catch (e) { /* storage unavailable: play without saving */ }
+        function saveStore() {
+          try { window.localStorage.setItem(SKEY, JSON.stringify(store)); } catch (e) {}
+        }
+
+        /* ---------- game state ---------- */
+        var pathKey = "standard";
         var mode = "solo";      // "solo" | "duet"
+        var seq = PATHS.standard.seq;
+        var pos = 0;            // position within seq
+        var level = 0;          // index into LINES
         var turn = 0;           // index into PLAYERS (duet)
+        var lineStartTurn = 0;
         var placedCount = { red: 0, blue: 0 };
-        var level = 0;
+        var lineStartCounts = { red: 0, blue: 0 };
         var tiles = [];
         var placedIds = [];
         var placedBy = {};      // tile id -> player key (duet)
         var lineStars = 3;
+        var starCap = 3;        // drops to 2 when the whole-word hint is used (standard)
         var totalStars = 0;
         var hintStage = 0;
+        var hintUsedThisLine = false;
         var finished = false;
+        // Encore timing / badges
+        var lineStartMs = 0;
+        var elapsedBeforeMs = 0;
+        var badges = 0;
+        var timerInt = null;
 
         var el = function (id) { return document.getElementById(id); };
         var screenOpen = el("screen-open"), screenGame = el("screen-game"), screenFinal = el("screen-final");
@@ -797,20 +924,33 @@
         var starsEl = el("stars"), levelLabel = el("level-label");
         var progressEl = el("progress"), rodFill = el("rod-fill"), rodJoints = el("rod-joints");
         var playArea = el("play-area"), completeArea = el("complete-area");
-        var hintText = el("hint-text");
+        var hintText = el("hint-text"), hintBtn = el("hint-btn");
+        var undoBtn = el("undo-btn");
         var turnBrick = el("turn-brick"), turnText = el("turn-text");
+        var readCard = el("read-card"), readLine = el("read-line");
+        var timerChip = el("timer-chip");
 
-        // Build the K'Nex rod joints: one per line.
+        function path() { return PATHS[pathKey]; }
+        function isEncore() { return path().encore; }
+        function isLittle() { return path().little; }
+
+        // Build the K'Nex rod joints: one per line in the current path.
         var jointEls = [];
-        LINES.forEach(function (_, i) {
-          var j = document.createElement("span");
-          j.className = "joint";
-          j.setAttribute("aria-hidden", "true");
-          rodJoints.appendChild(j);
-          jointEls.push(j);
-        });
+        function buildRod() {
+          rodJoints.innerHTML = "";
+          jointEls = [];
+          seq.forEach(function (_, i) {
+            var j = document.createElement("span");
+            j.className = "joint";
+            j.setAttribute("aria-hidden", "true");
+            rodJoints.appendChild(j);
+            jointEls.push(j);
+          });
+          progressEl.setAttribute("aria-valuemax", String(seq.length));
+        }
+        buildRod();
 
-        // About panel: the teaching notes live here now.
+        // About panel: the teaching notes live here.
         var notesList = el("about-notes");
         LINES.forEach(function (line, i) {
           var li = document.createElement("li");
@@ -826,6 +966,17 @@
           }
           return s;
         }
+        function earnedStarString(n) {
+          var s = "";
+          for (var i = 0; i < n; i++) s += "★";
+          return s || "★";
+        }
+        function fmtTime(ms) {
+          var s = Math.round(ms / 1000);
+          var m = Math.floor(s / 60);
+          var r = s % 60;
+          return m + ":" + (r < 10 ? "0" : "") + r;
+        }
 
         function shuffle(arr) {
           var a = arr.slice();
@@ -837,11 +988,11 @@
         }
 
         function renderRod() {
-          progressEl.setAttribute("aria-valuenow", String(level + (finished ? 1 : 0)));
-          var doneCount = level + (finished ? 1 : 0);
-          rodFill.style.width = (doneCount / LINES.length * 100) + "%";
+          var doneCount = pos + (finished ? 1 : 0);
+          progressEl.setAttribute("aria-valuenow", String(doneCount));
+          rodFill.style.width = (doneCount / seq.length * 100) + "%";
           jointEls.forEach(function (j, i) {
-            j.className = "joint" + (i < doneCount ? " done" : (i === level && !finished ? " now" : ""));
+            j.className = "joint" + (i < doneCount ? " done" : (i === pos && !finished ? " now" : ""));
           });
         }
 
@@ -858,30 +1009,92 @@
           }
         }
 
-        function startGame(selectedMode) {
+        function updateHintBtn() {
+          if (isLittle()) {
+            hintBtn.textContent = hintStage === 0 ? "♪ Hear the shape — free" : "♪ Hear the word — free";
+          } else if (pathKey === "standard") {
+            hintBtn.textContent = hintStage === 0 ? "♪ Hear the shape — free" : "♪ Hear the word (−1 ★)";
+          } else {
+            hintBtn.textContent = hintStage === 0 ? "♪ Hear the shape — free" : "♪ Hear the word";
+          }
+        }
+
+        function updateUndoBtn() {
+          if (placedIds.length === 0) {
+            undoBtn.disabled = true;
+            undoBtn.textContent = "Undo last";
+            return;
+          }
+          var topId = placedIds[placedIds.length - 1];
+          if (mode === "duet") {
+            var ownerKey = placedBy[topId];
+            var owner = ownerKey === "blue" ? PLAYERS[1] : PLAYERS[0];
+            // Only the player who placed the top tile may take it back.
+            // Turns flip on placement, so the top tile belongs to the player
+            // who just moved — undo is theirs, never the partner's.
+            var lastMover = PLAYERS[(turn + 1) % PLAYERS.length];
+            undoBtn.disabled = owner.key !== lastMover.key;
+            undoBtn.textContent = "Undo — " + owner.name + "’s tile";
+          } else {
+            undoBtn.disabled = false;
+            undoBtn.textContent = "Undo last";
+          }
+        }
+
+        function startGame(selectedPath, selectedMode, startPos) {
+          pathKey = selectedPath;
           mode = selectedMode;
+          seq = PATHS[pathKey].seq.slice();
+          buildRod();
           totalStars = 0;
           placedCount = { red: 0, blue: 0 };
           turn = 0;
+          badges = 0;
+          elapsedBeforeMs = 0;
+          // Resuming: credit stars already earned on earlier lines of this path.
+          var saved = store.paths[pathKey];
+          if (startPos > 0 && saved && saved.stars) {
+            for (var i = 0; i < startPos; i++) {
+              if (saved.stars[i]) totalStars += saved.stars[i];
+            }
+          }
           screenOpen.hidden = true;
           screenFinal.hidden = true;
           screenGame.hidden = false;
-          startLevel(0);
+          startLevel(startPos || 0);
         }
 
-        function startLevel(idx) {
-          level = idx;
+        function encoreDistractors(line) {
+          var pool = [];
+          LINES.forEach(function (l) {
+            if (l === line) return;
+            l.words.forEach(function (w) {
+              if (line.words.indexOf(w) === -1 && pool.indexOf(w) === -1) pool.push(w);
+            });
+          });
+          return shuffle(pool).slice(0, 3);
+        }
+
+        function startLevel(p) {
+          pos = p;
+          level = seq[p];
           lineStars = 3;
+          starCap = 3;
           placedIds = [];
           placedBy = {};
           hintStage = 0;
+          hintUsedThisLine = false;
           finished = false;
-          var line = LINES[idx];
+          lineStartTurn = turn;
+          lineStartCounts = { red: placedCount.red, blue: placedCount.blue };
+          lineStartMs = Date.now();
+          var line = LINES[level];
 
+          var distractors = isEncore() ? encoreDistractors(line) : line.distractors;
           var pool = line.words.map(function (w, i) {
             return { id: "t" + i, word: w, isTarget: true, placed: false };
           });
-          line.distractors.forEach(function (w, i) {
+          distractors.forEach(function (w, i) {
             pool.push({ id: "d" + i, word: w, isTarget: false, placed: false });
           });
           tiles = shuffle(pool);
@@ -895,11 +1108,25 @@
 
           playArea.hidden = false;
           completeArea.hidden = true;
-          levelLabel.textContent = "Line " + (idx + 1) + " of " + LINES.length;
+          levelLabel.textContent = path().name + " · Line " + (p + 1) + " of " + seq.length;
           hintText.innerHTML = "";
           setFeedback("", false);
+          startTimer();
           renderRod();
           render();
+        }
+
+        function startTimer() {
+          stopTimer();
+          if (!isEncore()) { timerChip.hidden = true; return; }
+          timerChip.hidden = false;
+          timerChip.textContent = fmtTime(elapsedBeforeMs);
+          timerInt = setInterval(function () {
+            if (!finished) timerChip.textContent = fmtTime(elapsedBeforeMs + (Date.now() - lineStartMs));
+          }, 500);
+        }
+        function stopTimer() {
+          if (timerInt) { clearInterval(timerInt); timerInt = null; }
         }
 
         function nextWord() {
@@ -919,27 +1146,49 @@
         }
 
         function render() {
-          starsEl.innerHTML = starString(lineStars);
+          starsEl.innerHTML = isLittle() ? earnedStarString(lineStars) : starString(lineStars);
           renderTurn();
+          updateHintBtn();
+          updateUndoBtn();
+
+          // Read-it card: full line until the first tile lands.
+          if (placedIds.length === 0) {
+            readCard.hidden = false;
+            readLine.textContent = LINES[level].display;
+          } else {
+            readCard.hidden = true;
+          }
 
           slotsEl.innerHTML = "";
           LINES[level].words.forEach(function (word, i) {
             if (i < placedIds.length) {
               var tile = tiles.filter(function (t) { return t.id === placedIds[i]; })[0];
-              var b = document.createElement("button");
-              b.type = "button";
               var cls = slotClassFor(i, tile.id);
-              b.className = "slot filled " + cls + (cls === "c3" ? " dark-text" : "");
-              b.textContent = tile.word;
-              b.setAttribute("aria-label", "Remove " + tile.word + " and the words after it");
-              b.addEventListener("click", function () { unplaceFrom(i); });
-              slotsEl.appendChild(b);
+              var isTop = i === placedIds.length - 1;
+              if (isTop) {
+                var b = document.createElement("button");
+                b.type = "button";
+                b.className = "slot filled top " + cls + (cls === "c3" ? " dark-text" : "");
+                b.textContent = tile.word;
+                b.setAttribute("aria-label", "Take back the last word: " + tile.word);
+                b.addEventListener("click", undoLast);
+                slotsEl.appendChild(b);
+              } else {
+                var d = document.createElement("div");
+                d.className = "slot filled locked " + cls + (cls === "c3" ? " dark-text" : "");
+                d.textContent = tile.word;
+                slotsEl.appendChild(d);
+              }
             } else {
               var s = document.createElement("div");
               s.className = "slot";
-              var dots = "";
-              for (var k = 0; k < word.length; k++) dots += "·";
-              s.innerHTML = '<span class="dots">' + dots + "</span>";
+              if (isEncore()) {
+                s.innerHTML = '<span class="dots">&nbsp;</span>';
+              } else {
+                var dots = "";
+                for (var k = 0; k < word.length; k++) dots += "·";
+                s.innerHTML = '<span class="dots">' + dots + "</span>";
+              }
               slotsEl.appendChild(s);
             }
           });
@@ -977,6 +1226,18 @@
               setFeedback(randomPraise(), false);
               render();
             }
+          } else if (isLittle()) {
+            // Little Lines: never a star. Shake, glow, second try.
+            setFeedback("Try again.", false);
+            btnEl.classList.remove("glow");
+            void btnEl.offsetWidth;
+            btnEl.classList.add("glow");
+            setTimeout(function () { btnEl.classList.remove("glow"); }, 1000);
+            if (!reducedMotion) {
+              btnEl.classList.remove("shake");
+              void btnEl.offsetWidth;
+              btnEl.classList.add("shake");
+            }
           } else {
             if (lineStars > 0) lineStars--;
             starsEl.innerHTML = starString(lineStars);
@@ -992,19 +1253,42 @@
           }
         }
 
-        function unplaceFrom(slotIndex) {
-          if (finished) return;
-          var removed = placedIds.splice(slotIndex);
-          removed.forEach(function (id) {
-            tiles.forEach(function (t) { if (t.id === id) t.placed = false; });
-            if (mode === "duet" && placedBy[id]) {
-              placedCount[placedBy[id]]--;
-              delete placedBy[id];
-            }
-          });
+        /* Undo: only the most recent tile, only by its placer. No cascade. */
+        function undoLast() {
+          if (finished || placedIds.length === 0) return;
+          if (undoBtn.disabled && mode === "duet") return;
+          var id = placedIds.pop();
+          tiles.forEach(function (t) { if (t.id === id) t.placed = false; });
+          if (mode === "duet" && placedBy[id]) {
+            var ownerKey = placedBy[id];
+            placedCount[ownerKey]--;
+            delete placedBy[id];
+            turn = ownerKey === "blue" ? 1 : 0; // hand the turn back to the placer
+          }
           hintStage = 0;
           hintText.innerHTML = "";
           setFeedback("Sent back.", false);
+          render();
+        }
+
+        function startLineOver() {
+          if (finished) return;
+          placedIds.forEach(function (id) {
+            tiles.forEach(function (t) { if (t.id === id) t.placed = false; });
+          });
+          placedIds = [];
+          placedBy = {};
+          if (mode === "duet") {
+            placedCount = { red: lineStartCounts.red, blue: lineStartCounts.blue };
+            turn = lineStartTurn;
+          }
+          lineStars = 3;
+          starCap = 3;
+          hintStage = 0;
+          hintUsedThisLine = false;
+          hintText.innerHTML = "";
+          lineStartMs = Date.now();
+          setFeedback("Start again.", false);
           render();
         }
 
@@ -1017,29 +1301,55 @@
           if (finished) return;
           var word = nextWord();
           if (!word) return;
+          hintUsedThisLine = true;
           if (hintStage === 0) {
             hintStage = 1;
             var shape = word.charAt(0);
             for (var i = 1; i < word.length; i++) shape += " ·";
             hintText.innerHTML = 'Next: <span class="shape">' + shape + "</span>";
-          } else if (hintStage === 1) {
+          } else {
+            if (hintStage === 1 && pathKey === "standard") {
+              // Honest star economy: the whole word costs the line its third star.
+              starCap = 2;
+              if (lineStars > starCap) lineStars = starCap;
+              starsEl.innerHTML = starString(lineStars);
+            }
             hintStage = 2;
             hintText.innerHTML = 'Next: <span class="shape">' + word + "</span>";
-          } else {
-            hintText.innerHTML = 'Next: <span class="shape">' + word + "</span> — in the tray.";
           }
+          updateHintBtn();
+        }
+
+        function saveProgress() {
+          var p = store.paths[pathKey] || (store.paths[pathKey] = { done: 0, stars: {}, mode: mode });
+          p.done = Math.max(p.done, pos + 1);
+          p.stars[pos] = Math.max(p.stars[pos] || 0, lineStars);
+          p.mode = mode;
+          store.last = { path: pathKey, mode: mode, done: p.done };
+          saveStore();
         }
 
         function completeLevel() {
           finished = true;
+          stopTimer();
           totalStars += lineStars;
-          setFeedback("", false);
-          renderRod();
+
+          var badgeEarned = false;
+          if (isEncore()) {
+            var lineMs = Date.now() - lineStartMs;
+            elapsedBeforeMs += lineMs;
+            timerChip.textContent = fmtTime(elapsedBeforeMs);
+            var prevBest = store.encoreBest.lines[level];
+            if (prevBest == null || lineMs < prevBest) store.encoreBest.lines[level] = lineMs;
+            if (!hintUsedThisLine) { badges++; badgeEarned = true; }
+          }
+          saveProgress();
 
           var line = LINES[level];
-          el("complete-stars").innerHTML = starString(lineStars);
+          el("complete-stars").innerHTML = isLittle() ? earnedStarString(lineStars) : starString(lineStars);
+          el("badge-note").hidden = !badgeEarned;
           el("complete-line").textContent = line.display;
-          el("next-btn").textContent = level === LINES.length - 1 ? "Finish the road" : "Next line";
+          el("next-btn").textContent = pos === seq.length - 1 ? "Finish the road" : "Next line";
 
           playArea.hidden = true;
           turnBrick.hidden = true;
@@ -1063,44 +1373,100 @@
           }
         }
 
+        function scoreBrick(cls, text) {
+          var d = document.createElement("span");
+          d.className = "score-brick " + cls;
+          d.textContent = text;
+          return d;
+        }
+
         function showFinal() {
           screenGame.hidden = true;
           screenFinal.hidden = false;
           var scores = el("final-scores");
           scores.innerHTML = "";
           if (mode === "duet") {
-            el("final-line").textContent = "You speak Zap Zoom Echo now — together.";
+            el("final-line").textContent = isLittle()
+              ? "You speak Little Lines now — together."
+              : "You speak Zap Zoom Echo now — together.";
             PLAYERS.forEach(function (p) {
-              var d = document.createElement("span");
-              d.className = "score-brick " + p.cls;
-              d.textContent = p.name + ": " + placedCount[p.key] + " tiles";
-              scores.appendChild(d);
+              scores.appendChild(scoreBrick(p.cls, p.name + ": " + placedCount[p.key] + " tiles"));
             });
           } else {
-            el("final-line").textContent = "You speak Zap Zoom Echo now.";
+            el("final-line").textContent = isLittle()
+              ? "You speak Little Lines now."
+              : "You speak Zap Zoom Echo now.";
           }
-          var starsBrick = document.createElement("span");
-          starsBrick.className = "score-brick stars-brick";
-          starsBrick.textContent = "★ " + totalStars + " of " + (LINES.length * 3) + " team stars";
-          scores.appendChild(starsBrick);
+          if (isLittle()) {
+            scores.appendChild(scoreBrick("stars-brick", "★ " + totalStars + " stars earned"));
+          } else {
+            scores.appendChild(scoreBrick("stars-brick", "★ " + totalStars + " of " + (seq.length * 3) + " team stars"));
+          }
+          if (isEncore()) {
+            scores.appendChild(scoreBrick("time-brick", "Time: " + fmtTime(elapsedBeforeMs)));
+            scores.appendChild(scoreBrick("badge-brick", "No-hint badges: " + badges + " of " + seq.length));
+            var best = store.encoreBest.total;
+            if (best == null || elapsedBeforeMs < best) {
+              store.encoreBest.total = elapsedBeforeMs;
+              saveStore();
+              scores.appendChild(scoreBrick("stars-brick", "New best time!"));
+            } else {
+              scores.appendChild(scoreBrick("stars-brick", "Best time: " + fmtTime(best)));
+            }
+          }
           burst(document.querySelector("#screen-final .complete-card"));
           el("replay-btn").focus();
         }
 
-        el("solo-btn").addEventListener("click", function () { startGame("solo"); });
-        el("duet-btn").addEventListener("click", function () { startGame("duet"); });
-        el("hint-btn").addEventListener("click", useHint);
+        /* ---------- opening: path pick, mode start, resume ---------- */
+        var pathBtns = Array.prototype.slice.call(document.querySelectorAll("[data-path]"));
+        function selectPath(k) {
+          pathKey = k;
+          pathBtns.forEach(function (b) {
+            var on = b.getAttribute("data-path") === k;
+            b.classList.toggle("selected", on);
+            b.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+        }
+        pathBtns.forEach(function (b) {
+          b.addEventListener("click", function () { selectPath(b.getAttribute("data-path")); });
+        });
+
+        function refreshResume() {
+          var last = store.last;
+          var wrap = el("resume-wrap");
+          if (!last || !PATHS[last.path]) { wrap.hidden = true; return; }
+          var p = store.paths[last.path];
+          var len = PATHS[last.path].seq.length;
+          if (!p || p.done <= 0 || p.done >= len) { wrap.hidden = true; return; }
+          wrap.hidden = false;
+          el("resume-btn").textContent = "Keep singing — " + PATHS[last.path].name + ", Line " + (p.done + 1);
+        }
+        refreshResume();
+
+        el("resume-btn").addEventListener("click", function () {
+          var last = store.last;
+          if (!last) return;
+          var p = store.paths[last.path];
+          startGame(last.path, last.mode || "solo", p ? p.done : 0);
+        });
+        el("solo-btn").addEventListener("click", function () { startGame(pathKey, "solo", 0); });
+        el("duet-btn").addEventListener("click", function () { startGame(pathKey, "duet", 0); });
+        hintBtn.addEventListener("click", useHint);
+        undoBtn.addEventListener("click", undoLast);
+        el("restart-btn").addEventListener("click", startLineOver);
 
         el("next-btn").addEventListener("click", function () {
-          if (level === LINES.length - 1) {
+          if (pos === seq.length - 1) {
             showFinal();
+            refreshResume();
           } else {
-            startLevel(level + 1);
+            startLevel(pos + 1);
           }
         });
 
         el("replay-btn").addEventListener("click", function () {
-          startGame(mode);
+          startGame(pathKey, mode, 0);
         });
 
         /* ---------- info panels ---------- */
