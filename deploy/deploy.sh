@@ -91,6 +91,9 @@ ssh -o BatchMode=yes wbic16@44.248.235.76 'bash -s' <<'BOXEOF'
 set -e
 mkdir -p ~/apertureshift-deploy
 tar xzf /tmp/as-stage.tgz -C ~/apertureshift-deploy
+# rootless container uid mapping: the nginx worker runs as a mapped uid that is
+# neither owner nor group, so staged files must be world-readable.
+chmod -R a+rX ~/apertureshift-deploy/site
 # one-time backup of the live vhost (rollback source); never overwritten later
 if [ ! -f ~/apertureshift-deploy/apertureshift.com.vhost.orig ]; then
   cp /etc/nginx/sites-enabled/apertureshift.com ~/apertureshift-deploy/apertureshift.com.vhost.orig

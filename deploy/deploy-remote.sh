@@ -20,6 +20,10 @@ fail() { echo "DEPLOY-REMOTE: $*" >&2; exit 1; }
 ( cd "${STAGE}" && sha256sum -c manifest.sha256 --quiet ) || fail "manifest verification FAILED"
 echo "manifest: all staged files match their sha256"
 
+# rootless container uid mapping: the nginx worker runs as a mapped uid that is
+# neither owner nor group, so staged files must be world-readable.
+chmod -R a+rX "${SITE}"
+
 # --- preflight: podman ---------------------------------------------------------
 if ! command -v podman >/dev/null 2>&1; then
   cat >&2 <<'MSG'
