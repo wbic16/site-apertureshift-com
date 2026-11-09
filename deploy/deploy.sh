@@ -4,7 +4,9 @@
 # 1. Verifies the local publish tree against the live repo tree of
 #    wbic16/site-apertureshift-com@exo (fresh HEAD read at run time).
 # 2. Stages the web files + box tooling to the AWS box via aletheia-core
-#    (the proven nested hop), into ~/apertureshift-deploy/ on the box.
+#    (the proven nested hop; the box leg runs over the tailnet to awsbox,
+#    100.78.221.38, so ranch egress IP changes no longer break deploys),
+#    into ~/apertureshift-deploy/ on the box.
 # 3. Runs the box-side deploy-remote.sh, which rebuilds the rootless
 #    podman nginx container and verifies the loopback endpoint.
 #
@@ -21,7 +23,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(dirname "${HERE}")"
 PUBLISH="${ROOT}/publish"
 REPO="wbic16/site-apertureshift-com"
-BOX="wbic16@44.248.235.76"
+BOX="wbic16@100.78.221.38"  # awsbox on the tailnet (Will, 2026-11-09); public-IP fallback: wbic16@44.248.235.76
 ACORE="wbic16@100.88.154.1"
 SSH_VM=(ssh -i "${HOME}/.ssh/id_ed25519" -o IdentitiesOnly=yes
         -o "ProxyCommand=nc -X connect -x hatch-egress-proxy:3130 %h %p")
@@ -86,8 +88,8 @@ echo "== shipping to the box via aletheia-core =="
 tar czf - -C "${STAGE}" . | acore_put /tmp/as-stage.tgz
 acore_sh <<'EOF'
 set -e
-scp -q -o BatchMode=yes /tmp/as-stage.tgz wbic16@44.248.235.76:/tmp/as-stage.tgz
-ssh -o BatchMode=yes wbic16@44.248.235.76 'bash -s' <<'BOXEOF'
+scp -q -o BatchMode=yes /tmp/as-stage.tgz wbic16@100.78.221.38:/tmp/as-stage.tgz
+ssh -o BatchMode=yes wbic16@100.78.221.38 'bash -s' <<'BOXEOF'
 set -e
 mkdir -p ~/apertureshift-deploy
 tar xzf /tmp/as-stage.tgz -C ~/apertureshift-deploy
