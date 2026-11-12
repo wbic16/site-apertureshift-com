@@ -79,7 +79,7 @@ for f in "${PUBLISH}"/*; do
   cp "${f}" "${STAGE}/site/"
 done
 cp "${HERE}/deploy-remote.sh" "${HERE}/apertureshift-web.container" \
-   "${HERE}/apertureshift.com.vhost" "${STAGE}/"
+   "${HERE}/apertureshift.com.vhost" "${HERE}/default.conf" "${STAGE}/"
 ( cd "${STAGE}" && find site -type f | sort | xargs sha256sum > manifest.sha256 )
 echo "staged $(find "${STAGE}/site" -type f | wc -l) web files + tooling"
 

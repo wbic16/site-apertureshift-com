@@ -8,6 +8,7 @@ Image=docker.io/library/nginx:alpine
 ContainerName=apertureshift-web
 PublishPort=127.0.0.1:3002:80
 Volume=/home/wbic16/apertureshift-deploy/site:/usr/share/nginx/html:ro
+Volume=/home/wbic16/apertureshift-deploy/default.conf:/etc/nginx/conf.d/default.conf:ro
 
 [Service]
 Restart=always

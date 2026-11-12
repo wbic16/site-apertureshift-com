@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFBF0">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#2C2019">
+<title>Page not found — Roads to the Future</title>
+<meta name="description" content="This road isn't on the map. Head back to Roads to the Future — eighteen free games, no sign-up, no ads.">
+<style>
+  :root{ color-scheme:light;
+    --ink:#3E3A34; --soft:#5D564A; --bg1:#FFFBF0; --bg2:#FFEFCE;
+    --edge:#E7D6B4; --focus:#B85C0E; --plate:#FFFBF1; --edge-white:#F2DFA8;
+    --btn-ink:#FFF8EC; --btn-blue1:#3F6CA8; --btn-blue2:#35619C;
+    --dot-lo:#F3DFAE; --rod1:#F6D9A8; --rod2:#E2B56B;
+    --shadow:0 10px 28px rgba(133,90,32,.13), 0 2px 6px rgba(133,90,32,.10);
+    --btnshadow:rgba(133,90,32,.18); }
+  @media (prefers-color-scheme: dark){
+    :root{ color-scheme:dark;
+    --ink:#F6EBD7; --soft:#DCC7A4; --bg1:#2C2019; --bg2:#20160F;
+    --edge:#5C4630; --focus:#F0B35C; --plate:#3B2D21; --edge-white:#8A6A3C;
+    --btn-ink:#FFF6E6; --btn-blue1:#426A9E; --btn-blue2:#385C8C;
+    --dot-lo:#57432C; --rod1:#8A6A3C; --rod2:#6E5327;
+    --shadow:0 10px 28px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.30);
+    --btnshadow:rgba(0,0,0,.35); }
+  }
+  *{box-sizing:border-box}
+  html{ font-size:17px; }
+  body{ margin:0; font-family:Verdana, Geneva, sans-serif; color:var(--ink); line-height:1.6;
+    background-color:var(--bg2);
+    background-image:linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 72%); }
+  main{ width:75%; max-width:42rem; margin:0 auto; padding:2.5rem 0 3rem; }
+  .brick{ border-radius:22px; padding:1.15rem 1.3rem; margin:1rem 0; position:relative; color:var(--ink);
+    background:var(--plate);
+    border:1px solid var(--edge); border-left:10px solid var(--edge-white);
+    box-shadow:var(--shadow); }
+  .brick::before{ content:""; display:block; height:12px; margin:-.2rem 0 .55rem;
+    background-image:radial-gradient(circle, var(--dot-lo) 0 3.5px, transparent 4.5px);
+    background-size:34px 12px; background-repeat:repeat-x; background-position:center; }
+  h1{ font-size:2rem; margin:.2rem 0; }
+  p{ line-height:1.55; margin:.35rem 0; }
+  a{ color:inherit; }
+  .play{ display:inline-block; color:var(--btn-ink); font-weight:bold; text-decoration:none;
+    border-radius:999px; padding:.8rem 1.5rem; margin-top:.5rem; font-size:1.1rem; min-height:48px;
+    border:1px solid var(--edge);
+    background:linear-gradient(180deg, var(--btn-blue1), var(--btn-blue2));
+    box-shadow:0 3px 8px var(--btnshadow); }
+  .rod{ display:flex; align-items:center; gap:.4rem; margin:.6rem 0 0; }
+  .rod .joint{ width:16px; height:16px; border-radius:50%; flex:none;
+    background:radial-gradient(circle at 35% 30%, #FFFFFF, var(--rod1) 55%, var(--rod2) 100%);
+    border:2px solid var(--edge); box-shadow:0 1px 2px var(--btnshadow); }
+  .rod .bar{ height:6px; flex:1; border-radius:3px;
+    background:linear-gradient(180deg, var(--rod1), var(--rod2)); }
+  footer{ margin-top:2rem; font-size:.95rem; color:var(--soft); }
+  footer a{ margin-right:1.1rem; }
+  :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+  @media (max-width:700px){ main{ width:94%; } }
+</style>
+</head>
+<body>
+<main>
+  <section class="brick">
+    <h1>404 — This road isn&rsquo;t on the map</h1>
+    <p>The page you were looking for isn&rsquo;t here. It may have moved, or the address may have a small typo in it. Nothing is lost — the roads themselves are all still here.</p>
+    <div class="rod"><span class="joint"></span><span class="bar"></span><span class="joint"></span><span class="bar"></span><span class="joint"></span></div>
+    <p><a class="play" href="index.html">Back to the roads</a></p>
+  </section>
+  <footer>
+    <a href="about.html">About</a>
+    <a href="legal.html#privacy">Privacy</a>
+    <a href="legal.html#terms">Terms</a>
+    <a href="legal.html#license">License</a>
+    <p>Roads to the Future · from the Exocortex of 2130 · apertureshift.com</p>
+  </footer>
+</main>
+</body>
+</html>

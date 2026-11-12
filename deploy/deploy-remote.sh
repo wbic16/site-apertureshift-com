@@ -65,6 +65,12 @@ grep -q "Roads to the Future" /tmp/as-index.html || fail "hub marker missing fro
 grep -q "Road Card" /tmp/as-index.html || fail "XP Road Card missing from served /"
 code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/word-home.html")
 [ "${code}" = "200" ] || fail "word-home.html returned ${code}"
+code404=$(curl -s -o /tmp/as-404.html -w '%{http_code}' "http://127.0.0.1:${PORT}/no-such-road-daily-better-check")
+[ "${code404}" = "404" ] || fail "missing page returned ${code404}, expected 404"
+served404_sha=$(sha256sum /tmp/as-404.html | awk '{print $1}')
+staged404_sha=$(sha256sum "${SITE}/404.html" | awk '{print $1}')
+[ "${served404_sha}" = "${staged404_sha}" ] || fail "served 404 sha ${served404_sha} != staged ${staged404_sha}"
+echo "404 page: styled error page serves on missing paths (sha256=${served404_sha})"
 served_sha=$(sha256sum /tmp/as-index.html | awk '{print $1}')
 staged_sha=$(sha256sum "${SITE}/index.html" | awk '{print $1}')
 [ "${served_sha}" = "${staged_sha}" ] || fail "served index sha ${served_sha} != staged ${staged_sha}"
