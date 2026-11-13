@@ -28,11 +28,16 @@
   h1{ font-size:1.8rem; } h2{ margin-top:1.8rem; font-size:1.25rem; }
   p, li{ line-height:1.6; }
   footer{ margin-top:2rem; font-size:.95rem; } footer a{ margin-right:1.1rem; }
+  .skip{ position:absolute; left:1rem; top:-100px; z-index:10; font-weight:bold; color:var(--ink);
+    background:#fff; border:1px solid rgba(0,0,0,.25); border-radius:999px; padding:.7rem 1.2rem; }
+  .skip:focus{ top:1rem; }
+  :focus-visible{ outline:3px solid #B85C0E; outline-offset:2px; }
   code{ background:rgba(0,0,0,.07); padding:.05rem .3rem; border-radius:4px; }
 </style>
 </head>
 <body>
-<main>
+<a class="skip" href="#main">Skip to main content</a>
+<main id="main" tabindex="-1">
   <h1>About Roads to the Future</h1>
   <p>"Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help." And by help, we mean: survive the singularity.</p>
 

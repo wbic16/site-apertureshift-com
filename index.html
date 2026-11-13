@@ -199,6 +199,10 @@
     background-color:var(--bg2);
     background-image:linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 72%); }
   main{ width:75%; max-width:80rem; margin:0 auto; padding:1.5rem 0 3rem; }
+  .skip{ position:absolute; left:1rem; top:-100px; z-index:20; font-weight:bold; text-decoration:none;
+    color:var(--ink); background:var(--plate); border:1px solid var(--edge); border-radius:999px;
+    padding:.7rem 1.2rem; box-shadow:var(--shadow); }
+  .skip:focus{ top:1rem; }
   main > h2.band:first-of-type{ margin-top:.2rem; }
   .themerow{ display:flex; justify-content:flex-end; margin:0 0 .2rem; }
   #themetoggle{ min-height:48px; min-width:48px; font:inherit; font-weight:bold; cursor:pointer;
@@ -286,9 +290,10 @@
 </script>
 </head>
 <body>
-<main>
+<a class="skip" href="#main">Skip to main content</a>
+<main id="main" tabindex="-1">
 
-  <div class="themerow"><button id="themetoggle" type="button" aria-label="Switch between morning and evening colors">&#9728; / &#9790;</button></div>
+  <div class="themerow"><button id="themetoggle" type="button" aria-pressed="false" aria-label="Switch between morning and evening colors">&#9728; / &#9790;</button></div>
 
   <h2 class="band">Ages 0&ndash;2 · First Taps</h2>
   <p class="bandnote">All Duplo: cause and effect, one tap at a time. A grown-up holds the screen.</p>
@@ -437,21 +442,21 @@
     <h2>The XP Road Card</h2>
     <p>Finish all eighteen games and this card fills up. A full card earns a <strong>Volumen-class Wavefront grant</strong>: disk space on <a href="https://edit.phext.io">edit.phext.io</a>, yours to claim with the code this page makes for you. (The grants that came before the games are all Incipit-class; this is the first Volumen-class one.)</p>
     <p>Your stamps live only on this device. Where a game keeps its own record of a finish, this page reads that record — it never leaves the device. A game that keeps no record (the youngest ones, and Your Own Archive, which stores nothing on purpose) you stamp yourself when you finish it. Stamps are self-attested, by design: checking up on players would take accounts and tracking, and this road has neither. The full rules are in the <a href="legal.html#grant">grant terms</a>.</p>
-    <p id="stampcount" class="facts">0 of 18 stamped</p>
-    <div class="stampgrid" id="stampgrid"></div>
+    <p id="stampcount" class="facts" role="status" aria-live="polite">0 of 18 stamped</p>
+    <div class="stampgrid" id="stampgrid" role="group" aria-label="Stamps for the eighteen games"></div>
     <div id="grantpanel" class="hidden">
       <h2>Your grant is ready</h2>
       <p>All eighteen roads walked. Make your claim code, keep it safe, then sign in at <a href="https://edit.phext.io">edit.phext.io</a> and present it to receive your Volumen-class grant. The code is a bearer code — like a gift card, whoever presents it claims the grant — and it works once. <strong>This page does not keep a copy of your code.</strong> Copy it down or download the receipt before you leave; if you lose it, you can make a new one here.</p>
-      <button class="bigbtn" id="gencode" type="button">Make my claim code</button>
+      <button class="bigbtn" id="gencode" type="button" aria-label="Make my claim code for the Volumen-class grant">Make my claim code</button>
       <div id="codebox" class="hidden">
         <code id="claimcode"></code>
-        <button class="bigbtn" id="copycode" type="button">Copy the code</button>
-        <button class="bigbtn" id="receipt" type="button">Download my receipt</button>
-        <p id="copied" class="hidden">Copied. Keep it somewhere safe.</p>
+        <button class="bigbtn" id="copycode" type="button" aria-label="Copy the claim code">Copy the code</button>
+        <button class="bigbtn" id="receipt" type="button" aria-label="Download my grant receipt as a text file">Download my receipt</button>
+        <p id="copied" class="hidden" role="status" aria-live="polite">Copied. Keep it somewhere safe.</p>
       </div>
     </div>
-    <p><button class="bigbtn" id="wipe" type="button">Clear my stamps and saved progress on this device</button></p>
-    <p id="wiped" class="hidden">Cleared. This device now remembers nothing about your roads.</p>
+    <p><button class="bigbtn" id="wipe" type="button" aria-label="Clear my stamps and saved progress on this device">Clear my stamps and saved progress on this device</button></p>
+    <p id="wiped" class="hidden" role="status" aria-live="polite">Cleared. This device now remembers nothing about your roads.</p>
   </section>
 
   <section class="brick white closing">
