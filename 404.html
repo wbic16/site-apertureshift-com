@@ -60,6 +60,22 @@
   footer a{ margin-right:1.1rem; }
   :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
   @media (max-width:700px){ main{ width:94%; } }
+
+  @media print{
+    @page{ margin:1.5cm; }
+    *{ box-shadow:none !important; text-shadow:none !important; }
+    body{ background:#fff !important; color:#000 !important; }
+    main{ width:100%; max-width:none; margin:0; padding:0; }
+    .skip{ display:none !important; }
+    .brick{ background:#fff !important; color:#000 !important; border:1px solid #000 !important;
+      border-left:4px solid #000 !important; box-shadow:none !important; }
+    .brick::before{ display:none !important; }
+    h1, p{ color:#000 !important; }
+    footer{ color:#000 !important; }
+    a{ color:#000 !important; text-decoration:underline; }
+    .play{ background:#fff !important; color:#000 !important; border:1px solid #000 !important; box-shadow:none !important; }
+    .rod{ display:none !important; }
+  }
 </style>
 </head>
 <body>

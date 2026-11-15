@@ -33,6 +33,17 @@
   .skip:focus{ top:1rem; }
   :focus-visible{ outline:3px solid #B85C0E; outline-offset:2px; }
   code{ background:rgba(0,0,0,.07); padding:.05rem .3rem; border-radius:4px; }
+
+  @media print{
+    @page{ margin:1.5cm; }
+    *{ box-shadow:none !important; text-shadow:none !important; }
+    body{ background:#fff !important; color:#000 !important; }
+    main{ background:#fff !important; max-width:none; margin:0; padding:0; border-radius:0; }
+    .skip{ display:none !important; }
+    a{ color:#000 !important; text-decoration:underline; }
+    code, pre{ background:#fff !important; color:#000 !important; border:1px solid #999; }
+    h1, h2, p, li{ color:#000 !important; }
+  }
 </style>
 </head>
 <body>
