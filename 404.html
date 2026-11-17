@@ -58,6 +58,8 @@
     background:linear-gradient(180deg, var(--rod1), var(--rod2)); }
   footer{ margin-top:2rem; font-size:.95rem; color:var(--soft); }
   footer a{ margin-right:1.1rem; }
+  .collects{ display:inline-block; margin:1.8rem 0 0; padding:.35rem .9rem; border:1px solid var(--edge); border-radius:999px; background:var(--plate); color:var(--soft); font-size:.9rem; box-shadow:var(--shadow); }
+  .collects a{ font-weight:bold; }
   :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
   @media (max-width:700px){ main{ width:94%; } }
 
@@ -75,6 +77,7 @@
     a{ color:#000 !important; text-decoration:underline; }
     .play{ background:#fff !important; color:#000 !important; border:1px solid #000 !important; box-shadow:none !important; }
     .rod{ display:none !important; }
+    .collects{ background:#fff !important; color:#000 !important; border:1px solid #000 !important; box-shadow:none !important; }
   }
 </style>
 </head>
@@ -87,6 +90,7 @@
     <div class="rod"><span class="joint"></span><span class="bar"></span><span class="joint"></span><span class="bar"></span><span class="joint"></span></div>
     <p><a class="play" href="index.html">Back to the roads</a></p>
   </section>
+  <p class="collects">&#10003; This site collects nothing &middot; <a href="legal.html#privacy">Privacy</a></p>
   <footer>
     <a href="about.html">About</a>
     <a href="legal.html#privacy">Privacy</a>

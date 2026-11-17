@@ -248,6 +248,8 @@
     background:linear-gradient(180deg, var(--rod1), var(--rod2)); }
   footer{ margin-top:2rem; font-size:.95rem; color:var(--soft); }
   footer a{ margin-right:1.1rem; }
+  .collects{ display:inline-block; margin:1.8rem 0 0; padding:.35rem .9rem; border:1px solid var(--edge); border-radius:999px; background:var(--plate); color:var(--soft); font-size:.9rem; box-shadow:var(--shadow); }
+  .collects a{ font-weight:bold; }
   .greeting{ font-size:1.2rem; }
   .closing .greeting{ font-size:1.25rem; }
   .stampgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr)); gap:.6rem; margin:.8rem 0; }
@@ -308,6 +310,7 @@
     .stamp button, .bigbtn{ display:none !important; }
     #claimcode{ background:#fff !important; color:#000 !important; border:1px solid #000; box-shadow:none !important; }
     footer a{ color:#000 !important; }
+    .collects{ background:#fff !important; color:#000 !important; border:1px solid #000 !important; box-shadow:none !important; }
   }
 </style>
 <script>
@@ -499,6 +502,7 @@
     <p id="epoch">This week's instances are being dealt&hellip;</p>
   </section>
 
+  <p class="collects">&#10003; This site collects nothing &middot; <a href="legal.html#privacy">Privacy</a></p>
   <footer>
     <a href="about.html">About</a>
     <a href="legal.html#privacy">Privacy</a>
