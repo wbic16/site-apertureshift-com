@@ -269,6 +269,15 @@
     box-shadow: inset 0 2px 8px rgba(0,0,0,.28); }
   .hidden{ display:none; }
   :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+  /* Keyboard pass (roads-1.12): tab order is the reading order (no positive
+     tabindex anywhere; <main> keeps tabindex="-1" as the skip target only).
+     Plain text links gain a thick underline as a second, non-colour focus
+     cue; pill controls get a plate-coloured halo inside the focus ring so
+     the ring reads on every band colour and on the coloured pills
+     themselves. The hub has no dialog, panel or menu, so there is no open
+     panel for Escape to close. */
+  a:focus-visible{ text-decoration:underline; text-decoration-thickness:3px; text-underline-offset:3px; }
+  .play:focus-visible, button:focus-visible{ outline:none; text-decoration:none; box-shadow:0 0 0 3px var(--plate), 0 0 0 6px var(--focus); }
   ::selection{ background:var(--armed2); color:var(--armed-ink); }
   @media (prefers-reduced-motion: no-preference){
     .play, .bigbtn, .stamp button, #themetoggle{ transition:filter .18s ease; }

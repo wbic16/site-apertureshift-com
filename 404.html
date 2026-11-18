@@ -61,6 +61,11 @@
   .collects{ display:inline-block; margin:1.8rem 0 0; padding:.35rem .9rem; border:1px solid var(--edge); border-radius:999px; background:var(--plate); color:var(--soft); font-size:.9rem; box-shadow:var(--shadow); }
   .collects a{ font-weight:bold; }
   :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+  /* Keyboard pass (roads-1.12): same treatment as the hub index - a thick
+     underline on plain text links, and a plate-coloured halo inside the
+     focus ring on the pill link so it reads on the card. */
+  a:focus-visible{ text-decoration:underline; text-decoration-thickness:3px; text-underline-offset:3px; }
+  .play:focus-visible{ outline:none; text-decoration:none; box-shadow:0 0 0 3px var(--plate), 0 0 0 6px var(--focus); }
   @media (max-width:700px){ main{ width:94%; } }
 
   @media print{

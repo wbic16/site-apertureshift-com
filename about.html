@@ -34,6 +34,9 @@
     background:#fff; border:1px solid rgba(0,0,0,.25); border-radius:999px; padding:.7rem 1.2rem; }
   .skip:focus{ top:1rem; }
   :focus-visible{ outline:3px solid #B85C0E; outline-offset:2px; }
+  /* Keyboard pass (roads-1.12): plain text links gain a thick underline as
+     a second, non-colour focus cue. */
+  a:focus-visible{ text-decoration:underline; text-decoration-thickness:3px; text-underline-offset:3px; }
   code{ background:rgba(0,0,0,.07); padding:.05rem .3rem; border-radius:4px; }
 
   @media print{
