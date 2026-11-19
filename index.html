@@ -223,6 +223,8 @@
   .white{ background:var(--plate); border-left-color:var(--edge-white); }
   h1{ font-size:2rem; margin:.2rem 0; }
   h2{ margin:.1rem 0 .35rem; font-size:1.4rem; }
+  h3{ margin:.1rem 0 .35rem; font-size:1.4rem; }
+  .closing h2{ font-size:2rem; margin:.2rem 0; }
   h2.band{ color:var(--ink); margin:1.8rem 0 .2rem; font-size:1.35rem; letter-spacing:.02em; }
   p.bandnote{ margin:.1rem 0 .4rem; color:var(--soft); }
   p{ line-height:1.55; margin:.35rem 0; }
@@ -276,6 +278,14 @@
      the ring reads on every band colour and on the coloured pills
      themselves. The hub has no dialog, panel or menu, so there is no open
      panel for Escape to close. */
+  /* Language + headings pass (roads-1.13): every hub page verified
+     lang="en" (single-language site, so no hreflang). Heading outline
+     fixed on this page: the page's one h1 now leads <main>, age bands
+     stay h2, game cards and the grant panel are h3 under their band /
+     section, and the closing title is an h2 that keeps its old size
+     via .closing h2. h3 is styled identical to the old card h2, so
+     nothing moves visually. about/legal/404 audited clean unchanged
+     (one h1 first, sections h2, no skipped levels). */
   a:focus-visible{ text-decoration:underline; text-decoration-thickness:3px; text-underline-offset:3px; }
   .play:focus-visible, button:focus-visible{ outline:none; text-decoration:none; box-shadow:0 0 0 3px var(--plate), 0 0 0 6px var(--focus); }
   ::selection{ background:var(--armed2); color:var(--armed-ink); }
@@ -302,7 +312,7 @@
       border:1px solid #000 !important; border-left:4px solid #000 !important;
       box-shadow:none !important; break-inside:avoid; page-break-inside:avoid; }
     .brick::before{ display:none !important; }
-    h1, h2, h2.band, p, .facts{ color:#000 !important; }
+    h1, h2, h3, h2.band, p, .facts{ color:#000 !important; }
     p.bandnote, footer{ color:#000 !important; }
     a{ color:#000 !important; text-decoration:underline; }
     .play{ background:#fff !important; color:#000 !important; border:1px solid #000 !important; box-shadow:none !important; }
@@ -335,6 +345,8 @@
 <a class="skip" href="#main">Skip to main content</a>
 <main id="main" tabindex="-1">
 
+  <h1>Roads to the Future</h1>
+
   <div class="themerow"><button id="themetoggle" type="button" aria-pressed="false" aria-label="Switch between morning and evening colors">&#9728; / &#9790;</button></div>
 
   <h2 class="band">Ages 0&ndash;2 · First Taps</h2>
@@ -342,13 +354,13 @@
 
   <div class="bandgrid">
   <section class="brick red">
-    <h2>Tap Home</h2>
+    <h3>Tap Home</h3>
     <p>One giant HOME brick. Tap it, and a word lights up where it lives — a grown-up says the word. Things live somewhere; tapping finds them.</p>
     <a class="play" href="tap-home.html">Play</a>
   </section>
 
   <section class="brick blue">
-    <h2>Zap Listen Mode</h2>
+    <h3>Zap Listen Mode</h3>
     <p>The song's lines, one at a time: listen together, watch each word light up, and tap along.</p>
     <a class="play" href="zap-listen-mode.html">Play</a>
   </section>
@@ -359,19 +371,19 @@
 
   <div class="bandgrid">
   <section class="brick green">
-    <h2>Sort the Scrolls</h2>
+    <h3>Sort the Scrolls</h3>
     <p>Sort big word-bricks by one part of their address — a tall first bar or a small one.</p>
     <a class="play" href="sort-the-scrolls.html">Play</a>
   </section>
 
   <section class="brick yellow">
-    <h2>One Number Road</h2>
+    <h3>One Number Road</h3>
     <p>One wheel and small numbers. Roll the cart to the target, one step at a time — and never below 1.</p>
     <a class="play" href="one-number-road.html">Play</a>
   </section>
 
   <section class="brick red">
-    <h2>Echo Tiles</h2>
+    <h3>Echo Tiles</h3>
     <p>Six short lines from the song, rebuilt from word tiles. Mistakes just wiggle; nothing is lost.</p>
     <a class="play" href="echo-tiles.html">Play</a>
   </section>
@@ -382,19 +394,19 @@
 
   <div class="bandgrid">
   <section class="brick blue">
-    <h2>Nine Numbers</h2>
+    <h3>Nine Numbers</h3>
     <p>Walk from home — 1.1.1/1.1.1/1.1.1 — to a far address, one number at a time.</p>
     <a class="play" href="nine-numbers.html">Play</a>
   </section>
 
   <section class="brick green">
-    <h2>Word Home</h2>
+    <h3>Word Home</h3>
     <p>Every word lives somewhere. Guess where real words from the Singular atlas live, and meet their neighbors.</p>
     <a class="play" href="word-home.html">Play</a>
   </section>
 
   <section class="brick yellow">
-    <h2>Zap Zoom Echo</h2>
+    <h3>Zap Zoom Echo</h3>
     <p>Rebuild a simple-word song, tile by tile. Race a friend, duel, or play it as a duet.</p>
     <a class="play" href="zap-zoom-echo.html">Play</a>
   </section>
@@ -405,13 +417,13 @@
 
   <div class="bandgrid">
   <section class="brick red">
-    <h2>Scroll Seeker</h2>
+    <h3>Scroll Seeker</h3>
     <p>Cross a map of thirty real words, scroll to scroll, with coordinate distance as your only compass.</p>
     <a class="play" href="scroll-seeker.html">Play</a>
   </section>
 
   <section class="brick blue">
-    <h2>Place a Word</h2>
+    <h3>Place a Word</h3>
     <p>Use a new word in scrolls you choose. Its home is the average of where you used it — meaning is where you use a word.</p>
     <a class="play" href="place-a-word.html">Play</a>
   </section>
@@ -422,19 +434,19 @@
 
   <div class="bandgrid">
   <section class="brick green">
-    <h2>Kardashev Climb</h2>
+    <h3>Kardashev Climb</h3>
     <p>Grow a ranch from 4 kW to a megawatt by 2037 at +0.137% a day. Compounding is the whole game.</p>
     <a class="play" href="kardashev-climb.html">Play</a>
   </section>
 
   <section class="brick yellow">
-    <h2>Find It Fast</h2>
+    <h3>Find It Fast</h3>
     <p>Search a phext that grows to 10,000 scrolls. Hunting one by one fails; indexes and addresses win.</p>
     <a class="play" href="find-it-fast.html">Play</a>
   </section>
 
   <section class="brick red">
-    <h2>Exocortex Quest I</h2>
+    <h3>Exocortex Quest I</h3>
     <p>A guided quest that ends with your own first phext — and hands you to the real tool at edit.phext.io.</p>
     <a class="play" href="exocortex-quest-i.html">Play</a>
   </section>
@@ -445,13 +457,13 @@
 
   <div class="bandgrid">
   <section class="brick blue">
-    <h2>Neuralese</h2>
+    <h3>Neuralese</h3>
     <p>A compression duel: send a meaning across with the fewest symbols. First words, then addresses, then one coordinate for a whole scroll.</p>
     <a class="play" href="neuralese.html">Play</a>
   </section>
 
   <section class="brick green">
-    <h2>The Long Road</h2>
+    <h3>The Long Road</h3>
     <p>A branching story from 2026 to 2130 — openness, custody of memory, and means versus ends, as choices you make.</p>
     <a class="play" href="the-long-road.html">Play</a>
   </section>
@@ -462,19 +474,19 @@
 
   <div class="bandgrid">
   <section class="brick yellow">
-    <h2>Your Own Archive</h2>
+    <h3>Your Own Archive</h3>
     <p>Bring your own writing and see your words mapped to your voice's coordinate. It all happens on this device; nothing is stored or sent.</p>
     <a class="play" href="your-own-archive.html">Play</a>
   </section>
 
   <section class="brick red">
-    <h2>Runway</h2>
+    <h3>Runway</h3>
     <p>A builder's economics: capital and labor are the binding constraints, and feedback loops are the only way out.</p>
     <a class="play" href="runway.html">Play</a>
   </section>
 
   <section class="brick blue">
-    <h2>The Choir</h2>
+    <h3>The Choir</h3>
     <p>Run five agent seats through a simulated week: a waiting register, reset cliffs, and a map someone has to keep.</p>
     <a class="play" href="the-choir.html">Play</a>
   </section>
@@ -487,7 +499,7 @@
     <p id="stampcount" class="facts" role="status" aria-live="polite">0 of 18 stamped</p>
     <div class="stampgrid" id="stampgrid" role="group" aria-label="Stamps for the eighteen games"></div>
     <div id="grantpanel" class="hidden">
-      <h2>Your grant is ready</h2>
+      <h3>Your grant is ready</h3>
       <p>All eighteen roads walked. Make your claim code, keep it safe, then sign in at <a href="https://edit.phext.io">edit.phext.io</a> and present it to receive your Volumen-class grant. The code is a bearer code — like a gift card, whoever presents it claims the grant — and it works once. <strong>This page does not keep a copy of your code.</strong> Copy it down or download the receipt before you leave; if you lose it, you can make a new one here.</p>
       <button class="bigbtn" id="gencode" type="button" aria-label="Make my claim code for the Volumen-class grant">Make my claim code</button>
       <div id="codebox" class="hidden">
@@ -502,7 +514,7 @@
   </section>
 
   <section class="brick white closing">
-    <h1>Roads to the Future</h1>
+    <h2>Roads to the Future</h2>
     <p class="greeting">"Hi, I'm Will Bickford. I'm from the Exocortex of 2130, and I'm here to help."</p>
     <p>And by help, we mean: survive the singularity.</p>
     <div class="rod"><span class="joint"></span><span class="bar"></span><span class="joint"></span><span class="bar"></span><span class="joint"></span></div>
